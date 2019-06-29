@@ -179,11 +179,8 @@ if($arParams["DISPLAY_BOTTOM_PAGER"])
 <div class="clear"></div>
 <div>
 	<?
-    global $sotbitSeoMetaBottomDesc;//для установки нижнего описания
+    if(!$arParams['SMART_FILTER_PATH']){
 
-    if($sotbitSeoMetaBottomDesc){
-        echo $sotbitSeoMetaBottomDesc;//вывод нижнего описания
-    }else{
         $arDescs = array();
         foreach($arResult['~UF_DESCRIPTION'] as $desc){
             $descs = explode(";",$desc,2);

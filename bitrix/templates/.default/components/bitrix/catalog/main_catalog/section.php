@@ -108,24 +108,10 @@ $arFilter = array(
 ?>
 </div>
 
-<?
-    $APPLICATION->IncludeComponent(
-        "sotbit:seo.meta",
-        ".default",
-        Array(
-            "FILTER_NAME" => $arParams["FILTER_NAME"],
-            "SECTION_ID" => $arCurSection['ID'],
-            "CACHE_TYPE" => $arParams["CACHE_TYPE"],
-            "CACHE_TIME" => $arParams["CACHE_TIME"],
-        )
-    );
-?>
+
 
 <? } ?>
 
-<?
-global $sotbitSeoMetaTopDesc;//для установки верхнего описания
-?>
 
 <?
 if($_REQUEST["PAGE_ELEMENT_COUNT"]){
@@ -135,15 +121,14 @@ if($_REQUEST["PAGE_ELEMENT_COUNT"]){
 ?>
 <div class="the_content_right_column">
 
-    <? if($sotbitSeoMetaTopDesc): ?>
-        <div><?=$sotbitSeoMetaTopDesc;//вывод верхнего описания?></div>
-    <?endif;?>
+    <div><? $APPLICATION->ShowViewContent('sotbit_seometa_top_desc');//вывод верхнего описания?></div>
 
 	<?
 	$APPLICATION->IncludeComponent(
 		"bitrix:catalog.section",
 		"",
 		Array(
+        "SMART_FILTER_PATH" => $arResult["VARIABLES"]["SMART_FILTER_PATH"],
 		"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
 		"IBLOCK_ID" => $arParams["IBLOCK_ID"],
 		"ELEMENT_SORT_FIELD" => $arParams["ELEMENT_SORT_FIELD"],
@@ -195,5 +180,23 @@ if($_REQUEST["PAGE_ELEMENT_COUNT"]){
 	$component
 );
 ?>
+
+    <?
+    $APPLICATION->IncludeComponent(
+        "sotbit:seo.meta",
+        ".default",
+        Array(
+            "FILTER_NAME" => $arParams["FILTER_NAME"],
+            "SECTION_ID" => $arCurSection['ID'],
+            "CACHE_TYPE" => $arParams["CACHE_TYPE"],
+            "CACHE_TIME" => $arParams["CACHE_TIME"],
+        )
+    );
+    global $sotbitSeoMetaBottomDesc;
+    ?>
+
+    <?if($sotbitSeoMetaBottomDesc):?>
+        <div><?=$sotbitSeoMetaBottomDesc; ?></div>
+    <?endif;?>
 
 </div>
