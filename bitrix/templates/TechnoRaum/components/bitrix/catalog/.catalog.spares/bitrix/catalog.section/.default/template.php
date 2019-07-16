@@ -79,13 +79,12 @@ $this->setFrameMode(true);
                     if(count($arItem['SECTIONS']) > 1){
                         if (in_array($arItem['IBLOCK_SECTION_ID'], $arItem['PROPERTIES']['SORT_M']['DESCRIPTION'])) {
                             $sort_key = array_search($arItem['IBLOCK_SECTION_ID'], $arItem['PROPERTIES']['SORT_M']['DESCRIPTION']);
-                            $sort = $arItem['PROPERTIES']['SORT_M']['VALUE'][$sort_key];
-                        }else
-                            unset($sort);
+                            $arItem['SORT'] = $arItem['PROPERTIES']['SORT_M']['VALUE'][$sort_key];
+                        }
                     }
                     ?>
                     <tr>
-                        <td><?=(isset($sort) && $sort) ? $sort : $arItem['SORT']?></td>
+                        <td><?=$arItem['SORT']?></td>
                         <td><?=$arItem['PROPERTIES']['ARTICLE']['VALUE']?></td>
                         <td><?=$arItem['NAME']?></td>
                         <td><?=$arItem['PROPERTIES']['COUNT_COMPLECT']['VALUE']?></td>
