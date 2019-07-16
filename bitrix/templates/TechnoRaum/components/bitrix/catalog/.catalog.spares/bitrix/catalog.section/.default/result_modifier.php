@@ -463,4 +463,10 @@ if (!empty($arResult['ITEMS']))
 		}
 	}
 }
+
+foreach ($arResult['ITEMS'] as &$arItem){
+    $db_old_groups = CIBlockElement::GetElementGroups($arItem['ID'], true);
+    while($ar_group = $db_old_groups->Fetch())
+        $arItem['SECTIONS'][] = $ar_group["ID"];
+}
 ?>
