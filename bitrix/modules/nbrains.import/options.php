@@ -201,7 +201,19 @@ use Bitrix\Main\Type;
                     <Товары>
 
                         <?
-                        foreach ($arProduct as $product): ?>
+                        foreach ($arProduct as $product):
+                            $arElementSection = array();
+                            $arSelect = Array("ID", "NAME");
+                            $arFilter = Array("IBLOCK_ID" => $condition["INFOBLOCK"], "CODE" => ($product['articlenumber']) ? trim($product['articlenumber']) : false);
+                            $res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
+                            if($ar_fields = $res->GetNext())
+                            {
+                                $db_old_groups = CIBlockElement::GetElementGroups($ar_fields['ID'], true);
+                                while($ar_group = $db_old_groups->Fetch())
+                                    $arElementSection[] = $ar_group["ID"];
+                            }
+                            $arElementSection = array_unique(array_merge($condition["SECTIONS"], $arElementSection));
+                            ?>
                             <Товар>
 
                                 <Ид><?= str_replace(array('.', '-'), '', $product['articlenumber']) ?></Ид>
@@ -211,7 +223,7 @@ use Bitrix\Main\Type;
 
                                 <Группы>
                                     <?
-                                    foreach ($condition["SECTIONS"] as $section): ?>
+                                    foreach ($arElementSection as $section): ?>
                                         <Ид><?= $section; ?></Ид>
                                     <?endforeach; ?>
                                 </Группы>
