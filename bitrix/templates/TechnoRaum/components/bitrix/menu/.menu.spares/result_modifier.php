@@ -24,7 +24,7 @@ foreach($arResult as $i=>$arMenu)
 
 if($bWasSelected)
 {
-	for($i=0; $i<$depth-1; $i++)
-		$arResult[$arParents[$i]]['CHILD_SELECTED'] = true;
+	//for($i=0; $i<$depth-1; $i++)
+		$arResult[$arParents[$depth-2]]['CHILD_SELECTED'] = true;
 }
 ?>

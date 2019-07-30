@@ -14,7 +14,7 @@ foreach($arResult as $arItem):
 	<?endif?>
 
 	<?if ($arItem["IS_PARENT"]):?>
-			<li>
+			<li class="<?=($arItem["SELECTED"] || $arItem['CHILD_SELECTED']) ? 'active' : ''?>">
 				    <a href="<?=$arItem["LINK"]?>"><?=$arItem["TEXT"]?></a>
 				<ul>
 
