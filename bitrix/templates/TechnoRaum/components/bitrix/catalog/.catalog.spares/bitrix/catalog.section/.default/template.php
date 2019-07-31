@@ -45,7 +45,7 @@ $this->setFrameMode(true);
             <div class="option-image" style="background: url(<?=SITE_TEMPLATE_PATH?>/img/arrow.jpg) no-repeat left 4px">
                 <div class="o-title">Скачать деталировку</div>
                 <div class="o-body">
-                    <a href="<?=CFile::GetPath($arResult['UF_DETAIL_SPARES']);?>" target="_blank">
+                    <a href="<?=CFile::GetPath($arResult['UF_DETAIL_SPARES']);?>" download>
                         <img src="<?=SITE_TEMPLATE_PATH?>/img/jpg.jpg" alt="Скачать деталировку">
                     </a>
                 </div>
