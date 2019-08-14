@@ -18,6 +18,7 @@ $(document).ready(function(){
     $(".mform").submit(function(e){
         e.preventDefault();
         $.post("/mail.php",$(this).serialize(),function(data){
+            console.log(data);
             $(".fancybox-close").trigger("click");
             setTimeout(function(){
                 $(".open_thanks").trigger("click");
