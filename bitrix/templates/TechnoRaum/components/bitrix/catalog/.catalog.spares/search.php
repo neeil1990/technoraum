@@ -105,7 +105,7 @@ else
 
 		"RESTART" => "N",
 		"NO_WORD_LOGIC" => "Y",
-		"USE_LANGUAGE_GUESS" => "Y",
+		"USE_LANGUAGE_GUESS" => "N",
 		"CHECK_DATES" => "Y",
 
 		'LABEL_PROP' => $arParams['LABEL_PROP'],
