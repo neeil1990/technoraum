@@ -76,6 +76,20 @@ $this->setFrameMode(true);
     </div>
 
     <div class="row">
+        <div class="col-md-12">
+            <?
+            $APPLICATION->IncludeFile(SITE_TEMPLATE_PATH."/include/spares_not_product_form.php", Array(), Array(
+                "MODE"      => "html",                                           // будет редактировать в веб-редакторе
+                "NAME"      => "Редактирование включаемой области раздела",      // текст всплывающей подсказки на иконке
+                "TEMPLATE"  => "spares_not_product_form.php"                    // имя шаблона для нового файла
+            ));
+            ?>
+        </div>
+    </div>
+
+    <div class="row"><div style="height: 80px;"></div></div>
+
+    <div class="row">
         <div class="col-md-4">
 
             <?$APPLICATION->IncludeComponent("bitrix:menu", ".menu.spares", Array(

@@ -119,6 +119,34 @@ if($_SERVER["REQUEST_URI"] != "/")
         </form>
     </div>
 
+    <div class="popup callback_popup" id="spares_not_found_product">
+        <form method="post" class="mform">
+            <div class="the_form">
+                <input type="hidden" name="form_id" value="10" />
+                <p class="form_title">Не нашли то, что искали?</p>
+                <div class="the_form_div">
+                    <input type="text" name="model" placeholder="Модель">
+                </div>
+                <div class="the_form_div">
+                    <input type="text" name="article" placeholder="Артикул">
+                </div>
+                <div class="the_form_div">
+                    <input required type="text" name="name" placeholder="Ваше имя">
+                </div>
+                <div class="the_form_div">
+                    <input required type="text" name="tel" placeholder="+7 (9ХХ) ХХХ-ХХ-ХХ">
+                </div>
+                <div class="the_form_div the_form_div_accept">
+                    <label><input required type="checkbox" name="check" checked="checked"><span>Я согласен с <a href="/soglasie-na-obrabotku-personalnykh-dannykh/" target=_blank>условиями использования</a> моих персональных данных.</span></label>
+                </div>
+                <div class="the_form_div the_form_div_submit clearfix">
+                    <input type="submit" name="submit1" value="Отправить">
+                </div>
+            </div>
+        </form>
+    </div>
+    <!--/callback_popup-->
+
     <div class="popup callback_popup" id="callback_popup">
       <form method="post" class="mform">
         <div class="the_form">                    

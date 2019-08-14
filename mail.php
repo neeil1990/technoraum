@@ -1,6 +1,6 @@
 <?php
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
-include($_SERVER["DOCUMENT_ROOT"]."/include/amocrm.php");
+
 
 $to      = "zakaz@technoraum.ru";
 $headers = 'From: webmaster@technoraum.ru' . "\r\n" .
@@ -104,6 +104,24 @@ elseif($_POST["form_id"] == 9)
     );
 
     $event = "DELIVERY_OTHER_INC";
+
+    CEvent::Send($event, SITE_ID, $arEventFields);
+}
+elseif($_POST["form_id"] == 10)
+{
+    $model = iconv("UTF-8","CP1251",trim(strip_tags($_POST["model"])));
+    $article = iconv("UTF-8","CP1251",trim(strip_tags($_POST["article"])));
+    $name = iconv("UTF-8","CP1251",trim(strip_tags($_POST["name"])));
+    $tel = iconv("UTF-8","CP1251",trim(strip_tags($_POST["tel"])));
+
+    $arEventFields = array(
+        "MODEL" => $model,
+        "ARTICLE" => $article,
+        "NAME" => $name,
+        "PHONE" => $tel,
+    );
+
+    $event = "SPARES_NOT_FOUND";
 
     CEvent::Send($event, SITE_ID, $arEventFields);
 }
