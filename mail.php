@@ -1,6 +1,6 @@
 <?php
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
-
+include($_SERVER["DOCUMENT_ROOT"]."/include/amocrm.php");
 
 $to      = "zakaz@technoraum.ru";
 $headers = 'From: webmaster@technoraum.ru' . "\r\n" .
