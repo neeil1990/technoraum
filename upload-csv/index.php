@@ -7,7 +7,13 @@ if(!$USER->IsAdmin())
 
 if($_REQUEST['import_file'] && $_REQUEST['IBLOCK_ID']):
 
- $base_columns = [];
+ $base_columns = [
+         'PRICE' => 'Цена',
+         'WEIGHT' => 'Вес',
+         'LENGTH' => 'Длина',
+         'WIDTH' => 'Ширина',
+         'HEIGHT' => 'Высота',
+ ];
  $import_files_dir = 'files/'; // Временная папка
  $import_file = ($_REQUEST['import_file']) ? $_REQUEST['import_file'] : 'import.csv';           // Временный файл
  $columns = [];
@@ -15,6 +21,12 @@ if($_REQUEST['import_file'] && $_REQUEST['IBLOCK_ID']):
 
 $f = fopen($import_files_dir.$import_file, 'r');
 $columns = fgetcsv($f, null, $column_delimiter);
+
+foreach ($columns as $i => &$column){
+    if(!$i)
+        continue;
+    $column = array_search($column,$base_columns);
+}
 
 $arResult = [];
 for($k=0; !feof($f); $k++)
@@ -35,6 +47,8 @@ for($k=0; !feof($f); $k++)
 }
 fclose($f);
 
+
+
 foreach($arResult as $art => $value){
 
     $arSelect = Array("ID", "IBLOCK_ID", "NAME", "PRICE_TYPE","PROPERTY_*");
@@ -44,19 +58,24 @@ foreach($arResult as $art => $value){
         $arFields = $ob->GetFields();
         $arProps = $ob->GetProperties();
 
-        if($value['Цена']){
+        if($value['PRICE']){
             $price = CPrice::GetBasePrice($arFields['ID']);
-            CPrice::Update($price['ID'], array("PRICE" => floatval(str_replace(array(',',' '), array('.',''), $value['Цена']))));
+            CPrice::Update($price['ID'], array("PRICE" => floatval(str_replace(array(',',' '), array('.',''), $value['PRICE']))));
+            unset($value['PRICE']);
         }
 
-        if(is_array($value)){
+        if(is_array($value) && count($value) > 0) {
+            CCatalogProduct::Update($arFields['ID'], $value);
+        }
+
+/*        if(is_array($value)){
             $arPropSet = [];
             foreach ($value as $desc => $val){
-                if($desc != 'Цена')
+                if($desc != 'PRICE')
                     $arPropSet[] = ['VALUE' => $val,'DESCRIPTION' => $desc];
             }
             CIBlockElement::SetPropertyValuesEx($arFields['ID'], $arFilter['IBLOCK_ID'], array('CML2_ATTRIBUTES' => $arPropSet));
-        }
+        }*/
     }
 }
 
