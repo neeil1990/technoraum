@@ -14,5 +14,17 @@
     ),
   false
   );
+
+  $aMenuLinksExt[] = [
+      'Каталог запчастей',
+      '/spares/',
+      ['/spares/'],
+      [
+          'FROM_IBLOCK' => true,
+          'IS_PARENT' => true,
+          'DEPTH_LEVEL' => "1"
+      ]
+  ];
+
   $aMenuLinks = array_merge($aMenuLinksExt, $aMenuLinks); 
 ?>
