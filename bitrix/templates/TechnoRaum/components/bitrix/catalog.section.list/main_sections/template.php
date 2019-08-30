@@ -30,7 +30,7 @@ $this->setFrameMode(true);
 							<p class="title"><?=$item["NAME"]?></p>
 							<p class="desc"><?=$res["UF_DESC"]?></p>
 						</div>
-						<a class="button" href="<?=$item["SECTION_PAGE_URL"]?>">�������</a>
+						<a class="button" href="<?=$item["SECTION_PAGE_URL"]?>">�������</a>
 					</div>
 					<a href="<?=$item["SECTION_PAGE_URL"]?>" class="ref"></a>
 				</div>
@@ -38,5 +38,18 @@ $this->setFrameMode(true);
 		}
 	}
 ?>
+    <div class="glav_services_div main_section">
+        <div class="img">
+            <img src="/upload/zp.png" alt="Запасные части" />
+        </div>
+        <div class="text">
+            <div class="text_inner">
+                <p class="title">Запасные части</p>
+                <p class="desc"></p>
+            </div>
+            <a class="button" href="/spares/">Перейти</a>
+        </div>
+        <a href="/spares/" class="ref"></a>
+    </div>
 </div>
 <div><? echo CIBlock::GetArrayByID(8, "DESCRIPTION");?></div>
