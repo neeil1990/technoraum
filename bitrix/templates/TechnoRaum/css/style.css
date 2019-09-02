@@ -644,7 +644,9 @@ a.button.filter_clear_button:hover {border-color:transparent;text-decoration:non
 
 
 .the_content_right_column {width:860px;float:right;max-width:100%;}
-
+.the_content_right_column ul{padding: 0px 20px;}
+.the_content_right_column i{font-weight: 300;}
+.the_content_right_column ul li{font-size: 16px;color: #111111;line-height: 24px;font-weight: 300;}
 .the_content_right_column .glav_cat_wrap.glav_cat_wrap_mark2 {}
 .the_content_right_column .glav_cat_wrap.glav_cat_wrap_mark2 .glav_cat_div {width:33.33%;}
 .the_content_right_column .glav_cat_wrap.glav_cat_wrap_mark2 .glav_cat_div p {padding-bottom:0;}

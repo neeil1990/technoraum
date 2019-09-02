@@ -505,3 +505,4 @@ Stack trace:
 [28-Aug-2019 18:13:51 Europe/Moscow] PHP Fatal error:  Maximum execution time of 600 seconds exceeded in /home/t/technoraum/technoraum.ru/public_html/upload-csv/index.php on line 32
 [28-Aug-2019 18:23:57 Europe/Moscow] PHP Fatal error:  Maximum execution time of 600 seconds exceeded in /home/t/technoraum/technoraum.ru/public_html/upload-csv/index.php on line 35
 [29-Aug-2019 17:23:49 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[01-Sep-2019 21:14:05 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5

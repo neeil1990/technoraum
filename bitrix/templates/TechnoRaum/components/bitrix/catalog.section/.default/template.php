@@ -158,7 +158,7 @@ if($arParams["DISPLAY_BOTTOM_PAGER"])
 		</div>
 		<div class="page-count">
 			<?
-			$arPageCount = array(12,30,50,100,1000);
+			$arPageCount = array(30,50,100,1000);
 			?>
 			<form action="" method="get">
 				<select name="PAGE_ELEMENT_COUNT" onchange="this.form.submit()">
