@@ -204,9 +204,9 @@ $APPLICATION->SetTitle("Каталог запчастей");
     <script>
         //Деталировка spares
         var default_notes = [
-            {x: "0.0750", y:"0.1", note:"Один"},
+            /*{x: "0.0750", y:"0.1", note:"Один"},
             {x: "0.322", y:"0.269", note: 'Два'},
-            {x: "0.824", y: "0.593", note: "Три"}
+            {x: "0.824", y: "0.593", note: "Три"}*/
         ];
 
         var $imgd = $("#zoom_dt").imgNotes({
