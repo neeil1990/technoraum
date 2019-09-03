@@ -74,15 +74,7 @@ $this->setFrameMode(true);
                 </thead>
 
                 <tbody>
-                <?
-                foreach ($arResult['ITEMS'] as $arItem):
-                    if(count($arItem['SECTIONS']) > 1){
-                        if (in_array($arItem['IBLOCK_SECTION_ID'], $arItem['PROPERTIES']['SORT_M']['DESCRIPTION'])) {
-                            $sort_key = array_search($arItem['IBLOCK_SECTION_ID'], $arItem['PROPERTIES']['SORT_M']['DESCRIPTION']);
-                            $arItem['SORT'] = $arItem['PROPERTIES']['SORT_M']['VALUE'][$sort_key];
-                        }
-                    }
-                    ?>
+                <? foreach ($arResult['ITEMS'] as $arItem): ?>
                     <tr>
                         <td><?=$arItem['SORT']?></td>
                         <td><?=$arItem['PROPERTIES']['ARTICLE']['VALUE']?></td>

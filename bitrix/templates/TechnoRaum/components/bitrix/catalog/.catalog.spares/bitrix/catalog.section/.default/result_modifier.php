@@ -464,9 +464,20 @@ if (!empty($arResult['ITEMS']))
 	}
 }
 
-foreach ($arResult['ITEMS'] as &$arItem){
+foreach ($arResult['ITEMS'] as $key => &$arItem){
+
     $db_old_groups = CIBlockElement::GetElementGroups($arItem['ID'], true);
     while($ar_group = $db_old_groups->Fetch())
         $arItem['SECTIONS'][] = $ar_group["ID"];
+
+    if(count($arItem['SECTIONS']) > 1){
+        if (in_array($arItem['IBLOCK_SECTION_ID'], $arItem['PROPERTIES']['SORT_M']['DESCRIPTION'])) {
+            $sort_key = array_search($arItem['IBLOCK_SECTION_ID'], $arItem['PROPERTIES']['SORT_M']['DESCRIPTION']);
+            $arItem['SORT'] = $arItem['PROPERTIES']['SORT_M']['VALUE'][$sort_key];
+        }
+    }
+    $arResult['ITEMS_SORT'][$arItem['SORT']] = $arItem;
 }
+$arResult['ITEMS'] = $arResult['ITEMS_SORT'];
+ksort($arResult['ITEMS']);
 ?>
