@@ -1,13 +1,11 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
+$APPLICATION->SetPageProperty("title", "Каталог запчастей");
 $APPLICATION->SetTitle("Каталог запчастей");
-?>
-<!--strat content page-->
-
-<?$APPLICATION->IncludeComponent(
-	"bitrix:catalog", 
-	".catalog.spares", 
-	array(
+?><!--strat content page--> <?$APPLICATION->IncludeComponent(
+	"bitrix:catalog",
+	".catalog.spares",
+	Array(
 		"ACTION_VARIABLE" => "action",
 		"ADD_ELEMENT_CHAIN" => "N",
 		"ADD_PICT_PROP" => "-",
@@ -30,9 +28,7 @@ $APPLICATION->SetTitle("Каталог запчастей");
 		"COMPONENT_TEMPLATE" => ".catalog.spares",
 		"CONVERT_CURRENCY" => "N",
 		"DETAIL_ADD_DETAIL_TO_SLIDER" => "N",
-		"DETAIL_ADD_TO_BASKET_ACTION" => array(
-			0 => "ADD",
-		),
+		"DETAIL_ADD_TO_BASKET_ACTION" => array(0=>"ADD",),
 		"DETAIL_BACKGROUND_IMAGE" => "-",
 		"DETAIL_BRAND_USE" => "N",
 		"DETAIL_BROWSER_TITLE" => "-",
@@ -42,10 +38,7 @@ $APPLICATION->SetTitle("Каталог запчастей");
 		"DETAIL_DISPLAY_PREVIEW_TEXT_MODE" => "E",
 		"DETAIL_META_DESCRIPTION" => "-",
 		"DETAIL_META_KEYWORDS" => "-",
-		"DETAIL_PROPERTY_CODE" => array(
-			0 => "",
-			1 => "",
-		),
+		"DETAIL_PROPERTY_CODE" => array(0=>"",1=>"",),
 		"DETAIL_SET_CANONICAL_URL" => "N",
 		"DETAIL_SET_VIEWED_IN_COMPONENT" => "N",
 		"DETAIL_SHOW_MAX_QUANTITY" => "N",
@@ -92,10 +85,7 @@ $APPLICATION->SetTitle("Каталог запчастей");
 		"LIST_BROWSER_TITLE" => "-",
 		"LIST_META_DESCRIPTION" => "-",
 		"LIST_META_KEYWORDS" => "-",
-		"LIST_PROPERTY_CODE" => array(
-			0 => "",
-			1 => "",
-		),
+		"LIST_PROPERTY_CODE" => array(0=>"",1=>"",),
 		"MESSAGE_404" => "",
 		"MESS_BTN_ADD_TO_BASKET" => "В корзину",
 		"MESS_BTN_BUY" => "Купить",
@@ -111,14 +101,11 @@ $APPLICATION->SetTitle("Каталог запчастей");
 		"PAGER_TITLE" => "Товары",
 		"PAGE_ELEMENT_COUNT" => "0",
 		"PARTIAL_PRODUCT_PROPERTIES" => "N",
-		"PRICE_CODE" => array(
-			0 => "price",
-		),
+		"PRICE_CODE" => array(0=>"price",),
 		"PRICE_VAT_INCLUDE" => "Y",
 		"PRICE_VAT_SHOW_VALUE" => "N",
 		"PRODUCT_ID_VARIABLE" => "id",
-		"PRODUCT_PROPERTIES" => array(
-		),
+		"PRODUCT_PROPERTIES" => array(),
 		"PRODUCT_PROPS_VARIABLE" => "prop",
 		"PRODUCT_QUANTITY_VARIABLE" => "quantity",
 		"SECTIONS_SHOW_PARENT_NAME" => "Y",
@@ -131,6 +118,7 @@ $APPLICATION->SetTitle("Каталог запчастей");
 		"SECTION_TOP_DEPTH" => "1",
 		"SEF_FOLDER" => "/spares/",
 		"SEF_MODE" => "Y",
+		"SEF_URL_TEMPLATES" => array("sections"=>"","section"=>"#SECTION_CODE_PATH#/","element"=>"#SECTION_CODE_PATH#/#ELEMENT_CODE#/","compare"=>"compare.php?action=#ACTION_CODE#","smart_filter"=>"#SECTION_CODE_PATH#/filter/#SMART_FILTER_PATH#/apply/",),
 		"SET_LAST_MODIFIED" => "N",
 		"SET_STATUS_404" => "Y",
 		"SET_TITLE" => "Y",
@@ -148,10 +136,7 @@ $APPLICATION->SetTitle("Каталог запчастей");
 		"TOP_ELEMENT_SORT_ORDER" => "asc",
 		"TOP_ELEMENT_SORT_ORDER2" => "desc",
 		"TOP_LINE_ELEMENT_COUNT" => "3",
-		"TOP_PROPERTY_CODE" => array(
-			0 => "",
-			1 => "",
-		),
+		"TOP_PROPERTY_CODE" => array(0=>"",1=>"",),
 		"TOP_VIEW_MODE" => "SECTION",
 		"USER_CONSENT" => "N",
 		"USER_CONSENT_ID" => "0",
@@ -172,35 +157,14 @@ $APPLICATION->SetTitle("Каталог запчастей");
 		"USE_REVIEW" => "N",
 		"USE_SALE_BESTSELLERS" => "N",
 		"USE_STORE" => "N",
-		"SEF_URL_TEMPLATES" => array(
-			"sections" => "",
-			"section" => "#SECTION_CODE_PATH#/",
-			"element" => "#SECTION_CODE_PATH#/#ELEMENT_CODE#/",
-			"compare" => "compare.php?action=#ACTION_CODE#",
-			"smart_filter" => "#SECTION_CODE_PATH#/filter/#SMART_FILTER_PATH#/apply/",
-		),
-		"VARIABLE_ALIASES" => array(
-			"compare" => array(
-				"ACTION_CODE" => "action",
-			),
-		)
-	),
-	false
-);
-
-?>
-<!--end content page-->
-
-
-    <!--imgNotes-->
-    <link rel="stylesheet" href="<?=SITE_TEMPLATE_PATH."/js/imgNotes/imgNotes.min.css"?>" media="screen">
+		"VARIABLE_ALIASES" => array("compare"=>array("ACTION_CODE"=>"action",),)
+	)
+);?> <!--end content page--> <!--imgNotes--> <?=SITE_TEMPLATE_PATH."/js/imgNotes/imgNotes.min.css"?><span class="bxhtmled-surrogate-inner"><span class="bxhtmled-right-side-item-icon"></span><span class="bxhtmled-comp-lable" unselectable="on" spellcheck="false">Код PHP</span></span>" media="screen"&gt;
     <script src="<?=SITE_TEMPLATE_PATH."/js/imgNotes/jquery.mousewheel.js"?>"></script>
-
     <script src="<?=SITE_TEMPLATE_PATH."/js/imgNotes/hammer.min.js"?>"></script>
     <script src="<?=SITE_TEMPLATE_PATH."/js/imgNotes/jquery.hammer.js"?>"></script>
     <script src="<?=SITE_TEMPLATE_PATH."/js/imgNotes/imgViewer.min.js"?>"></script>
     <script src="<?=SITE_TEMPLATE_PATH."/js/imgNotes/imgNotes.min.js"?>"></script>
-
     <script>
         //Деталировка spares
         var default_notes = [
@@ -214,6 +178,4 @@ $APPLICATION->SetTitle("Каталог запчастей");
                 this.import(default_notes);
             }
         });
-    </script>
-
-<?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
+    </script><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

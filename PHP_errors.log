@@ -506,3 +506,15 @@ Stack trace:
 [28-Aug-2019 18:23:57 Europe/Moscow] PHP Fatal error:  Maximum execution time of 600 seconds exceeded in /home/t/technoraum/technoraum.ru/public_html/upload-csv/index.php on line 35
 [29-Aug-2019 17:23:49 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
 [01-Sep-2019 21:14:05 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[02-Sep-2019 15:56:18 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[02-Sep-2019 15:56:21 Europe/Moscow] PHP Notice:  Undefined variable: temp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 19
+[03-Sep-2019 17:37:29 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[04-Sep-2019 11:32:34 Europe/Moscow] PHP Warning:  Unknown: POST data can't be buffered; all data discarded in Unknown on line 0
+[04-Sep-2019 19:08:44 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[05-Sep-2019 19:55:57 Europe/Moscow] PHP Fatal error:  Cannot redeclare addContacts() (previously declared in /home/t/technoraum/technoraum.ru/public_html/bitrix/php_interface/init.php:245) in /home/t/technoraum/technoraum.ru/public_html/include/amocrm.php on line 284
+[08-Sep-2019 08:06:00 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[09-Sep-2019 17:59:41 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[09-Sep-2019 18:55:58 Europe/Moscow] PHP Fatal error:  Cannot redeclare addContacts() (previously declared in /home/t/technoraum/technoraum.ru/public_html/bitrix/php_interface/init.php:245) in /home/t/technoraum/technoraum.ru/public_html/include/amocrm.php on line 284
+[09-Sep-2019 19:15:33 Europe/Moscow] PHP Fatal error:  Cannot redeclare addContacts() (previously declared in /home/t/technoraum/technoraum.ru/public_html/bitrix/php_interface/init.php:245) in /home/t/technoraum/technoraum.ru/public_html/include/amocrm.php on line 284
+[09-Sep-2019 19:53:08 Europe/Moscow] PHP Fatal error:  Cannot redeclare addContacts() (previously declared in /home/t/technoraum/technoraum.ru/public_html/bitrix/php_interface/init.php:245) in /home/t/technoraum/technoraum.ru/public_html/include/amocrm.php on line 284
+[10-Sep-2019 10:02:04 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
