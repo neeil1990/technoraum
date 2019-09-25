@@ -53,7 +53,7 @@ while ($arItems = $dbBasketItems->Fetch())
 {
     $arBasketItems[] = $arItems;
 }
-?> 
+?>
 <style>
 	.card_page_specs span.in_store{background: url(/bitrix/templates/TechnoRaum/img/green_check.png) no-repeat 0 4px}
 </style>
@@ -403,10 +403,25 @@ while ($arItems = $dbBasketItems->Fetch())
 	</div>
 </div>
 
-<?endif;?>
+<?endif; ?>
 
-
-
+<!--schema.org-->
+<script type="application/ld+json">
+    {
+        "@context": "http://schema.org/",
+        "@type": "Product",
+        "name": "<?=$arResult[NAME];?>",
+        "image": [
+            "<?=$_SERVER[REQUEST_SCHEME].'://'.$_SERVER[SERVER_NAME].$arResult[DETAIL_PICTURE][SRC];?>"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "RUB",
+            "price": "<?=$arResult[PRICES][price][VALUE];?>"
+        }
+    }
+</script>
+<!--//schema.org-->
 
 
 <?

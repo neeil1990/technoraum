@@ -31,6 +31,10 @@ $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/contact-tabs.js");
 </div>
 <?endif;?>
 
+<span class="url">
+ <span class="value-title" title="https://technoraum.ru"> </span>
+</span>
+
 <div id="tabs-contact">
 	<ul>
 		<li><a href="#shop">Магазины</a></li>
@@ -89,10 +93,10 @@ $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/contact-tabs.js");
 <script type="html/tpl" id="item-temp">
 
 	<li class="shop" data-pid="{pid}" data-cord="{cord}">
-		<div class="shop-name">{name}</div>
+		<div class="shop-name street-address">{name}</div>
 		<div class="shop-body">
-			<span><i class="fa fa-phone" aria-hidden="true"></i> {phone}</span>
-			<span><i class="fa fa-clock-o" aria-hidden="true"></i> {mode}</span>
+			<span class="tel"><i class="fa fa-phone" aria-hidden="true"></i> {phone}</span>
+			<span class="workhours"><i class="fa fa-clock-o" aria-hidden="true"></i> {mode}</span>
 			<span><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Ежедневно без перерывов и выходных</span>
 		</div>
 	</li>

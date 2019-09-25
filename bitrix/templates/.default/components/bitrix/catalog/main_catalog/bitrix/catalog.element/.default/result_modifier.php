@@ -83,6 +83,7 @@ if (is_object($cp))
 		array(
 			'ARTICLE',
 			'PRICE',
+			'PREVIEW_PICTURE',
 			'META_TITLE',
 			'META_TITLE_SECTION',
 			'META_KEYWORDS',

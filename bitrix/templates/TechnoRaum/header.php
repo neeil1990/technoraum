@@ -27,10 +27,16 @@ if($url[1] != "personal" && $url[2] != "order" && $url[3] != "make")
         })(window,document,'script','dataLayer','GTM-TKQX2R2');</script>
     <!-- End Google Tag Manager -->
 
-		<meta name="yandex-verification" content="dd3124205879e327" />
-<meta name="google-site-verification" content="ccjrPE4dXLJ5OSnSmsPlY3D2BFpidw66j04twxL5M5M" />
-<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900&amp;subset=cyrillic" rel="stylesheet">
+        <meta name="yandex-verification" content="dd3124205879e327" />
+        <meta name="google-site-verification" content="ccjrPE4dXLJ5OSnSmsPlY3D2BFpidw66j04twxL5M5M" />
+        <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900&amp;subset=cyrillic" rel="stylesheet">
 		<?$APPLICATION->ShowHead();?>
+
+        <meta property="og:title" content="<?$APPLICATION->ShowTitle()?>"/>
+        <meta property="og:description" content="<?$APPLICATION->ShowProperty('description');?>"/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:url" content= "<?=$_SERVER['REQUEST_SCHEME']?>://<?=$_SERVER['SERVER_NAME']?><?=$APPLICATION->GetCurPage()?>" />
+
 		<title><?$APPLICATION->ShowTitle()?></title>
 		<meta name="viewport" content="width=device-width">
 		<link rel="shortcut icon" type="image/x-icon" href="<?=SITE_TEMPLATE_PATH?>/favicon.ico" />

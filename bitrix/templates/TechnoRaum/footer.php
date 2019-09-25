@@ -432,4 +432,29 @@ if($_SERVER["REQUEST_URI"] != "/")
 
 
 		?>
+
+<!--schema.org-->
+<script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "LocalBusiness",
+        "name": "ТехноРаум",
+        "image": "https://technoraum.ru/bitrix/templates/TechnoRaum/img/logo.png",
+        "url": "https://technoraum.ru",
+        "telephone": "8-800-777-57-01",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Калинина, 15/2",
+            "addressLocality": "Краснодар",
+            "addressCountry": "Russia",
+            "addressRegion": "Краснодарский Край"
+        },
+        "openingHours": [
+            "Пн-Вс: 10:00 - 21:00"
+        ],
+        "priceRange": "100-5000RUB"
+    }
+</script>
+<!--//schema.org-->
+
 </html>

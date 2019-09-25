@@ -72,3 +72,5 @@ if (isset($arDescription[SITE_ID])) {
     }
 
 }
+
+$APPLICATION->AddHeadString('<meta property="og:image" content="' . $arResult["PREVIEW_PICTURE"]["SRC"] . '" />');
