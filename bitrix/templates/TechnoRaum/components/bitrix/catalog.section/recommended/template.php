@@ -63,7 +63,7 @@ $this->setFrameMode(true);
                         <div class="the_price">
                             <p class="price"><?=$item["PRICES"]["price"]["PRINT_DISCOUNT_VALUE"]?></p>
                         </div>
-                        <a class="button to_cart_button" href="<?=$item["BUY_URL"]?>">В корзине</a>
+                        <a class="button to_cart_button" data-href="<?=$item["BUY_URL"]?>">В корзине</a>
                     </div>
                 </div>
             </li>

@@ -115,7 +115,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		"COMPATIBLE_MODE" => "Y",
 		"CONVERT_CURRENCY" => "N",
 		"CUSTOM_FILTER" => "{\"CLASS_ID\":\"CondGroup\",\"DATA\":{\"All\":\"AND\",\"True\":\"True\"},\"CHILDREN\":[{\"CLASS_ID\":\"CondIBProp:8:18\",\"DATA\":{\"logic\":\"Equal\",\"value\":12}}]}",
-		"DETAIL_URL" => "/catalog/element/#ELEMENT_CODE#/",
+		"DETAIL_URL" => "/catalog/#SECTION_CODE_PATH#/#ELEMENT_CODE#/",
 		"DISPLAY_COMPARE" => "N",
 		"ELEMENT_COUNT" => "9",
 		"ELEMENT_SORT_FIELD" => "sort",
@@ -172,7 +172,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		),
 		"PROPERTY_CODE_MOBILE" => array(
 		),
-		"SECTION_URL" => "/catalog/#SECTION_CODE#/",
+		"SECTION_URL" => "/catalog/#SECTION_CODE_PATH#/",
 		"SEF_MODE" => "Y",
 		"SHOW_CLOSE_POPUP" => "N",
 		"SHOW_DISCOUNT_PERCENT" => "N",
@@ -188,7 +188,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		"USE_PRODUCT_QUANTITY" => "N",
 		"VIEW_MODE" => "SECTION",
 		"COMPONENT_TEMPLATE" => "recom_main",
-		"SEF_RULE" => " /catalog/#SECTION_CODE#/"
+		"SEF_RULE" => " /catalog/#SECTION_CODE_PATH#/"
 	),
 	false
 );?>
@@ -218,7 +218,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		"COMPATIBLE_MODE" => "Y",
 		"CONVERT_CURRENCY" => "N",
 		"CUSTOM_FILTER" => "{\"CLASS_ID\":\"CondGroup\",\"DATA\":{\"All\":\"AND\",\"True\":\"True\"},\"CHILDREN\":[{\"CLASS_ID\":\"CondIBProp:8:18\",\"DATA\":{\"logic\":\"Equal\",\"value\":13}}]}",
-		"DETAIL_URL" => "/catalog/element/#ELEMENT_CODE#/",
+		"DETAIL_URL" => "/catalog/#SECTION_CODE_PATH#/#ELEMENT_CODE#/",
 		"DISPLAY_COMPARE" => "N",
 		"ELEMENT_COUNT" => "9",
 		"ELEMENT_SORT_FIELD" => "sort",
@@ -275,7 +275,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		),
 		"PROPERTY_CODE_MOBILE" => array(
 		),
-		"SECTION_URL" => "/catalog/#SECTION_CODE#/",
+		"SECTION_URL" => "/catalog/#SECTION_CODE_PATH#/",
 		"SEF_MODE" => "Y",
 		"SHOW_CLOSE_POPUP" => "N",
 		"SHOW_DISCOUNT_PERCENT" => "N",
@@ -291,7 +291,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		"USE_PRODUCT_QUANTITY" => "N",
 		"VIEW_MODE" => "SECTION",
 		"COMPONENT_TEMPLATE" => "main_top1",
-		"SEF_RULE" => " /catalog/#SECTION_CODE#/"
+		"SEF_RULE" => " /catalog/#SECTION_CODE_PATH#/"
 	),
 	false
 );?>

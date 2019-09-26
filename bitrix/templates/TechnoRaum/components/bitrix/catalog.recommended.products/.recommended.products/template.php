@@ -31,6 +31,7 @@ if (!empty($arResult['RECOMMENDED_IDS']))
 	$offerIblockId = !empty($arSku) ? $arSku['IBLOCK_ID'] : 0;
 
 	CBitrixComponent::includeComponentClass('bitrix:catalog.section');
+
 	$APPLICATION->IncludeComponent(
 		'bitrix:catalog.section',
 		'recommended',
@@ -69,7 +70,7 @@ if (!empty($arResult['RECOMMENDED_IDS']))
 			'SECTION_URL' => $arParams['SECTION_URL'],
 			'DETAIL_URL' => $arParams['DETAIL_URL'],
 			'BASKET_URL' => $arParams['BASKET_URL'],
-			'ACTION_VARIABLE' => $arParams['ACTION_VARIABLE'],
+			'ACTION_VARIABLE' => "action",
 			'PRODUCT_ID_VARIABLE' => $arParams['PRODUCT_ID_VARIABLE'],
 			'SECTION_ID_VARIABLE' => $arParams['SECTION_ID_VARIABLE'],
 
