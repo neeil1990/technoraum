@@ -41,7 +41,7 @@ elseif($_POST["form_id"] == 4 ||
 
     $page = iconv("UTF-8","CP1251",trim(strip_tags($_POST["name_page"])));
     $name = iconv("UTF-8","CP1251",trim(strip_tags($_POST["name"])));
-    $phone = iconv("UTF-8","CP1251",trim(strip_tags($_POST["tel"])));
+    $phone = iconv("UTF-8","CP1251",trim(strip_tags($_POST["phone"])));
     
     $arEventFields = array(
         "PAGE" => $page,

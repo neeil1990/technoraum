@@ -149,14 +149,17 @@ if($_SERVER["REQUEST_URI"] != "/")
 
     <div class="popup callback_popup" id="callback_popup">
       <form method="post" class="mform">
-        <div class="the_form">                    
+          <input type="hidden" name="city" value="<?=$_SESSION['IPOLSDEK_city']?>">
+          <input type="hidden" name="link" value="<?=$APPLICATION->GetCurPage();?>">
+          <input type="hidden" name="call_header" value="Заказать звонок">
+        <div class="the_form">
           <input type="hidden" name="form_id" value="7" />
           <p class="form_title">Заказать звонок</p>
           <div class="the_form_div">
             <input required type="text" name="name" placeholder="Ваше имя">
           </div>
           <div class="the_form_div">
-            <input required type="text" name="tel" placeholder="+7 (9ХХ) ХХХ-ХХ-ХХ">
+            <input required type="text" name="phone" placeholder="+7 (9ХХ) ХХХ-ХХ-ХХ">
           </div>
           <div class="the_form_div the_form_div_accept">
             <label><input required type="checkbox" name="check" checked="checked"><span>Я согласен с <a href="/soglasie-na-obrabotku-personalnykh-dannykh/" target=_blank>условиями использования</a> моих персональных данных.</span></label>

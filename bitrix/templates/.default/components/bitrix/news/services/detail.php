@@ -87,7 +87,7 @@ if($ar_res = $res->GetNext()){
 				<input required type="text" name="name" placeholder="Ваше имя">
 			</div>
 			<div class="the_form_div">
-				<input required type="text" name="tel" placeholder="+7 (9ХХ) ХХХ-ХХ-ХХ">
+				<input required type="text" name="phone" placeholder="+7 (9ХХ) ХХХ-ХХ-ХХ">
 			</div>
 			<div class="the_form_div the_form_div_accept">
 				<label><input required type="checkbox" name="check" checked="checked"><span>Я согласен с <a href="/soglasie-na-obrabotku-personalnykh-dannykh/" target=_blank>условиями использования</a> моих персональных данных.</span></label>
