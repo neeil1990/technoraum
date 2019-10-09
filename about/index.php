@@ -1,9 +1,9 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetPageProperty("description", "Интернет-магазин «ТехноРаум» предлагает широкий ассортимент уборочной техники от немецкого бренда Karcher профессионального и бытового уровня");
+$APPLICATION->SetPageProperty("description", "О компании «TechnoRaum» в Краснодаре - о");
 $APPLICATION->SetPageProperty("keywords", "дилеры керхер, дилеры керхер в россии официальный сайт, дилеры керхер краснодар, керхер в краснодаре официальный дилер, ТезноРаум официальный дилер керхер");
-$APPLICATION->SetPageProperty("title", "Компания Керхер в Краснодаре. Интернет-магазин ТехноРаум - дилер Karcher в Краснодаре");
-$APPLICATION->SetTitle("О компании Керхер");
+$APPLICATION->SetPageProperty("title", "Компания «TechnoRaum» в Краснодаре. Интернет-магазин «TechnoRaum»  - дилер Karcher в Краснодаре");
+$APPLICATION->SetTitle("О компании «TechnoRaum» - дилер Karcher");
 ?><div style="max-width:500px;">
  <img width="100%" alt="Сертификат о партнерстве с Karcher" src="/upload/medialibrary/ec7/ec76ecfb8b636ebd499ed1ddc5b0a518.jpg" height="677" style="width:100%;" title="Сертификат о партнерстве с Karcher" align="left">
 </div>

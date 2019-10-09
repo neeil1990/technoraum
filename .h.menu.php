@@ -15,7 +15,7 @@ $aMenuLinks = Array(
 		"" 
 	),
 	Array(
-		"Способы оплаты", 
+		"Оплата и доставка", 
 		"pay/", 
 		Array(), 
 		Array(), 

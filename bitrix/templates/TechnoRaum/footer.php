@@ -457,4 +457,12 @@ if($_SERVER["REQUEST_URI"] != "/")
 </script>
 <!--//schema.org-->
 
+<div style="display: none;">
+<!-- Top DragoWeb for: `technoraum.ru` id: `373891` -->
+<a href="https://dragoweb.ru/" rel="nofollow" 
+target="_blank" title="DragoWeb">
+<noscript charset="utf-8" type="text/javascript"
+src="//count.dragoweb.ru/jsn.js"></noscript>
+</a><!-- /Top DragoWeb -->
+</div>
 </html>

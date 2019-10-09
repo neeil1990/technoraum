@@ -1,11 +1,10 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetPageProperty("description", "Скидки на технику Керхер. Положение о дисконтной программе интернет-магазина \"ТехноРаум\"");
+$APPLICATION->SetPageProperty("description", "Дисконтная программа на Karcher в Краснодаре - «TechnoRaum»");
 $APPLICATION->SetPageProperty("keywords", "karcher купить акции, karcher скидки, karcher со скидкой, акция karcher, акция karcher краснодар, керхер акции, керхер купить по акции, керхер распродажа, керхер со скидкой, керхер со скидкой купить, купить karcher со скидкой, скидка karcher, скидки на керхер");
-$APPLICATION->SetPageProperty("title", "Купить Керхер по акции в Краснодаре. Скидки на Karcher от официального сайта ТехноРаум.");
+$APPLICATION->SetPageProperty("title", "Купить Керхер со скидкой в Краснодаре - «TechnoRaum»");
 $APPLICATION->SetTitle("Дисконтная система");
-?>
-<div class="discont_page_wrap clearfix">
+?><div class="discont_page_wrap clearfix">
 	<div class="discont_page_left_column">
 		<? $APPLICATION->IncludeFile(SITE_TEMPLATE_PATH."/include/discont_text.php",Array(),Array("MODE"=>"html")); ?>
 		<div class="yellow_text_block">
