@@ -7101,6 +7101,10 @@ a.product-unavailable:hover{
 .seometa_menu_icon{
     background: url("icons/sotbit.seometa/icon.png") no-repeat center;
 }
+.adm-submenu-item-link-icon.s2u_optipic_icon {
+        background: url('icons/step2use.optimg/s2u_optipic_icon.png') center center no-repeat;
+        background-size: auto 75%;
+    }
 .subscribe_border {border:1px solid #BDC6E0; padding:4px;}
 
 /*Menu icon*/
