@@ -71,11 +71,14 @@ $APPLICATION->SetTitle("Корзина");
 			0 => "top",
 		),
 		"USE_DYNAMIC_SCROLL" => "Y",
-		"USE_ENHANCED_ECOMMERCE" => "N",
+		"USE_ENHANCED_ECOMMERCE" => "Y",
 		"USE_GIFTS" => "Y",
 		"USE_PREPAYMENT" => "N",
 		"USE_PRICE_ANIMATION" => "Y",
 		"COMPONENT_TEMPLATE" => ".basket",
+		"ADDITIONAL_PICT_PROP_16" => "-",
+		"DATA_LAYER_NAME" => "dataLayer",
+		"BRAND_PROPERTY" => "PROPERTY_PROIZVODITEL"
 	),
 	false
 );?>

@@ -379,7 +379,7 @@ if($ar_res = $res->GetNext()){
 				<label><input required type="checkbox" name="check" checked="checked"><span>Я согласен с <a href="/soglasie-na-obrabotku-personalnykh-dannykh/" target=_blank>условиями использования</a> моих персональных данных.</span></label>
 			</div>
 			<div class="the_form_div the_form_div_submit clearfix">
-				<input type="submit" name="submit1" onclick="yaCounter51314392.reachGoal('MANAGER',function(){console.log('goal MANAGER');});" value="Отправить">
+				<input type="submit" name="submit1" value="Отправить">
 			</div>
 		</div>
 	</form>
@@ -425,7 +425,7 @@ if($ar_res = $res->GetNext()){
 				<label><input required type="checkbox" name="check" checked="checked"><span>Я согласен с <a href="/soglasie-na-obrabotku-personalnykh-dannykh/" target=_blank>условиями использования</a> моих персональных данных.</span></label>
 			</div>
 			<div class="the_form_div the_form_div_submit clearfix">
-				<input type="submit" name="submit1" onclick="yaCounter51314392.reachGoal('otpravit')" value="Отправить">
+				<input type="submit" name="submit1" value="Отправить">
 			</div>
 		</div>
 	</form>

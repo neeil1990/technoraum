@@ -254,6 +254,9 @@ $APPLICATION->SetTitle("Каталог товаров");
 		"TOP_ROTATE_TIMER" => "30",
 		"COMPOSITE_FRAME_MODE" => "A",
 		"COMPOSITE_FRAME_TYPE" => "AUTO",
+		"USE_ENHANCED_ECOMMERCE" => "Y",
+        "DATA_LAYER_NAME" => "dataLayer",
+        "BRAND_PROPERTY" => "PROPERTY_PROIZVODITEL",
 		"SEF_URL_TEMPLATES" => array(
 			"sections" => "",
 			"section" => "#SECTION_CODE_PATH#/",
