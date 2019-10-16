@@ -145,7 +145,7 @@ if (authorizes($user, $link) > 0) {
 
         addDeals($dealName,$idc, $dealStatusID, $pipID, $responsibleId, $form, $subdomain,$field,$fieldpost);
         }else{
-        $idc =  addContacts($name,$responsibleId,$phoneFieldId,$phone, $subdomain, $contactTags);
+        $idc =  addContactsb($name,$responsibleId,$phoneFieldId,$phone, $subdomain, $contactTags);
         
         if($form == "form_credit"){
                 $form = "form_credit";
@@ -281,7 +281,7 @@ function findContacts($subdomain, $phone)
 //  * @param $subdomain {string} - поддомен для доступа к amocrm
 //  * @return int - ID добавленного пользователя
 //  */
-function addContacts($name,$responsibleId,$phoneFieldId,$phone, $subdomain, $contactTags)
+function addContactsb($name,$responsibleId,$phoneFieldId,$phone, $subdomain, $contactTags)
 {
     $contacts['add'] = array(
         array(
