@@ -89,7 +89,15 @@ $this->setFrameMode(true);
         </div>
     </div>
 
-    <div class="row"><div style="height: 80px;"></div></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main_title">
+                <h1><?$APPLICATION->ShowTitle(false)?></h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"><div style="height: 40px;"></div></div>
 
     <div class="row">
         <div class="col-md-4">

@@ -213,9 +213,11 @@ if($url[1] != "personal" && $url[2] != "order" && $url[3] != "make")
 				</div>
 				<section class="section <?if(!CSite::InDir('/spares/')):?>the_content_section<?endif;?> padd_bottom0">
 					<div class="inner_section clearfix">
+                    <?if(!CSite::InDir('/spares/')):?>
 						<div class="main_title">
 							<h1><?$APPLICATION->ShowTitle(false)?></h1>
 						</div>
+                    <?endif;?>
 						<div class="contacts_page_wrap">
 				<?
 			}
