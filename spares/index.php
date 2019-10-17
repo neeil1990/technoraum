@@ -201,7 +201,24 @@ $APPLICATION->SetTitle("Каталог запчастей");
     <script src="<?=SITE_TEMPLATE_PATH."/js/imgNotes/imgViewer.min.js"?>"></script>
     <script src="<?=SITE_TEMPLATE_PATH."/js/imgNotes/imgNotes.min.js"?>"></script>
 
+
+    <link rel="stylesheet" href="<?=SITE_TEMPLATE_PATH."/js/mCustomScrollbar/jquery.mCustomScrollbar.css"?>" media="screen">
+    <script src="<?=SITE_TEMPLATE_PATH."/js/mCustomScrollbar/jquery.mCustomScrollbar.concat.min.js"?>"></script>
+
     <script>
+        $(".dTree-menu").mCustomScrollbar({
+            axis:"x",
+            theme:"rounded-dark",
+            autoExpandScrollbar : false,
+            scrollInertia: 0,
+            advanced:{
+                autoExpandHorizontalScroll : 3
+            },
+            mouseWheel:{
+                scrollAmount: 3
+            },
+        });
+
         //Деталировка spares
         var default_notes = [
             /*{x: "0.0750", y:"0.1", note:"Один"},
