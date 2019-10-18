@@ -1,5 +1,7 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
+$APPLICATION->SetPageProperty("title", "Купить запчасти для Керхер (Karcher) в Краснодаре по низкой цене -  «TechnoRaum»");
+$APPLICATION->SetPageProperty("description", "Купить запчасти для Керхер (Karcher) в Краснодаре по низкой цене в интернет-магазине «TechnoRaum». Низкие цены, быстрая доставка. Максимальный ассортимент запасных частей.");
 $APPLICATION->SetTitle("Каталог запчастей");
 ?>
 <!--strat content page-->
