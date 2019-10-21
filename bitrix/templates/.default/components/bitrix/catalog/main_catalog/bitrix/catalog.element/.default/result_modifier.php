@@ -54,7 +54,10 @@ foreach($arResult["PROPERTIES"]["GIFT"]["VALUE"] as $key => $gifts)
 		$count = preg_replace("/[^0-9]/", '', $arResult["PROPERTIES"]["GIFT"]["DESCRIPTION"][$key]);
 		if(is_numeric($count)){
 			(float)$price["PRICE"] *= (int)$count;
+            $arResult["PROPERTIES"]["GIFT"]["ITEM"][$ar_res['ID']]["COUNT"] = (int)$count;
 		}
+        $arResult["PROPERTIES"]["GIFT"]["ITEM"][$ar_res['ID']]["PRICE_COUNT"] = (float)$price["PRICE"];
+
 		$arResult["GIFT_SUM"] += (float)$price["PRICE"];
 	}
 }

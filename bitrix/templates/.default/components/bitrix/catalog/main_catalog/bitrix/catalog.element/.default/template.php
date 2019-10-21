@@ -228,30 +228,39 @@ while ($arItems = $dbBasketItems->Fetch())
 
 		<? if($arResult["PROPERTIES"]["GIFT"]["VALUE"]):?>
 				<? if(count($arResult["PROPERTIES"]["GIFT"]["ITEM"]) > 0): ?>
-					<div class="items">
-							<a href="#" class="list-group-item">
-								<div class="thumbnail list-group-img">
-									<img alt="<?=$product["NAME"]?>" style="height: 50px; width: 50px; display: block;" src="<?=SITE_TEMPLATE_PATH?>/img/gift_icon.png">
-								</div>
-								<div class="list-group-desc">
-									<div class="list-group-item-text">Подарки</div>
-									<div class="list-group-item-text">на сумму</div>
-									<div class="list-group-item-text"><?=number_format($arResult["GIFT_SUM"] , 0 , " " , " ");?> &#8381;</div>
-								</div>
-							</a>
-						<? foreach($arResult["PROPERTIES"]["GIFT"]["ITEM"] as $product):?>
-							<a href="<?=$product["URL"]?>" class="list-group-item">
-								<div class="thumbnail list-group-img">
-									<img alt="<?=$product["NAME"]?>" style="height: 50px; width: 50px; display: block;" src="<?=$product["PICTURE"]["src"]?>">
-								</div>
-								<div class="list-group-desc">
-									<div class="list-group-item-text"><?=$product["NAME"]?></div>
-									<div class="list-group-item-text"><?=number_format($product["PRICE"] , 0 , " " , " ");?> &#8381;</div>
-									<div class="list-group-item-text"><?=$product["DESC"]?></div>
-								</div>
-							</a>
-						<? endforeach; ?>
-					</div>
+                <div class="items-gifts">
+                    <div class="item">
+                        <a href="#">
+                            <div class="thumb-gift">
+                                <img src="<?=SITE_TEMPLATE_PATH?>/img/gift_icon.png">
+                            </div>
+                            <div class="desc-gift">
+                                <span>Подарки на сумму <?=number_format($arResult["GIFT_SUM"] , 0 , " " , " ");?> &#8381;</span>
+                            </div>
+                        </a>
+                    </div>
+                    <hr>
+                    <? foreach($arResult["PROPERTIES"]["GIFT"]["ITEM"] as $product):?>
+                    <div class="item">
+                        <a href="<?=$product["URL"]?>">
+                            <div class="thumb-gift">
+                                <img src="<?=$product["PICTURE"]["src"]?>" alt="<?=$product["NAME"]?>">
+                            </div>
+                            <div class="desc-gift">
+                                <span><?=$product["NAME"]?></span>
+                                <span>
+                                    <?=number_format($product["PRICE"] , 0 , " " , " ");?> &#8381;
+                                    <?if($product['COUNT']):?>
+                                    * <?=$product['COUNT']?> шт. = <?=number_format($product['PRICE_COUNT'] , 0 , " " , " ");?> &#8381;
+                                    <?else:?>
+                                      <?=$product['DESC']?>
+                                    <?endif;?>
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                    <? endforeach; ?>
+                </div>
 				<? endif; ?>
 			<? endif; ?>
 		<p class="title">Как получить товар</p>
