@@ -12,6 +12,7 @@
 .items-gifts{margin: 30px auto;}
 .items-gifts .item{
     margin-bottom: 10px;
+    margin-left: 50px;
 }
 .items-gifts .item a{
     text-decoration: none;
@@ -31,6 +32,13 @@
     width: 50px;
     height: 50px;
 }
+.items-gifts .item.main{
+    margin: 0;
+}
+.items-gifts .item.main a .thumb-gift{
+    border:none;
+}
+
 .items-gifts .item a .desc-gift{display: inline-block;}
 .items-gifts .item a .desc-gift span{
     margin-right: 10px;

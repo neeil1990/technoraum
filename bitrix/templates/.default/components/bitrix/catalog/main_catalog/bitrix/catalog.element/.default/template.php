@@ -229,10 +229,10 @@ while ($arItems = $dbBasketItems->Fetch())
 		<? if($arResult["PROPERTIES"]["GIFT"]["VALUE"]):?>
 				<? if(count($arResult["PROPERTIES"]["GIFT"]["ITEM"]) > 0): ?>
                 <div class="items-gifts">
-                    <div class="item">
+                    <div class="item main">
                         <a href="#">
                             <div class="thumb-gift">
-                                <img src="<?=SITE_TEMPLATE_PATH?>/img/gift_icon.png">
+                                <img width="100%" src="<?=SITE_TEMPLATE_PATH?>/img/gift_icon.png">
                             </div>
                             <div class="desc-gift">
                                 <span>Подарки на сумму <?=number_format($arResult["GIFT_SUM"] , 0 , " " , " ");?> &#8381;</span>
