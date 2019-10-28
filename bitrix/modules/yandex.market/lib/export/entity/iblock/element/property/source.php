@@ -910,12 +910,12 @@ class Source extends Market\Export\Entity\Reference\Source
 	{
 		$result = null;
 
-		if (isset($property['VALUE']))
+		if (isset($property['VALUE']) && !$this->isEmptyValue($property['VALUE']))
 		{
 			switch ($this->getPropertyType($property))
 			{
 				case 'F':
-					$fileIds = !empty($property['VALUE']) ? (array)$property['VALUE'] : [];
+					$fileIds = (array)$property['VALUE'];
 					$result = [];
 
 					foreach ($fileIds as $fileId)
@@ -1012,6 +1012,20 @@ class Source extends Market\Export\Entity\Reference\Source
 			}
 
 			$this->highloadDataClassCache[$tableName] = $result;
+		}
+
+		return $result;
+	}
+
+	protected function isEmptyValue($value)
+	{
+		if (is_scalar($value))
+		{
+			$result = ((string)$value === '');
+		}
+		else
+		{
+			$result = empty($value);
 		}
 
 		return $result;

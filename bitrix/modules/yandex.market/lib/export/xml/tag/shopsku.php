@@ -4,7 +4,7 @@ namespace Yandex\Market\Export\Xml\Tag;
 
 use Yandex\Market;
 
-class ShopSku extends Price
+class ShopSku extends Base
 {
 	public function getDefaultParameters()
 	{

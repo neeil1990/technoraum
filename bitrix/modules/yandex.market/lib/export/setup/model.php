@@ -137,6 +137,7 @@ class Model extends Market\Reference\Storage\Model
 			'EXPORT_FORMAT' => $this->getField('EXPORT_FORMAT'),
 			'EXPORT_FORMAT_TYPE' => $format->getType(),
 			'ENABLE_AUTO_DISCOUNTS' => $this->isAutoDiscountsEnabled(),
+			'HTTPS' => $this->isHttps(),
 			'DOMAIN_URL' => $this->getDomainUrl(),
 			'ORIGINAL_URL' => $this->getDomainUrl($this->getField('DOMAIN')),
 			'USER_GROUPS' => [2], // support only public

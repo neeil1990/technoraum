@@ -2,12 +2,15 @@
 
 namespace Yandex\Market\Export\Xml\Tag;
 
+use Yandex\Market;
+
 class EnableAutoDiscounts extends Base
 {
 	public function getDefaultParameters()
 	{
 		return [
-			'name' => 'enable_auto_discounts'
+			'name' => 'enable_auto_discounts',
+			'value_type' => Market\Type\Manager::TYPE_BOOLEAN,
 		];
 	}
 
@@ -22,7 +25,7 @@ class EnableAutoDiscounts extends Base
 
 		if (!empty($context['ENABLE_AUTO_DISCOUNTS']) && $this->getParameter('global'))
 		{
-			$result = 'true';
+			$result = true;
 		}
 
 		return $result;

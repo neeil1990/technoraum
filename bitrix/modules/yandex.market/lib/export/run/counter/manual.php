@@ -121,7 +121,9 @@ class Manual extends Base
 
 		if (!$context['CATALOG_TYPE_COMPATIBILITY'] && !$context['OFFER_ONLY'])
 		{
-			$result[] = 'CATALOG_TYPE';
+			$result[] = Market\Export\Entity\Catalog\Provider::useCatalogShortFields()
+				? 'TYPE'
+				: 'CATALOG_TYPE';
 		}
 
 		return $result;
@@ -139,11 +141,15 @@ class Manual extends Base
 		{
 			$result = true;
 		}
+		else if (isset($element['TYPE']))
+		{
+			$result = (int)$element['TYPE'] === Market\Export\Run\Steps\Offer::ELEMENT_TYPE_SKU;
+		}
 		else if (isset($element['CATALOG_TYPE']))
 		{
 			$result = (int)$element['CATALOG_TYPE'] === Market\Export\Run\Steps\Offer::ELEMENT_TYPE_SKU;
 		}
-		else if (array_key_exists('CATALOG_TYPE', $element))
+		else if (array_key_exists('CATALOG_TYPE', $element) || array_key_exists('TYPE', $element))
 		{
 			$result = true;
 		}

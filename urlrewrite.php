@@ -56,14 +56,6 @@ $arUrlRewrite=array (
     'PATH' => '/services/index.php',
     'SORT' => 100,
   ),
-  90 => 
-  array (
-    'CONDITION' => '#^/actions/#',
-    'RULE' => '',
-    'ID' => 'bitrix:news',
-    'PATH' => '/actions/index.php',
-    'SORT' => 100,
-  ),
   137 => 
   array (
     'CONDITION' => '#^/service/#',
@@ -78,6 +70,14 @@ $arUrlRewrite=array (
     'RULE' => '',
     'ID' => 'bitrix:catalog',
     'PATH' => '/catalog/index.php',
+    'SORT' => 100,
+  ),
+  148 => 
+  array (
+    'CONDITION' => '#^/actions/#',
+    'RULE' => '',
+    'ID' => 'bitrix:news',
+    'PATH' => '/actions/index.php',
     'SORT' => 100,
   ),
   9 => 

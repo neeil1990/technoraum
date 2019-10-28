@@ -3,6 +3,7 @@
 namespace Yandex\Market\Export\Xml\Format\BeruRu;
 
 use Yandex\Market\Export\Xml;
+use Yandex\Market\Type;
 
 class VendorModel extends Xml\Format\YandexMarket\VendorModel
 {
@@ -19,7 +20,8 @@ class VendorModel extends Xml\Format\YandexMarket\VendorModel
 		$tag->addChildren([
 			new Xml\Tag\ShopSku(['required' => true]),
 			new Xml\Tag\Base(['name' => 'market-sku']),
-			new Xml\Tag\Base(['name' => 'disabled', 'value_type' => 'boolean'])
+			new Xml\Tag\Base(['name' => 'disabled', 'value_type' => Type\Manager::TYPE_BOOLEAN]),
+			new Xml\Tag\Count(),
 		]);
 
 		$this->removeChildTags($tag, ['condition', 'credit-template', 'purchase_price']);

@@ -729,6 +729,7 @@ class Offer extends Base
 		if (!empty($iblockContext['SELECT_MAP']))
 		{
 			$selectMap = $iblockContext['SELECT_MAP'];
+			$innerTypes = [ 'ATTRIBUTES', 'SETTINGS' ];
 
 			foreach ($tagDescriptionList as &$tagDescription)
 			{
@@ -742,16 +743,19 @@ class Offer extends Base
 					}
 				}
 
-				if (isset($tagDescription['ATTRIBUTES']))
+				foreach ($innerTypes as $innerType)
 				{
-					foreach ($tagDescription['ATTRIBUTES'] as &$attributeSourceMap)
+					if (isset($tagDescription[$innerType]))
 					{
-						if (isset($selectMap[$attributeSourceMap['TYPE']][$attributeSourceMap['FIELD']]))
+						foreach ($tagDescription[$innerType] as &$innerSourceMap)
 						{
-							$attributeSourceMap['FIELD'] = $selectMap[$attributeSourceMap['TYPE']][$attributeSourceMap['FIELD']];
+							if (is_array($innerSourceMap) && isset($selectMap[$innerSourceMap['TYPE']][$innerSourceMap['FIELD']]))
+							{
+								$innerSourceMap['FIELD'] = $selectMap[$innerSourceMap['TYPE']][$innerSourceMap['FIELD']];
+							}
 						}
+						unset($innerSourceMap);
 					}
-					unset($attributeSourceMap);
 				}
 			}
 			unset($tagDescription);
@@ -906,7 +910,11 @@ class Offer extends Base
 
 			if ($hasOffers)
 			{
-				$elementFilter['!CATALOG_TYPE'] = static::ELEMENT_TYPE_SKU;
+				$catalogTypeFieldName = Market\Export\Entity\Catalog\Provider::useCatalogShortFields()
+					? 'TYPE'
+					: 'CATALOG_TYPE';
+
+				$elementFilter['!' . $catalogTypeFieldName] = static::ELEMENT_TYPE_SKU;
 			}
 
 			$result += (int)\CIBlockElement::GetList([], $elementFilter, []);
@@ -1206,6 +1214,14 @@ class Offer extends Base
 				$result['OFFERS'] = $this->getFilterDefaults('OFFERS', $iblockIds['OFFERS']);
 				$result['OFFERS'][] = $result['CATALOG'];
 			}
+			else if ($this->canQueryCatalogFilterMerge($result['CATALOG']))
+			{
+				$isOfferSubQueryInitialized = true;
+				$result['ELEMENT'][] = $result['CATALOG'];
+
+				$result['OFFERS'] = $this->getFilterDefaults('OFFERS', $iblockIds['OFFERS']);
+				$result['OFFERS'][] = $result['CATALOG'];
+			}
 			else
 			{
 				$isOfferSubQueryInitialized = true;
@@ -1374,6 +1390,48 @@ class Offer extends Base
 	}
 
 	/**
+	 * Можно ли фильтровать по данным каталога без subfilter (пример, =AVAILABLE => Y).
+	 *
+	 * @param $catalogFilter
+	 *
+	 * @return bool
+	 */
+	protected function canQueryCatalogFilterMerge($catalogFilter)
+	{
+		$result = false;
+
+		if (is_array($catalogFilter) && Market\Export\Entity\Catalog\Provider::useSkuAvailableCalculation())
+		{
+			$result = true;
+			$availableFieldName = Market\Export\Entity\Catalog\Provider::useCatalogShortFields()
+				? '=AVAILABLE'
+				: '=CATALOG_AVAILABLE';
+
+			foreach ($catalogFilter as $partName => $part)
+			{
+				$canMerge = false;
+
+				if (!is_array($part))
+				{
+					$canMerge = ($partName === $availableFieldName && $part === 'Y');
+				}
+				else if (count($part) === 1)
+				{
+					$canMerge = (isset($part[$availableFieldName]) && $part[$availableFieldName] === 'Y');
+				}
+
+				if (!$canMerge)
+				{
+					$result = false;
+					break;
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Исключаем уже выгруженные элементы
 	 *
 	 * @param $queryContext
@@ -1515,12 +1573,16 @@ class Offer extends Base
 		{
 			$result = static::ELEMENT_TYPE_SKU;
 		}
+		else if (isset($element['TYPE']))
+		{
+			$result = (int)$element['TYPE'];
+		}
 		else if (isset($element['CATALOG_TYPE']))
 		{
 			$result = (int)$element['CATALOG_TYPE'];
 		}
 		else if (
-			array_key_exists('CATALOG_TYPE', $element)
+			(array_key_exists('CATALOG_TYPE', $element) || array_key_exists('TYPE', $element))
 			&& !empty($context['OFFER_IBLOCK_ID'])
 		)
 		{
@@ -1682,7 +1744,9 @@ class Offer extends Base
 					&& !$this->isCatalogTypeCompatibility($context) // is valid catalog_type
 				)
 				{
-					$result[] = 'CATALOG_TYPE';
+					$result[] = Market\Export\Entity\Catalog\Provider::useCatalogShortFields()
+						? 'TYPE'
+						: 'CATALOG_TYPE';
 				}
 			break;
 
@@ -1814,23 +1878,7 @@ class Offer extends Base
 		}
 		else
 		{
-			$selfOption = (string)Market\Config::getOption('export_offer_catalog_type_compatibility');
-			$catalogVersion = Main\ModuleManager::getVersion('catalog');
-
-			if ($selfOption !== '') // has self module option
-			{
-				$result = ($selfOption === 'Y');
-			}
-			else if ($catalogVersion !== false && CheckVersion('15.99.99', $catalogVersion)) // module catalog version less 16.0.0
-			{
-				$result = true;
-			}
-			else if (Main\Config\Option::get('catalog', 'show_catalog_tab_with_offers') === 'Y') // catalog tab open for product with offers
-			{
-				$result = true;
-			}
-
-			$this->isCatalogTypeCompatibility = $result;
+			$this->isCatalogTypeCompatibility = Market\Export\Entity\Catalog\Provider::useCatalogTypeCompatibility();
 		}
 
 		return $result;

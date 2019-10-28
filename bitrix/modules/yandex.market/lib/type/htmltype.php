@@ -8,7 +8,7 @@ class HtmlType extends StringType
 {
 	public function format($value, array $context = [], Market\Export\Xml\Reference\Node $node = null, Market\Result\XmlNode $nodeResult = null)
 	{
-		$result = strip_tags($value, '<h3><br><ul><ol><li><p>');
+		$result = $this->getSanitizedValue($value);
 		$maxLength = $node ? $node->getMaxLength() : null;
 
 		if (strpos($result, '<') !== false) // has tags
@@ -31,14 +31,12 @@ class HtmlType extends StringType
 			}
 			else
 			{
-				$result = trim($result);
-				$result = str_replace('&', '&amp;', $result);
+				$result = $this->replaceXmlEntity($result);
 			}
 		}
 		else
 		{
-			$result = trim($result);
-			$result = str_replace('&', '&amp;', $result);
+			$result = $this->replaceXmlEntity($result);
 
 			if ($maxLength !== null)
 			{
@@ -47,6 +45,11 @@ class HtmlType extends StringType
 		}
 
 		return $result;
+	}
+
+	protected function sanitizeValue($value)
+	{
+		return trim(strip_tags($value, '<h3><br><ul><ol><li><p>'));
 	}
 
 	protected function makeCData($contents)

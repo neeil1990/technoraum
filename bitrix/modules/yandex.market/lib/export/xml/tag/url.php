@@ -69,7 +69,21 @@ class Url extends Base
 
 			if ($hasQueryParams)
 			{
+				$anchorPosition = strpos($value, '#');
+				$slicedPart = '';
+
+				if ($anchorPosition !== false)
+				{
+					$slicedPart = substr($value, $anchorPosition);
+					$value = substr($value, 0, $anchorPosition);
+				}
+
 				$value .= (strpos($value, '?') === false ? '?' : '&') . $this->buildQueryParams($queryParams);
+
+				if ($slicedPart !== '')
+				{
+					$value .= $slicedPart;
+				}
 			}
 		}
 

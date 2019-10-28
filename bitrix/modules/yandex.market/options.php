@@ -25,6 +25,7 @@ else
 {
 	// process request
 
+	$uiOptions = new Market\Ui\Options();
 	$request = Main\Context::getCurrent()->getRequest();
 	$requestAction = $request->getPost('action');
 	$errorMessage = null;
@@ -41,12 +42,28 @@ else
 		}
 		else if ($requestAction === 'save')
 		{
-			ob_start();
-			$Update = '1'; // need inside main module
-			require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/admin/group_rights.php';
-			ob_end_clean();
+			try
+			{
+				$uiOptions->setRequest($request);
+				$uiOptions->save();
 
-			LocalRedirect($APPLICATION->GetCurPageParam());
+				ob_start();
+				$Update = '1'; // need inside main module
+				require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/admin/group_rights.php';
+				ob_end_clean();
+
+				LocalRedirect($APPLICATION->GetCurPageParam());
+			}
+			catch (Main\SystemException $exception)
+			{
+				$message = new CAdminMessage([
+					'TYPE' => 'ERROR',
+					'MESSAGE' => $exception->getMessage(),
+					'HTML' => true,
+				]);
+
+				echo $message->Show();
+			}
 		}
 		else
 		{
@@ -63,6 +80,7 @@ else
 	// tabs view
 
 	$tabs = [
+		[ 'DIV' => 'options', 'TAB' => Market\Config::getLang('OPTIONS_TAB_OPTIONS') ],
 		[ 'DIV' => 'permissions', 'TAB' => Market\Config::getLang('OPTIONS_TAB_PERMISSIONS') ],
 	];
 	$tabControl = new CAdminTabControl(Market\Config::getLangPrefix() . 'OPTIONS', $tabs, true, true);
@@ -73,6 +91,9 @@ else
 		<input type="hidden" name="action" value="save">
 		<?
 		echo bitrix_sessid_post();
+
+		$tabControl->BeginNextTab();
+		$uiOptions->showTab();
 
 		$tabControl->BeginNextTab();
 		require_once $_SERVER['DOCUMENT_ROOT']. '/bitrix/modules/main/admin/group_rights.php';

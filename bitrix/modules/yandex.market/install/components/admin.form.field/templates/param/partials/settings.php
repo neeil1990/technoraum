@@ -8,6 +8,7 @@ use Yandex\Market;
 /** @var $tagValue array */
 /** @var $tagName string */
 /** @var $tagInputName string */
+/** @var $this CBitrixComponentTemplate */
 
 $settings = $tag->getSettingsDescription();
 
@@ -27,6 +28,7 @@ if ($settings !== null)
 			$this->addExternalJs('/bitrix/js/yandex.market/ui/collapse.js');
 
 			$hasFilled = false;
+			$utmHtmlId = 'ym-utm-group-' . $tagName . '-' . $this->randString(3);
 
 			if (!empty($tagValue['SETTINGS']) && is_array($tagValue['SETTINGS']))
 			{
@@ -44,14 +46,14 @@ if ($settings !== null)
 			<tr>
 				<td class="b-param-table__cell" align="right" width="40%"></td>
 				<td class="b-param-table__cell" colspan="3">
-					<a class="b-link target--inside <?= $hasFilled ? 'is--active' : ''; ?> js-plugin" href="#" data-plugin="Ui.Collapse" data-target-element="#ym-utm-group-<?= $tagName; ?>" data-alt="<?= $hasFilled ? $langStatic['SETTINGS_UTM_TOGGLE_FILL'] : $langStatic['SETTINGS_UTM_TOGGLE_ALT']; ?>">
+					<a class="b-link target--inside <?= $hasFilled ? 'is--active' : ''; ?> js-plugin" href="#" data-plugin="Ui.Collapse" data-target-element="#<?= $utmHtmlId; ?>" data-alt="<?= $hasFilled ? $langStatic['SETTINGS_UTM_TOGGLE_FILL'] : $langStatic['SETTINGS_UTM_TOGGLE_ALT']; ?>">
 						<?= $hasFilled ? $langStatic['SETTINGS_UTM_TOGGLE_ALT'] : $langStatic['SETTINGS_UTM_TOGGLE']; ?>
 					</a>
 				</td>
 			</tr>
 			<tr>
 				<td colspan="4">
-					<div class="b-collapse <?= $hasFilled ? 'is--active' : ''; ?>" id="ym-utm-group-<?= $tagName; ?>">
+					<div class="b-collapse <?= $hasFilled ? 'is--active' : ''; ?>" id="<?= $utmHtmlId; ?>">
 						<table width="100%">
 			<?
 		break;
@@ -131,8 +133,12 @@ if ($settings !== null)
 				$selectedTypeId = null;
 				$disabledTypes = [
 					$arResult['RECOMMENDATION_TYPE'] => true,
-					Market\Export\Entity\Manager::TYPE_TEMPLATE => true,
 				];
+
+				if (!Market\Config::isExpertMode())
+				{
+					$disabledTypes[Market\Export\Entity\Manager::TYPE_TEMPLATE] = true;
+				}
 
 				if ($settingsLayout === 'utm')
 				{
@@ -196,6 +202,23 @@ if ($settings !== null)
 							}
 
 						?> />
+						<?
+					}
+					else if ($arResult['SOURCE_TYPE_ENUM'][$selectedTypeId]['TEMPLATE'])
+					{
+						?>
+						<div class="b-control-group js-param-node__field-wrap">
+							<input class="b-control-group__item pos--first b-param-table__input js-param-node__field js-param-node__input" type="text" data-name="FIELD" data-type="template" <?
+
+								if ($inputName !== null)
+								{
+									echo 'name="' . $inputName . '[FIELD]' . '"';
+									echo ' value="' . htmlspecialcharsbx($sourceField) . '"';
+								}
+
+							?> />
+							<button class="b-control-group__item pos--last adm-btn around--control js-param-node__template-button" type="button">...</button>
+						</div>
 						<?
 					}
 					else

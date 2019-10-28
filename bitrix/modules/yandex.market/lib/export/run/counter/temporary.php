@@ -142,7 +142,9 @@ class Temporary extends Base
 		else
 		{
 			$isNeedCatalogType = true;
-			$select[] = 'CATALOG_TYPE';
+			$select[] = Market\Export\Entity\Catalog\Provider::useCatalogShortFields()
+				? 'TYPE'
+				: 'CATALOG_TYPE';
 		}
 
 		$elementSql = $this->getElementSql($filter, $select, $elementSqlExtension);

@@ -1,8 +1,8 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetPageProperty("description", "Компания - дистрибьютер Karcher и её акции");
-$APPLICATION->SetPageProperty("keywords", "ну уж точно не мебель");
-$APPLICATION->SetTitle("Title");
+$APPLICATION->SetPageProperty("title", "Акции на продукцию Karcher в Краснодаре");
+$APPLICATION->SetPageProperty("description", "Акции на всю продукцию Karcher в Краснодаре - Технораум");
+$APPLICATION->SetTitle("Акции Karcher");
 ?><?$APPLICATION->IncludeComponent(
 	"bitrix:news", 
 	"actions", 

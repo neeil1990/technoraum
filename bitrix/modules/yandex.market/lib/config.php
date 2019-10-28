@@ -78,4 +78,11 @@ class Config
 
 		Option::set($moduleName, $name, $value, $siteId);
 	}
+
+	public static function removeOption($name)
+	{
+		$moduleName = static::getModuleName();
+
+		Option::delete($moduleName, [ 'name' => $name ]);
+	}
 }

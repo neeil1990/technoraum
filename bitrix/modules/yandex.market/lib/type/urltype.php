@@ -11,28 +11,34 @@ class UrlType extends AbstractType
 
 	public function format($value, array $context = [], Market\Export\Xml\Reference\Node $node = null, Market\Result\XmlNode $nodeResult = null)
 	{
-		$result = $value;
+		$parsedUrl = $this->parseUrl($value);
 
-		if (strpos($result, '://') === false) // is not absolute url
+		if ($parsedUrl !== null)
 		{
-			$parsedPath = $this->splitPath($result);
-
-			if (strpos($parsedPath['PATH'], '/') !== 0)
+			if ($parsedUrl['DOMAIN'] === '') // no domain
 			{
-				$parsedPath['PATH'] = '/' . $parsedPath['PATH'];
+				$parsedUrl['DOMAIN'] = $context['DOMAIN_URL'];
+			}
+			else if (strpos($parsedUrl['DOMAIN'], '//') === 0) // without protocol
+			{
+				$parsedUrl['DOMAIN'] =
+					($context['HTTPS'] ? 'https:' : 'http:')
+					. $parsedUrl['DOMAIN'];
 			}
 
-			$result =
-				$this->idnDomain($context['DOMAIN_URL'])
-				. $this->encodeUrlPath($parsedPath['PATH'])
-				. $parsedPath['QUERY'];
-		}
-		else if ($parsedUrl = $this->parseUrl($result))
-		{
+			if ($parsedUrl['PATH'] !== '' && strpos($parsedUrl['PATH'], '/') !== 0) // no start slash for path
+			{
+				$parsedUrl['PATH'] = '/' . $parsedUrl['PATH'];
+			}
+
 			$result =
 				$this->idnDomain($parsedUrl['DOMAIN'])
 				. $this->encodeUrlPath($parsedUrl['PATH'])
 				. $parsedUrl['QUERY'];
+		}
+		else
+		{
+			$result = $value;
 		}
 
 		$result = str_replace('&', '&amp;', $result); // escape xml entities
@@ -76,30 +82,13 @@ class UrlType extends AbstractType
 	{
 		$result = null;
 
-		if (preg_match('#^(https?://[^/?\#]+)([^?\#]*)(.*)?$#i', $url, $matches))
+		if (preg_match('#^((?:[A-Za-z]+?:)?//[^/?\#]+)?([^?\#]*)(.*)?$#', $url, $matches))
 		{
 			$result = [
-				'DOMAIN' => $matches[1],
-				'PATH' => $matches[2],
-				'QUERY' => $matches[3]
+				'DOMAIN' => (string)$matches[1],
+				'PATH' => (string)$matches[2],
+				'QUERY' => (string)$matches[3],
 			];
-		}
-
-		return $result;
-	}
-
-	protected function splitPath($path)
-	{
-		$questionPosition = strpos($path, '?');
-		$result = [
-			'PATH' => $path,
-			'QUERY' => ''
-		];
-
-		if ($questionPosition !== false)
-		{
-			$result['PATH'] = substr($path, 0, $questionPosition);
-			$result['QUERY'] = substr($path, $questionPosition);
 		}
 
 		return $result;

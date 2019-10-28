@@ -15,6 +15,11 @@ class Source extends Market\Export\Entity\Reference\Source
 	protected $basePriceIds;
 	protected $isOptimalPriceHandlersExists;
 
+	public function getOrder()
+	{
+		return 600; // after catalog_product
+	}
+
 	public function isFilterable()
 	{
 		return true;
@@ -28,6 +33,7 @@ class Source extends Market\Export\Entity\Reference\Source
 	 */
 	public function getQueryFilter($filter, $select)
 	{
+		$isShortSyntax = Market\Export\Entity\Catalog\Provider::useCatalogShortFields();
 		$usedPriceIds = [];
 		$result = [
 			'CATALOG' => []
@@ -48,12 +54,12 @@ class Source extends Market\Export\Entity\Reference\Source
                 switch ($fieldParts['FIELD'])
                 {
                     case 'CURRENCY':
-                        $filterItemField = 'CATALOG_CURRENCY_' . $priceId;
+                        $filterItemField = ($isShortSyntax ? '' : 'CATALOG_') . 'CURRENCY_' . $priceId;
                     break;
 
                     case 'DISCOUNT_VALUE': // for discount filter
                     case 'VALUE':
-                        $filterItemField = 'CATALOG_PRICE_' . $priceId;
+                        $filterItemField = ($isShortSyntax ? '' : 'CATALOG_') . 'PRICE_' . $priceId;
                     break;
                 }
 
@@ -62,7 +68,15 @@ class Source extends Market\Export\Entity\Reference\Source
                     if (!isset($usedPriceIds[$priceId]))
                     {
                         $usedPriceIds[$priceId] = true;
-                        $result['CATALOG']['CATALOG_SHOP_QUANTITY_' . $priceId] = 1;
+
+                        if ($isShortSyntax)
+						{
+							$result['CATALOG']['QUANTITY_RANGE_FILTER_' . $priceId] = 1;
+                    	}
+                        else
+						{
+							$result['CATALOG']['CATALOG_SHOP_QUANTITY_' . $priceId] = 1;
+						}
                     }
 
                     if ($isMultipleField)
@@ -109,6 +123,34 @@ class Source extends Market\Export\Entity\Reference\Source
 	public function initializeQueryContext($select, &$queryContext, &$sourceSelect)
 	{
 		global $USER;
+
+		// vat select
+
+		if (Market\Export\Entity\Catalog\Provider::useCatalogShortFields())
+		{
+			$priceSelect = $this->getPriceSelectFields($select);
+
+			if (isset($priceSelect['OPTIMAL']))
+			{
+				$isNeedSelectVatInfo = (count($priceSelect) > 1);
+			}
+			else
+			{
+				$isNeedSelectVatInfo = (count($priceSelect) > 0);
+			}
+
+			if ($isNeedSelectVatInfo)
+			{
+				$catalogProductType = Market\Export\Entity\Manager::TYPE_CATALOG_PRODUCT;
+
+				if (!isset($sourceSelect[$catalogProductType])) { $sourceSelect[$catalogProductType] = []; }
+
+				$sourceSelect[$catalogProductType][] = 'VAT';
+				$sourceSelect[$catalogProductType][] = 'VAT_INCLUDED';
+			}
+		}
+
+		// discount
 
 		$queryContext['DISCOUNT_USE'] = false;
 		$queryContext['DISCOUNT_CACHE'] = false;
@@ -333,6 +375,11 @@ class Source extends Market\Export\Entity\Reference\Source
 					}
 					else if (!empty($priceIdsByType[$priceType]) && !empty($elementListPrices[$elementId]))
 					{
+						if (Market\Export\Entity\Catalog\Provider::useCatalogShortFields())
+						{
+							$element += $this->extendElementBySiblingSources($sourceValues[$elementId]);
+						}
+
 						$elementPrice = $this->getElementCatalogPrice($element, $fields, $priceType, $queryContext, $priceIdsByType[$priceType], $elementListPrices[$elementId]);
 
 						if (!empty($elementPrice))
@@ -1029,7 +1076,7 @@ class Source extends Market\Export\Entity\Reference\Source
 
 		if (!empty($catalogPriceIds))
 		{
-			$isNeedDiscount = in_array('DISCOUNT_VALUE', $fields);
+			$isNeedDiscount = in_array('DISCOUNT_VALUE', $fields, true);
 			$percentVat = isset($element['CATALOG_VAT']) ? $element['CATALOG_VAT'] * 0.01 : 0;
 			$percentPriceWithVat = 1 + $percentVat;
 			$minPriceCurrency = null;
@@ -1116,6 +1163,20 @@ class Source extends Market\Export\Entity\Reference\Source
 					}
 				}
 			}
+		}
+
+		return $result;
+	}
+
+	protected function extendElementBySiblingSources($sourceValues)
+	{
+		$catalogProductType = Market\Export\Entity\Manager::TYPE_CATALOG_PRODUCT;
+		$result = [];
+
+		if (isset($sourceValues[$catalogProductType]))
+		{
+			$result['CATALOG_VAT'] = $sourceValues[$catalogProductType]['VAT'];
+			$result['CATALOG_VAT_INCLUDED'] = $sourceValues[$catalogProductType]['VAT_INCLUDED'];
 		}
 
 		return $result;

@@ -16,21 +16,24 @@ class Source extends Market\Export\Entity\Reference\Source
 			'CATALOG' => []
 		];
 
-		foreach ($select as $fieldName)
+		if (!Market\Export\Entity\Catalog\Provider::useCatalogShortFields())
 		{
-			if ($fieldName === 'YM_SIZE')
+			$splitFields = $this->getSplitFields();
+			$externalFields = $this->getExternalFields();
+
+			foreach ($select as $fieldName)
 			{
-				$result['CATALOG'][] = 'CATALOG_LENGTH';
-				$result['CATALOG'][] = 'CATALOG_WIDTH';
-				$result['CATALOG'][] = 'CATALOG_HEIGHT';
-			}
-			else if ($fieldName === 'MEASURE_RATIO')
-			{
-				// nothing, stored in separate table
-			}
-			else
-			{
-				$result['CATALOG'][] = 'CATALOG_' . $fieldName;
+				if (isset($splitFields[$fieldName]))
+				{
+					foreach ($splitFields[$fieldName] as $partFieldName)
+					{
+						$result['CATALOG'][] = $this->getFieldFullName($partFieldName);
+					}
+				}
+				else if (!in_array($fieldName, $externalFields, true))
+				{
+					$result['CATALOG'][] = $this->getFieldFullName($fieldName);
+				}
 			}
 		}
 
@@ -51,6 +54,7 @@ class Source extends Market\Export\Entity\Reference\Source
 
 		foreach ($filter as $filterItem)
 		{
+			$fieldFullName = $this->getFieldFullName($filterItem['FIELD']);
 			$sourceKey = 'CATALOG';
 
 			if ($filterItem['FIELD'] === 'TYPE')
@@ -58,7 +62,7 @@ class Source extends Market\Export\Entity\Reference\Source
 				$sourceKey = 'ELEMENT';
 			}
 
-            $this->pushQueryFilter($result[$sourceKey], $filterItem['COMPARE'], 'CATALOG_' . $filterItem['FIELD'], $filterItem['VALUE']);
+            $this->pushQueryFilter($result[$sourceKey], $filterItem['COMPARE'], $fieldFullName, $filterItem['VALUE']);
 		}
 
 		return $result;
@@ -68,17 +72,32 @@ class Source extends Market\Export\Entity\Reference\Source
 	{
 		$result = [];
 
-		if (!empty($elementList))
+		if (!empty($elementList) && Main\Loader::includeModule('catalog'))
 		{
-			$externalData = $this->loadExternalData($elementList, $select);
+			$internalData = null;
+			$externalData = null;
+
+			if (Market\Export\Entity\Catalog\Provider::useCatalogShortFields())
+			{
+				$internalData = $this->loadInternalData($elementList, $select);
+			}
+			else
+			{
+				$externalData = $this->loadExternalData($elementList, $select);
+			}
 
 			foreach ($elementList as $elementId => $element)
 			{
 				$result[$elementId] = [];
+				$elementInternalData = isset($internalData[$elementId]) ? $internalData[$elementId] : null;
 
 				foreach ($select as $fieldName)
 				{
-					if (isset($externalData[$fieldName]))
+					if ($elementInternalData !== null)
+					{
+						$result[$elementId][$fieldName] = $this->getDisplayValue($elementInternalData, $fieldName, $queryContext);
+					}
+					else if (isset($externalData[$fieldName]))
 					{
 						$result[$elementId][$fieldName] = isset($externalData[$fieldName][$elementId])
 							? $externalData[$fieldName][$elementId]
@@ -142,7 +161,8 @@ class Source extends Market\Export\Entity\Reference\Source
 					'TYPE' => Market\Export\Entity\Data::TYPE_CURRENCY
 				],
 				'VAT' => [
-					'TYPE' => Market\Export\Entity\Data::TYPE_NUMBER
+					'TYPE' => Market\Export\Entity\Data::TYPE_NUMBER,
+					'FILTERABLE' => false,
 				],
 				'TYPE' => [
 					'TYPE' => Market\Export\Entity\Data::TYPE_ENUM,
@@ -212,7 +232,7 @@ class Source extends Market\Export\Entity\Reference\Source
 
 		if ($fieldName === 'YM_SIZE')
 		{
-			$keys = [ 'CATALOG_LENGTH', 'CATALOG_WIDTH', 'CATALOG_HEIGHT' ];
+			$keys = [ $this->getFieldFullName('LENGTH'), $this->getFieldFullName('WIDTH'), $this->getFieldFullName('HEIGHT') ];
 			$values = [];
 			$hasIsset = false;
 
@@ -240,12 +260,12 @@ class Source extends Market\Export\Entity\Reference\Source
 		}
 		else if ($fieldName === 'PURCHASING_PRICE_RUR')
 		{
-			$elementKey = 'CATALOG_PURCHASING_PRICE';
+			$elementKey = $this->getFieldFullName('PURCHASING_PRICE');
 
 			if (isset($element[$elementKey]))
 			{
 				$price = (float)$element[$elementKey];
-				$currency = (string)$element['CATALOG_PURCHASING_CURRENCY'];
+				$currency = (string)$element[$this->getFieldFullName('PURCHASING_CURRENCY')];
 				$convertCurrency = Market\Data\Currency::getCurrency('RUB');
 
 				if ($convertCurrency !== false && $currency !== $convertCurrency)
@@ -259,7 +279,7 @@ class Source extends Market\Export\Entity\Reference\Source
 		}
 		else
 		{
-			$elementKey = 'CATALOG_' . $fieldName;
+			$elementKey = $this->getFieldFullName($fieldName);
 
 			if (isset($element[$elementKey]))
 			{
@@ -269,7 +289,7 @@ class Source extends Market\Export\Entity\Reference\Source
 				{
 					case 'PURCHASING_PRICE':
 						$price = (float)$originalValue;
-						$currency = (string)$element['CATALOG_PURCHASING_CURRENCY'];
+						$currency = (string)$element[$this->getFieldFullName('PURCHASING_CURRENCY')];
 
 						if (!empty($context['CONVERT_CURRENCY']))
 						{
@@ -299,6 +319,75 @@ class Source extends Market\Export\Entity\Reference\Source
 		}
 
 		return $result;
+	}
+
+	protected function loadInternalData($elementList, $select)
+	{
+		$result = [];
+		$entity = Catalog\ProductTable::getEntity();
+
+		list($internalSelect, $referenceMap, $runtime) = $this->convertSelectToInternalFields($select, $entity);
+		$internalSelect[] = 'ID';
+
+		$query = Catalog\ProductTable::getList([
+			'filter' => [ '=ID' => array_keys($elementList) ],
+			'select' => $internalSelect,
+			'runtime' => $runtime
+		]);
+
+		while ($row = $query->fetch())
+		{
+			foreach ($referenceMap as $selectName => $fieldName)
+			{
+				$row[$fieldName] = isset($row[$selectName]) ? $row[$selectName] : null;
+			}
+
+			$result[$row['ID']] = $row;
+		}
+
+		return $result;
+	}
+
+	protected function convertSelectToInternalFields($select, Main\ORM\Entity $entity)
+	{
+		$querySelect = [];
+		$referenceMap = [];
+		$runtime = [];
+		$referenceFields = $this->getReferenceFields();
+		$splitFields = $this->getSplitFields();
+
+		foreach ($select as $field)
+		{
+			if (isset($splitFields[$field]))
+			{
+				foreach ($splitFields[$field] as $partField)
+				{
+					if ($entity->hasField($field))
+					{
+						$querySelect[] = $partField;
+					}
+				}
+			}
+			else if (isset($referenceFields[$field]))
+			{
+				$reference = $referenceFields[$field];
+				$selectName = 'YM_FIELD_' . $field;
+
+				$querySelect[$selectName] = $reference[0] . '.' . $reference[1];
+				$referenceMap[$selectName] = $field;
+
+				if (!isset($runtime[$reference[0]]))
+				{
+					$runtime[$reference[0]] = $this->getRuntimeField($reference[0]);
+				}
+			}
+			else if ($entity->hasField($field))
+			{
+				$querySelect[] = $field;
+			}
+		}
+
+		return [ $querySelect, $referenceMap, $runtime ];
 	}
 
 	protected function loadExternalData($elementList, $select)
@@ -344,6 +433,57 @@ class Source extends Market\Export\Entity\Reference\Source
 		return $result;
 	}
 
+	protected function getSplitFields()
+	{
+		return [
+			'YM_SIZE' => [
+				'LENGTH',
+				'WIDTH',
+				'HEIGHT',
+			],
+			'PURCHASING_PRICE_RUR' => [
+				'PURCHASING_PRICE',
+				'PURCHASING_CURRENCY',
+			]
+		];
+	}
+
+	protected function getReferenceFields()
+	{
+		return [
+			'MEASURE_RATIO' => ['YM_MEASURE_RATIO', 'RATIO'],
+			'VAT' => ['YM_VAT', 'RATE'],
+		];
+	}
+
+	protected function getRuntimeField($key)
+	{
+		switch ($key)
+		{
+			case 'YM_MEASURE_RATIO':
+				$result = new Main\Entity\ReferenceField(
+					'YM_MEASURE_RATIO',
+					'\Bitrix\Catalog\MeasureRatioTable',
+					[ '=this.ID' => 'ref.PRODUCT_ID', '=ref.IS_DEFAULT' => [ '?', 'Y' ] ]
+				);
+			break;
+
+			case 'YM_VAT';
+				$result = new Main\Entity\ReferenceField(
+					'YM_VAT',
+					'\Bitrix\Catalog\VatTable',
+					[ '=this.VAT_ID' => 'ref.ID' ]
+				);
+			break;
+
+			default:
+				throw new Main\SystemException('undefined reference field');
+			break;
+		}
+
+		return $result;
+	}
+
 	protected function getExternalFields()
 	{
 		return [
@@ -361,6 +501,20 @@ class Source extends Market\Export\Entity\Reference\Source
 			{
 				$result[] = $searchField;
 			}
+		}
+
+		return $result;
+	}
+
+	protected function getFieldFullName($field)
+	{
+		if (!Market\Export\Entity\Catalog\Provider::useCatalogShortFields())
+		{
+			$result = 'CATALOG_' . $field;
+		}
+		else
+		{
+			$result = $field;
 		}
 
 		return $result;

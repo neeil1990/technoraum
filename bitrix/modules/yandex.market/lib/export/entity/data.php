@@ -79,7 +79,10 @@ class Data
 
 		return [
 			static::TYPE_STRING => [
-				'DATA' => $stringDataTypes,
+				'DATA' => array_merge(
+					$stringDataTypes,
+					[ Market\Type\Manager::TYPE_FILE ]
+				),
 				'COMPARE' => [
 					static::COMPARE_EQUAL,
 					static::COMPARE_NOT_EQUAL,

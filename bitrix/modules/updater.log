@@ -5778,3 +5778,4 @@
 							INDEX `template_id` (`TEMPLATE_ID`),
 							INDEX `iblock_id` (`IBLOCK_ID`)
 						), )
+2019-10-24 15:43:38 - CRUPDCF1 - Run updater '/bitrix/updates/update_m1571921018/yandex.market/updater1.1.14.php': CopyFiles(install/components, components/yandex.market)
