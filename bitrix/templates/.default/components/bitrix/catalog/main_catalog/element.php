@@ -156,7 +156,7 @@ $ar_res = CCatalogProduct::GetByID($ElementID);
 		);?>
 	</div>
 	<div id="tabs-2">
-		<? /*$APPLICATION->IncludeComponent("nbrains:ipol.sdekPickup", ".sdekPickup", Array(
+		<?$APPLICATION->IncludeComponent("nbrains:ipol.sdekPickup", ".sdekPickup", Array(
 			"CITIES" => "",	// Подключаемые города (если не выбрано ни одного - подключаются все)
 			"CNT_BASKET" => "N",	// Расчитывать доставку для корзины
 			"CNT_DELIV" => "Y",	// Расчитывать доставку при подключении
@@ -175,7 +175,7 @@ $ar_res = CCatalogProduct::GetByID($ElementID);
 			"WEIGHT" => $ar_res["WEIGHT"]
 		),
 			false
-		);*/?>
+		);?>
 		<p class="small-message" style="text-align: center">Сроки и стоимость доставки рассчитаны на основе данных, предоставленных транспортными компаниями.</p>
 	</div>
 	<div id="tabs-3">
