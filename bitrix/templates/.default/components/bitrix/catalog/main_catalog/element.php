@@ -127,6 +127,7 @@ else
 	$component
 );?>
 
+<? if($APPLICATION->GetCurPage() != "/catalog/bytovaya-tekhnika/pylesos-wd-3-home/"): ?>
 <!--TABS-->
 <?
 $ar_res = CCatalogProduct::GetByID($ElementID);
@@ -232,6 +233,7 @@ $ar_res = CCatalogProduct::GetByID($ElementID);
 	</div>
 </div>
 <!--TABS-END-->
+<? endif; ?>
 
 	<?$APPLICATION->IncludeComponent(
 		"bitrix:catalog.recommended.products",
