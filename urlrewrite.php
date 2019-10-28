@@ -8,10 +8,10 @@ $arUrlRewrite=array (
     'PATH' => '/desktop_app/router.php',
     'SORT' => 100,
   ),
-  146 => 
+  149 => 
   array (
-    'CONDITION' => '#^ /catalog/([^/]+?)/\\??(.*)#',
-    'RULE' => 'SECTION_CODE=$1&$2',
+    'CONDITION' => '#^ /catalog/(.+?)/\\??(.*)#',
+    'RULE' => 'SECTION_CODE_PATH=$1&$2',
     'ID' => 'bitrix:catalog.top',
     'PATH' => '/index.php',
     'SORT' => 100,

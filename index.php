@@ -358,7 +358,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		"CACHE_TIME" => "36000000",
 		"CACHE_TYPE" => "A",
 		"CHECK_DATES" => "Y",
-		"DETAIL_ACTIVE_DATE_FORMAT" => "d.m.Y",
+		"DETAIL_ACTIVE_DATE_FORMAT" => "j F Y",
 		"DETAIL_DISPLAY_BOTTOM_PAGER" => "Y",
 		"DETAIL_DISPLAY_TOP_PAGER" => "N",
 		"DETAIL_FIELD_CODE" => array(
@@ -380,7 +380,7 @@ $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте
 		"IBLOCK_ID" => "7",
 		"IBLOCK_TYPE" => "materials",
 		"INCLUDE_IBLOCK_INTO_CHAIN" => "Y",
-		"LIST_ACTIVE_DATE_FORMAT" => "d.m.Y",
+		"LIST_ACTIVE_DATE_FORMAT" => "j F Y",
 		"LIST_FIELD_CODE" => array(
 			0 => "",
 			1 => "",

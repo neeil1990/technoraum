@@ -235,11 +235,11 @@ while ($arItems = $dbBasketItems->Fetch())
                                 <img width="100%" src="<?=SITE_TEMPLATE_PATH?>/img/gift_icon.png">
                             </div>
                             <div class="desc-gift">
-                                <span>Подарки на сумму <?=number_format($arResult["GIFT_SUM"] , 0 , " " , " ");?> &#8381;</span>
+                                <span>Подарки на сумму <?=number_format($arResult["GIFT_SUM"] , 0 , " " , " ");?> &#8381; :</span>
                             </div>
                         </a>
                     </div>
-                    <hr>
+
                     <? foreach($arResult["PROPERTIES"]["GIFT"]["ITEM"] as $product):?>
                     <div class="item">
                         <a href="<?=$product["URL"]?>">

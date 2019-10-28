@@ -19,6 +19,10 @@
     font-size: 14px;
     color: #555;
 }
+.items-gifts .item.main a{
+    font-size: 18px;
+    font-weight: 700;
+}
 .items-gifts .item a .thumb-gift{
     display: inline-block;
     padding: 4px;
@@ -33,13 +37,17 @@
     height: 50px;
 }
 .items-gifts .item.main{
-    margin: 0;
+    margin-left: 0;
 }
 .items-gifts .item.main a .thumb-gift{
     border:none;
 }
 
-.items-gifts .item a .desc-gift{display: inline-block;}
+.items-gifts .item a .desc-gift{
+    display: inline-block;
+    max-width: 400px;
+    vertical-align: middle;
+}
 .items-gifts .item a .desc-gift span{
     margin-right: 10px;
     letter-spacing: 0.7px;
