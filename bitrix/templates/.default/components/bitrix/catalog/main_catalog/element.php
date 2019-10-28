@@ -127,7 +127,6 @@ else
 	$component
 );?>
 
-<? if($APPLICATION->GetCurPage() != "/catalog/bytovaya-tekhnika/pylesos-wd-3-home/"): ?>
 <!--TABS-->
 <?
 $ar_res = CCatalogProduct::GetByID($ElementID);
@@ -157,7 +156,7 @@ $ar_res = CCatalogProduct::GetByID($ElementID);
 		);?>
 	</div>
 	<div id="tabs-2">
-		<? $APPLICATION->IncludeComponent("nbrains:ipol.sdekPickup", ".sdekPickup", Array(
+		<? /*$APPLICATION->IncludeComponent("nbrains:ipol.sdekPickup", ".sdekPickup", Array(
 			"CITIES" => "",	// Подключаемые города (если не выбрано ни одного - подключаются все)
 			"CNT_BASKET" => "N",	// Расчитывать доставку для корзины
 			"CNT_DELIV" => "Y",	// Расчитывать доставку при подключении
@@ -176,7 +175,7 @@ $ar_res = CCatalogProduct::GetByID($ElementID);
 			"WEIGHT" => $ar_res["WEIGHT"]
 		),
 			false
-		);?>
+		);*/?>
 		<p class="small-message" style="text-align: center">Сроки и стоимость доставки рассчитаны на основе данных, предоставленных транспортными компаниями.</p>
 	</div>
 	<div id="tabs-3">
@@ -233,7 +232,6 @@ $ar_res = CCatalogProduct::GetByID($ElementID);
 	</div>
 </div>
 <!--TABS-END-->
-<? endif; ?>
 
 	<?$APPLICATION->IncludeComponent(
 		"bitrix:catalog.recommended.products",
