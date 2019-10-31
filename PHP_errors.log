@@ -11596,3 +11596,187 @@ Stack trace:
 [28-Oct-2019 15:05:59 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
 [28-Oct-2019 15:07:02 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
 [28-Oct-2019 15:09:19 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 06:24:44 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 08:37:52 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 12:38:06 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1123
+[29-Oct-2019 12:38:06 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1131
+[29-Oct-2019 14:01:21 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1123
+[29-Oct-2019 14:01:21 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1131
+[29-Oct-2019 15:44:39 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 15:45:22 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 17:26:33 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 17:29:56 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 17:35:49 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[29-Oct-2019 19:25:47 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 09:15:04 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1123
+[30-Oct-2019 09:15:04 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1131
+[30-Oct-2019 11:29:56 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 12:41:09 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 12:41:33 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 13:19:40 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 13:23:09 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 15:31:53 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[30-Oct-2019 18:00:04 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 18:01:10 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 18:05:55 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[30-Oct-2019 18:10:24 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[31-Oct-2019 00:41:54 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[31-Oct-2019 00:42:03 Europe/Moscow] PHP Notice:  Undefined variable: temp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 19
+[31-Oct-2019 02:29:24 Europe/Moscow] PHP Notice:  Undefined index: comp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 5
+[31-Oct-2019 02:29:27 Europe/Moscow] PHP Notice:  Undefined variable: temp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 19
+[31-Oct-2019 02:31:04 Europe/Moscow] PHP Notice:  Undefined variable: temp in /home/t/technoraum/technoraum.ru/public_html/system.php on line 17
+[31-Oct-2019 04:21:18 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[31-Oct-2019 09:19:19 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1123
+[31-Oct-2019 09:19:19 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1131
+[31-Oct-2019 09:59:18 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[31-Oct-2019 11:02:41 Europe/Moscow] PHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /home/t/technoraum/technoraum.ru/public_html/bitrix/templates/.default/components/bitrix/breadcrumb/.default/template.php on line 61
+[31-Oct-2019 11:06:54 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:08:47 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:12:54 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:16:00 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:16:01 Europe/Moscow] PHP Fatal error:  Unknown: Cannot use output buffering in output buffering display handlers in Unknown on line 0
+[31-Oct-2019 11:17:23 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:18:06 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:18:37 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:21:55 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:24:26 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:26:30 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:27:11 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:28:51 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:29:22 Europe/Moscow] PHP Fatal error:  Uncaught Bitrix\Main\DB\SqlQueryException: Mysql query error: (2006) MySQL server has gone away in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php:137
+Stack trace:
+#0 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqlcommonconnection.php(136): Bitrix\Main\DB\MysqliConnection->queryInternal('SELECT * FROM `...')
+#1 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/connection.php(779): Bitrix\Main\DB\MysqlCommonConnection->getTableFields('b_sec_session')
+#2 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/sqlhelper.php(399): Bitrix\Main\DB\Connection->getTableField('b_sec_session', 'SESSION_ID')
+#3 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/orm/data/datamanager.php(1531): Bitrix\Main\DB\SqlHelper->prepareAssignment('b_sec_session', 'SESSION_ID', '40341f8ceec8151...')
+#4 /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/security/classes/general/session_db.php(92): Bitrix\Main\ORM\Data\DataManager::delete(Array)
+#5 [internal function]: CSecuritySessionDB::write('40341f8ceec8151...', 'SESS_AUTH|a:27:...')
+#6 [internal function]: session_write_close()
+#7 {main}
+  thrown in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/main/lib/db/mysqliconnection.php on line 137
+[31-Oct-2019 11:41:46 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1123
+[31-Oct-2019 11:41:46 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1131
+[31-Oct-2019 15:10:31 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1123
+[31-Oct-2019 15:10:31 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1131
+[31-Oct-2019 15:53:09 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1123
+[31-Oct-2019 15:53:09 Europe/Moscow] PHP Warning:  "continue" targeting switch is equivalent to "break". Did you mean to use "continue 2"? in /home/t/technoraum/technoraum.ru/public_html/bitrix/modules/iblock/admin/iblock_element_admin.php on line 1131

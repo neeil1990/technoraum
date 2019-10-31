@@ -2799,6 +2799,15 @@ div.float-form-shadow {position:absolute; background-color:#797979; z-index:1; o
 #currency_menu_icon {background-image:url(icons/currency/mnu_currency.gif);}
 #currency_page_icon {background-image:url(icons/currency/title.gif);}
 /*Menu icon*/
+.dev2fun_compressimage_menu_icon {
+    background-image:url('icons/dev2fun.imagecompress/dev2fun_imagecompress.png');
+    background-position: 9px 4px;
+}
+#dev2fun_compressimage_menu_icon {
+    background-image:url('icons/dev2fun.imagecompress/dev2fun_imagecompress.png');
+}
+
+/*Menu icon*/
 #fileman_menu_icon {background-image:url(icons/fileman/mnu_fileman.gif);}
 #fileman_page_icon {background-image:url(icons/fileman/title.gif);}
 #fileman_menu_icon_sections {background-image:url(icons/fileman/mnu_folder.gif);}
@@ -3182,10 +3191,6 @@ div#btn_new {background-image:url(images/buttons/new.gif);}
 .form_edit_default_tpl {width:17px; height:17px; background-repeat:no-repeat; background-image: url(/bitrix/images/form/edit_def_templ_icon.gif)}
 
 table.contextmenu #btn_current {background-color:#DBE3F2; border:1px solid #AEB6C2; height:22px; margin:0px 0px 0px 4px; font-weight: bold; padding-left: 2px;}
-/*Menu icon*/
-#forum_menu_icon {background-image:url(icons/forum/mnu_forum.gif);}
-#forum_page_icon {background-image:url(icons/forum/title.gif);}
-
 /*Menu icon*/
 #highloadblock_menu_icon {background-image:url(icons/highloadblock/mnu_hlblock_settings.gif);}
 #highloadblock_page_icon {background-image:url(icons/highloadblock/title_settings.gif);}
@@ -7036,10 +7041,6 @@ a.product-unavailable:hover{
 .seometa_menu_icon{
     background: url("icons/sotbit.seometa/icon.png") no-repeat center;
 }
-.adm-submenu-item-link-icon.s2u_optipic_icon {
-        background: url('icons/step2use.optimg/s2u_optipic_icon.png') center center no-repeat;
-        background-size: auto 75%;
-    }
 .subscribe_border {border:1px solid #BDC6E0; padding:4px;}
 
 /*Menu icon*/
