@@ -1,8 +1,27 @@
 $( function() {
 
-    $("input[autocomplete='tel']").mask("+7 (999) 999 99-99");
 
-    $( "#tabs" ).tabs();
+
+    var element = $('#delivery_load');
+    if ((element.length > 0)){
+
+        var elem_position = element.offset().top;
+        $(window).scroll(function() {
+            var self = $(this);
+            var bottomScroll = self.scrollTop() + self.height();
+            if(bottomScroll > elem_position){
+                self.off("scroll");
+                $.get("/ajax/delivery.php",{ id : element.data('id')}).done(function (data) {
+                    $('#delivery-progress').remove();
+                    element.hide().html(data).fadeIn('200');
+                    $( "#tabs" ).tabs();
+                });
+            }
+        });
+    }
+
+
+    $("input[autocomplete='tel']").mask("+7 (999) 999 99-99");
 
     $(".checkbox-toggle").tinyToggle();
 

@@ -15,7 +15,7 @@ $(document).ready(function(){
         });
     });
 
-    $(".mform").submit(function(e){
+    $("body").on('submit','.mform',function(e){
         e.preventDefault();
         $.post("/mail.php",$(this).serialize(),function(data){
             console.log(data);
