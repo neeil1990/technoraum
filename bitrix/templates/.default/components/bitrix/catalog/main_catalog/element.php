@@ -128,6 +128,7 @@ else
 );?>
 
 <!--TABS-->
+<div id="delivery_load" data-id="<?=$ElementID;?>"></div>
 <style>
     .progress-striped .progress-bar, .progress-bar-striped{
 
@@ -143,7 +144,6 @@ else
         ѕодождите мы просчитываем дл€ вас доставку...
     </div>
 </div>
-<div id="delivery_load" data-id="<?=$ElementID;?>"></div>
 <!--TABS-END-->
 
 	<?$APPLICATION->IncludeComponent(
