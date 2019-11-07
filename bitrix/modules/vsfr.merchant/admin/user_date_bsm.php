@@ -1,0 +1,1 @@
+<?define("vsfr_merchant_TEMPORARY_CACHE", "dWAGAXoxU1ZvUitjC2JUKFAm");?>

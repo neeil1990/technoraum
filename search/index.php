@@ -17,7 +17,7 @@ $APPLICATION->SetTitle("Поиск");
 		),
 		"SHOW_WHERE" => "N",
 		"SHOW_WHEN" => "N",
-		"PAGE_RESULT_COUNT" => "50",
+		"PAGE_RESULT_COUNT" => "150",
 		"AJAX_MODE" => "N",
 		"AJAX_OPTION_SHADOW" => "Y",
 		"AJAX_OPTION_JUMP" => "N",

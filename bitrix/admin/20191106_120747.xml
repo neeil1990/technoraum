@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<table>
+  <head>
+    <order_type>Возможность доставки</order_type>
+    <media_pixel_id>POS</media_pixel_id>
+    <articlenumber>Артикульный №</articlenumber>
+    <partname>Описание</partname>
+    <quantity>Количество</quantity>
+    <unit>Единица</unit>
+    <critical_part>Вероятность отказа</critical_part>
+  </head>
+  <body>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>3</media_pixel_id>
+      <articlenumber>6.363-633.0</articlenumber>
+      <partname>Кольцо с проточкой 12x18x6/5/1</partname>
+      <quantity>3.000</quantity>
+      <unit>ST</unit>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>1</media_pixel_id>
+      <articlenumber>5.116-380.0</articlenumber>
+      <partname>Втулка направляющей поршня</partname>
+      <quantity>3.000</quantity>
+      <unit>ST</unit>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>5</media_pixel_id>
+      <articlenumber>5.062-349.0</articlenumber>
+      <partname>Направляющая поршня</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>2</media_pixel_id>
+      <articlenumber>5.116-381.0</articlenumber>
+      <partname>Поддерживающий диск</partname>
+      <quantity>3.000</quantity>
+      <unit>ST</unit>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>6</media_pixel_id>
+      <articlenumber>9.002-522.0</articlenumber>
+      <partname>Поршень completo K7 (c/imballo)</partname>
+      <quantity>3.000</quantity>
+      <unit>ST</unit>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>4</media_pixel_id>
+      <articlenumber>6.363-449.0</articlenumber>
+      <partname>Уплотнительное кольцо 72x2mm NBR70</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <critical_part>6</critical_part>
+    </row>
+  </body>
+</table>

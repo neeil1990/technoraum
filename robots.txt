@@ -45,5 +45,6 @@ Disallow: /*SHOWALL
 Disallow: /*show_all=
 Disallow: /*filter
 Disallow: /*.pdf
+Disallow: /catalog/element/
 Host: https://technoraum.ru/
 Sitemap: https://technoraum.ru/sitemap.xml
