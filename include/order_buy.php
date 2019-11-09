@@ -1,6 +1,6 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
-include($_SERVER["DOCUMENT_ROOT"]."/include/amocrm.php");
+
 CModule::IncludeModule("iblock");
 CModule::IncludeModule("sale");
 
@@ -30,10 +30,6 @@ if($_REQUEST['check']){
         "NAME"           => $name,
         "ACTIVE"         => "N",
     );
-
-    $form = '';
-    
-    login($name,$phone, $form, $fieldpost);
 
     if($PRODUCT_ID = $el->Add($arLoadProductArray)){
         $PROP[ID] = $PRODUCT_ID;
