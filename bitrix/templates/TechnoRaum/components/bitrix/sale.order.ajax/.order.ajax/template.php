@@ -625,8 +625,9 @@ else
 		if ($arParams['PICKUP_MAP_TYPE'] === 'yandex')
 		{
 			$this->addExternalJs($templateFolder.'/scripts/yandex_maps.js');
+			$apiKeyYandex = \Bitrix\Main\Config\Option::get('fileman', 'yandex_map_api_key', '');
 			?>
-			<script src="<?=$scheme?>://api-maps.yandex.ru/2.1.50/?load=package.full&lang=<?=$locale?>"></script>
+			<script src="<?=$scheme?>://api-maps.yandex.ru/2.1.50/?load=package.full&lang=<?=$locale?>&apikey=<?=$apiKeyYandex?>"></script>
 			<script>
 				(function bx_ymaps_waiter(){
 					if (typeof ymaps !== 'undefined' && BX.Sale && BX.Sale.OrderAjaxComponent)
