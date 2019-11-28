@@ -5785,3 +5785,4 @@
 2019-10-29 11:31:24 -  - exec CUpdateClient::GetHTTPPage
 2019-10-29 11:31:25 -  - TIME GetUpdatesList(request) 0.254 sec
 2019-10-29 11:31:25 -  - exec CUpdateClient::ParseServerData
+2019-11-26 15:46:07 - CRUPDCF1 - Run updater '/bitrix/updates/update_m1574772367/mcart.xls/updater9.1.0.php': CopyFiles(install/modules, modules)

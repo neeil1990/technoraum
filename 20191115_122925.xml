@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<table>
+  <head>
+    <order_type>Возможность доставки</order_type>
+    <media_pixel_id>POS</media_pixel_id>
+    <articlenumber>Артикульный №</articlenumber>
+    <partname>Описание</partname>
+    <quantity>Количество</quantity>
+    <unit>Единица</unit>
+    <consumable_part>Расходная деталь</consumable_part>
+    <critical_part>Вероятность отказа</critical_part>
+    <wearpart>Быстроизнашивающаяся деталь</wearpart>
+  </head>
+  <body>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>7</media_pixel_id>
+      <articlenumber>6.647-996.0</articlenumber>
+      <partname>Кабель с вилкой K 2101</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>18</media_pixel_id>
+      <articlenumber>6.645-179.0</articlenumber>
+      <partname>Кабель с заземлением</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>6</media_pixel_id>
+      <articlenumber>5.053-185.0</articlenumber>
+      <partname>Консоль двигателя М</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>1</media_pixel_id>
+      <articlenumber>5.069-310.0</articlenumber>
+      <partname>Крышка WD 3.XXX нейтрал.</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>15</media_pixel_id>
+      <articlenumber>6.303-150.0</articlenumber>
+      <partname>Винт 4,2x22</partname>
+      <quantity>6.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part/>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>3</media_pixel_id>
+      <articlenumber>5.332-997.0</articlenumber>
+      <partname>Винтовая пружина</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part/>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>9</media_pixel_id>
+      <articlenumber>4.490-000.0</articlenumber>
+      <partname>Всасывающ. турбина</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart>Да</wearpart>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>2</media_pixel_id>
+      <articlenumber>6.630-087.0</articlenumber>
+      <partname>Выключатель</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>5</media_pixel_id>
+      <articlenumber>5.075-037.0</articlenumber>
+      <partname>Замок WD 3.300 3.500</partname>
+      <quantity>2.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>17</media_pixel_id>
+      <articlenumber>4.075-012.0</articlenumber>
+      <partname>Замок в сборе</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>20</media_pixel_id>
+      <articlenumber>2.884-253.0</articlenumber>
+      <partname>Набор проводов</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>16</media_pixel_id>
+      <articlenumber>6.414-552.0</articlenumber>
+      <partname>Патронный фильтр</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part>Да</consumable_part>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>4</media_pixel_id>
+      <articlenumber>5.640-363.0</articlenumber>
+      <partname>Ползунок</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part/>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>12</media_pixel_id>
+      <articlenumber>5.585-062.0</articlenumber>
+      <partname>Поплавок ECO</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>19</media_pixel_id>
+      <articlenumber>6.332-001.0</articlenumber>
+      <partname>Пружина</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part/>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>14</media_pixel_id>
+      <articlenumber>5.731-646.0</articlenumber>
+      <partname>Сетка фильтра</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>13</media_pixel_id>
+      <articlenumber>5.034-734.0</articlenumber>
+      <partname>Удерживающая консоль</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <consumable_part/>
+      <critical_part>6</critical_part>
+      <wearpart/>
+    </row>
+  </body>
+</table>

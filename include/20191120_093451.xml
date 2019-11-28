@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<table>
+  <head>
+    <order_type>Возможность доставки</order_type>
+    <media_pixel_id>POS</media_pixel_id>
+    <articlenumber>Артикульный №</articlenumber>
+    <partname>Описание</partname>
+    <quantity>Количество</quantity>
+    <unit>Единица</unit>
+    <remark>Примечание</remark>
+    <footer_text>Текст ссылки</footer_text>
+    <critical_part>Вероятность отказа</critical_part>
+  </head>
+  <body>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>1</media_pixel_id>
+      <articlenumber>4.195-001.0</articlenumber>
+      <partname>Корпус пылесборника - только на замену</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>2</media_pixel_id>
+      <articlenumber>6.273-104.0</articlenumber>
+      <partname>Прокладка из пористой резины D6</partname>
+      <quantity>1.000</quantity>
+      <unit>M</unit>
+      <remark/>
+      <footer_text>ALS METERWARE BESTELLEN</footer_text>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>3</media_pixel_id>
+      <articlenumber>4.195-006.0</articlenumber>
+      <partname>Ручка для переноски - только на замену</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>4</media_pixel_id>
+      <articlenumber>4.195-007.0</articlenumber>
+      <partname>Кнопка только для замены</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>5</media_pixel_id>
+      <articlenumber>4.195-002.0</articlenumber>
+      <partname>Трубка в компл.</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>6</media_pixel_id>
+      <articlenumber>6.682-737.0</articlenumber>
+      <partname>Система управления IR</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>7</media_pixel_id>
+      <articlenumber>4.195-109.0</articlenumber>
+      <partname>Крепление фильтр-мешка в сборе</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>8</media_pixel_id>
+      <articlenumber>5.195-042.0</articlenumber>
+      <partname>Заглушка светодиода</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>9</media_pixel_id>
+      <articlenumber>4.195-095.0</articlenumber>
+      <partname>Кабель автоматики для замены *EU</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark>/*EU</remark>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>10</media_pixel_id>
+      <articlenumber>4.195-146.0</articlenumber>
+      <partname>Клапан охлажд.воздуха для замены</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>11</media_pixel_id>
+      <articlenumber>4.195-012.0</articlenumber>
+      <partname>Опорный крючок только для замены</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>12</media_pixel_id>
+      <articlenumber>4.195-013.0</articlenumber>
+      <partname>Комплектующие для корпуса - только на за</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>13</media_pixel_id>
+      <articlenumber>5.195-091.0</articlenumber>
+      <partname>Крышка отсека для принадлежностей</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>14</media_pixel_id>
+      <articlenumber>4.195-167.0</articlenumber>
+      <partname>Кнопка пуска на замену</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>15</media_pixel_id>
+      <articlenumber>4.195-090.0</articlenumber>
+      <partname>Решетка вытяжки для замены</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>16</media_pixel_id>
+      <articlenumber>4.195-088.0</articlenumber>
+      <partname>Крышка в сборе на замену</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>17</media_pixel_id>
+      <articlenumber>6.414-799.0</articlenumber>
+      <partname>Фильтр защиты электродвигателя в сборе</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>18</media_pixel_id>
+      <articlenumber>6.330-170.0</articlenumber>
+      <partname>Пружина сжатия</partname>
+      <quantity>2.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part/>
+    </row>
+    <row>
+      <order_type>1</order_type>
+      <media_pixel_id>19</media_pixel_id>
+      <articlenumber>4.195-094.0</articlenumber>
+      <partname>Кабель ферритовое кольцо заменитель</partname>
+      <quantity>1.000</quantity>
+      <unit>ST</unit>
+      <remark/>
+      <footer_text/>
+      <critical_part>6</critical_part>
+    </row>
+  </body>
+</table>

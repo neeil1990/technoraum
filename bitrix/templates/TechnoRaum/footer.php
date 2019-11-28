@@ -8,13 +8,6 @@ if($_SERVER["REQUEST_URI"] != "/")
       <footer>
         <div class="inner_footer inner_section clearfix">
           
-          <div class="logo logo_footer">
-            <a href="/">
-                  <!--<img src="img/logo_footer.png" alt="" />-->
-                  <span>TechnoRaum</span>
-                </a>
-          </div>
-          
           <div class="footer_left">
             <nav class="footer_menu">
               <div class="footer_menu_div">

@@ -391,7 +391,7 @@ a.read_more_toggler span {background:url(../img/plus.png) no-repeat 0 center;pad
 a.read_more_toggler.active span {background-image:url(../img/minus.png);}
 	
 
-footer {clear:both;position:relative;padding:80px 0 20px 0;background:#f8f8f8;margin-top:80px;}
+footer {clear:both;position:relative;padding:55px 0 20px 0;background:#f8f8f8;margin-top:80px;}
 footer p {font-size:14px;color:#000;display:block;padding-bottom:18px;}
 footer p.title {font-size:16px;line-height:20px;color: #111;font-weight:bold;padding-bottom:16px;}
 
