@@ -20,11 +20,11 @@ if($url[1] != "personal" && $url[2] != "order" && $url[3] != "make")
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
 	<head>
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    <!--<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
                 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-TKQX2R2');</script>
+        })(window,document,'script','dataLayer','GTM-TKQX2R2');</script>-->
     <!-- End Google Tag Manager -->
 
         <meta name="yandex-verification" content="dd3124205879e327" />
