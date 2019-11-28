@@ -37,7 +37,7 @@ $gpsS = '';
 					<strong>Адрес:</strong><br><span style='font-size: 12px'>$arProperty[ADDRESS]</span>
 					<strong>Телефон:</strong><br><span style='font-size: 12px'>$arProperty[PHONE]</span>
 					<strong>Режим работы:</strong><br><span style='font-size: 12px'>$arProperty[SCHEDULE]</span>
-					<a style='display: block;padding: 10px 12px;font-size: 12px;font-weight: bold;margin: auto 10px;' class='button' href='/catalog/element/?action=BUY&id=$arParams[PRODUCT_ID]'>Добавить в корзину</a>
+					<a style='display: block;padding: 10px 12px;font-size: 12px;font-weight: bold;margin: auto 10px;' class='button' href='?action=BUY&id=$arParams[PRODUCT_ID]'>Добавить в корзину</a>
 					</div>";
 					if($arProperty["GPS_S"]!=0 && $arProperty["GPS_N"]!=0)
 					{

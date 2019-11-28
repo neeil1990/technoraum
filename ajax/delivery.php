@@ -4,8 +4,8 @@ define("STOP_STATISTICS", true);
 global $APPLICATION;
 $APPLICATION->ShowAjaxHead();
 CModule::IncludeModule( 'catalog' );
-
-$ar_res = CCatalogProduct::GetByID($_REQUEST['id']);
+$ElementID = $_REQUEST['id'];
+$ar_res = CCatalogProduct::GetByID($ElementID);
 ?>
 <div id="tabs">
     <ul>

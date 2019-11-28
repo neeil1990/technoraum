@@ -58,12 +58,7 @@ if ($this->startResultCache())
 	$viewMap = false;
 	while ($arProp = $dbStoreProps->GetNext())
 	{
-		$storeSite = (string)$arProp['SITE_ID'];
-		if ($storeSite != '' && $storeSite != SITE_ID)
-			continue;
-		unset($storeSite);
 		$url = CComponentEngine::makePathFromTemplate($arParams["PATH_TO_ELEMENT"], array("store_id" => $arProp["ID"]));
-
 		$storeImg = false;
 		$arProp['IMAGE_ID'] = (int)$arProp['IMAGE_ID'];
 		if ($arProp['IMAGE_ID'] > 0)
