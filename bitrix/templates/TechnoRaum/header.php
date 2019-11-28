@@ -19,13 +19,7 @@ if($url[1] != "personal" && $url[2] != "order" && $url[3] != "make")
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
 	<head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-TKQX2R2');</script>
-    <!-- End Google Tag Manager -->
+
 
         <meta name="yandex-verification" content="dd3124205879e327" />
         <meta name="google-site-verification" content="ccjrPE4dXLJ5OSnSmsPlY3D2BFpidw66j04twxL5M5M" />
@@ -54,13 +48,10 @@ if($url[1] != "personal" && $url[2] != "order" && $url[3] != "make")
 		<script>
 			var arrProducts = new Array();
 		</script>
-        
+
 	</head>
 <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKQX2R2"
-                      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
+    
 
     <div id="panel"><?$APPLICATION->ShowPanel();?></div>
 	<div class="container" id="top">		
