@@ -16,7 +16,7 @@ $this->setFrameMode(true);
 $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/combobox.js");
 $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/contact-tabs.js");
 ?>
-<script src="https://api-maps.yandex.ru/2.1/?load=package.full&mode=release&lang=ru-RU&wizard=bitrix" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?load=package.full&mode=release&lang=ru-RU&wizard=bitrix&apikey=<?=\Bitrix\Main\Config\Option::get('fileman', 'yandex_map_api_key', '')?>" type="text/javascript"></script>
 
 <div id="map-data" data-items="<?=$arResult["ITEMS_JS"]?>"></div>
 
