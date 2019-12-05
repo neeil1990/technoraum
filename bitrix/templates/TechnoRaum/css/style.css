@@ -1242,7 +1242,7 @@ form[name='bform'] input[type='submit']{font-weight: bold;border-color: #feee35;
 	.header_menu_dropdown{box-shadow:none}
 	.header_menu_dropdown_level2{display:none;}
 	.header_menu_wrap{position:static !important;display:none;}
-	.header_menu > ul{position:static !important;background:#FFF;display:none;}
+	.header_menu > ul{position:static !important;background:#FFF;display:none;width: 100%;}
 	.mobile_menu_toggler{top:88px;}
 	header .logo{position:relative;top:10px;}
 	.header_menu > ul > li.has_ul > a:before {display:none;}
