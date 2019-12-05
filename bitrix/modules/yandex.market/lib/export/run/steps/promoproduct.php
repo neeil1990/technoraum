@@ -209,6 +209,7 @@ class PromoProduct extends Offer
                 $tagValuesList = $this->buildCategoryTagValuesList($usedCategoryIdList, $context);
                 $writeLimit = ($limit !== null ? $limit - $successCount : null);
 
+                $this->extendData($tagValuesList, [], $context);
                 $writeResultList = $this->writeData($tagValuesList, [], $context, [], $writeLimit);
 
                 foreach ($writeResultList as $writeResult)

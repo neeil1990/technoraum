@@ -131,7 +131,8 @@ class Model extends Market\Reference\Storage\Model
 	public function getContext()
 	{
 		$format = $this->getFormat();
-		$result = [
+		$result = $format->getContext();
+		$result += [
 			'SETUP_ID' => $this->getId(),
 			'EXPORT_SERVICE' => $this->getField('EXPORT_SERVICE'),
 			'EXPORT_FORMAT' => $this->getField('EXPORT_FORMAT'),

@@ -22,6 +22,7 @@ class Currencies extends Base
 		$tagValuesList = $this->buildTagValuesList([], $currencyList, $context);
 
 		$this->setRunAction($action);
+		$this->extendData($tagValuesList, $currencyList, $context);
 		$this->writeData($tagValuesList, $currencyList, $context);
 
 		return $result;
@@ -71,6 +72,11 @@ class Currencies extends Base
 	{
 		$currencyIds = $this->getUsedCurrencyIds($context);
 		$result = [];
+
+		if (empty($currencyIds) && !empty($context['CONVERT_CURRENCY']))
+		{
+			$currencyIds[] = $context['CONVERT_CURRENCY'];
+		}
 
 		if (!empty($currencyIds))
 		{

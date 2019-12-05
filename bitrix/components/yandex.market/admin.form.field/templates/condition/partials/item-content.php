@@ -1,6 +1,8 @@
 <?php
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) { die(); }
 
+use Yandex\Market;
+
 /** @var $itemInputName string */
 /** @var $itemValue array */
 /** @var $isItemPlaceholder boolean */
@@ -71,7 +73,7 @@ $isSelectedCompareMultiple = null;
 						}
 
 						?>
-						<option value="<?= $field['ID']; ?>" <?= $isSelectedField ? 'selected' : ''; ?> data-type="<?= $field['TYPE']; ?>"><?= $field['VALUE']; ?></option>
+						<option value="<?= $field['ID']; ?>" <?= $isSelectedField ? 'selected' : ''; ?> data-type="<?= $field['TYPE']; ?>"><?= Market\Utils::htmlEscape($field['VALUE']); ?></option>
 						<?
 					}
 
@@ -89,7 +91,7 @@ $isSelectedCompareMultiple = null;
 				if (!$isItemPlaceholder)
 				{
 					echo ' name="' . $itemInputName . '[FIELD]"';
-					echo ' value="' . $itemValue['FIELD'] . '"';
+					echo ' value="' . htmlspecialcharsbx($itemValue['FIELD']) . '"';
 				}
 
 			?> />
@@ -196,7 +198,7 @@ $isSelectedCompareMultiple = null;
 			$itemValueList = (array)$itemValue['VALUE'];
 
 			?>
-			<select class="b-filter-condition-field__input js-condition-item__input js-condition-item__value js-plugin" <?= $isSelectedCompareMultiple ? 'multiple' : ''; ?> size="1" data-plugin="Ui.Input.TagInput" data-name="VALUE" <?
+			<select class="b-filter-condition-field__input js-condition-item__input js-condition-item__value js-plugin-delayed" <?= $isSelectedCompareMultiple ? 'multiple' : ''; ?> size="1" data-plugin="Ui.Input.TagInput" data-name="VALUE" <?
 
 				if (!$isItemPlaceholder)
 				{
@@ -233,7 +235,7 @@ $isSelectedCompareMultiple = null;
 						}
 
 						?>
-						<option value="<?= $enum['ID']; ?>" <?= $isSelectedEnum ? 'selected' : ''; ?>><?= $enum['VALUE']; ?></option>
+						<option value="<?= $enum['ID']; ?>" <?= $isSelectedEnum ? 'selected' : ''; ?>><?= Market\Utils::htmlEscape($enum['VALUE']); ?></option>
 						<?
 					}
 				}
@@ -245,7 +247,7 @@ $isSelectedCompareMultiple = null;
 					if ($itemValue !== '' && !isset($foundValues[$itemValue]))
 					{
 						?>
-						<option value="<?= $itemValue; ?>" selected><?= $itemValue; ?></option>
+						<option value="<?= htmlspecialcharsbx($itemValue); ?>" selected><?= Market\Utils::htmlEscape($itemValue); ?></option>
 						<?
 					}
 				}
@@ -263,7 +265,7 @@ $isSelectedCompareMultiple = null;
 				if (!$isItemPlaceholder)
 				{
 					echo ' name="' . $itemInputName . '[VALUE]"';
-					echo ' value="' . $itemValue . '"';
+					echo ' value="' . htmlspecialcharsbx($itemValue) . '"';
 				}
 
 			?> />

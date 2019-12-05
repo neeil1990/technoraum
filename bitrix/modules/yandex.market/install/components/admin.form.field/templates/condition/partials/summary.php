@@ -1,6 +1,8 @@
 <?php
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) { die(); }
 
+use Yandex\Market;
+
 $summaryTextParts = [];
 
 foreach ($arParams['VALUE'] as $itemValue)
@@ -89,7 +91,11 @@ foreach ($arParams['VALUE'] as $itemValue)
 }
 
 ?>
-<a class="b-link action--heading target--inside js-condition-summary__text" href="#"><?= count($summaryTextParts) > 0 ? implode($lang['JUNCTION'], $summaryTextParts) : $lang['PLACEHOLDER']; ?></a>
+<a class="b-link action--heading target--inside js-condition-summary__text" href="#"><?
+	echo count($summaryTextParts) > 0
+		? Market\Utils::htmlEscape(implode($lang['JUNCTION'], $summaryTextParts))
+		: $lang['PLACEHOLDER'];
+?></a>
 <div class="b-grid spacing--1x1">
 	<div class="b-grid__item vertical--middle">
 		<button class="adm-btn js-condition-summary__edit-button" type="button"><?= $langStatic['EDIT_BUTTON']; ?></button>

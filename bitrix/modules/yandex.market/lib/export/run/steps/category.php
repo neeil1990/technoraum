@@ -22,6 +22,7 @@ class Category extends Base
 		$tagValuesList = $this->buildTagValuesList([], $sectionList, $context);
 
 		$this->setRunAction($action);
+		$this->extendData($tagValuesList, $sectionList, $context);
 		$this->writeData($tagValuesList, $sectionList, $context);
 
 		return $result;

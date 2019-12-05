@@ -4,7 +4,7 @@
  * Developer: adumnov
  * Site: http://www.altasib.ru
  * E-mail: dev@altasib.ru
- * @copyright (c) 2006-2017 ALTASIB
+ * @copyright (c) 2006-2019 ALTASIB
  */
 
 $MESS['ALTASIB_TABLE_CITY_DELETE'] = "Удалить";
@@ -45,7 +45,15 @@ $MESS['ALTASIB_RL_2_V'] = "Чувашская Республика";
 $MESS['ALTASIB_RL_3'] = "Ханты-Мансийский Автономный округ - Югра Автономный округ";
 $MESS['ALTASIB_RL_3_V'] = "Ханты-Мансийский автономный округ";
 $MESS['ALTASIB_RL_4'] = "Байконур Город";
-$MESS['ALTASIB_RL_4_V'] = "Челябинская Область";
+$MESS['ALTASIB_RL_4_V'] = "Кызылординская область";
+$MESS['ALTASIB_RL_5'] = "Москва Город";
+$MESS['ALTASIB_RL_5_V'] = "Москва";
+$MESS['ALTASIB_RL_6'] = "Санкт-Петербург Город";
+$MESS['ALTASIB_RL_6_V'] = "Санкт-Петербург";
+$MESS['ALTASIB_RL_7'] = "Крым Республика";
+$MESS['ALTASIB_RL_7_V'] = "Крым";
+$MESS['ALTASIB_RL_8'] = "Севастополь Город";
+$MESS['ALTASIB_RL_8_V'] = "Крым";
 
 $MESS['ALTASIB_G'] = "г";
 $MESS['ALTASIB_SPB'] = "Санкт-Петербург";

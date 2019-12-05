@@ -1,3 +1,0 @@
-<?
-$sSectionName="roistat.integration";
-?>

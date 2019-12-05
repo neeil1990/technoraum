@@ -79,6 +79,7 @@ class EditForm extends Market\Component\Model\EditForm
 		$this->validateIblock($result, $data, $fields);
 		$this->validateDelivery($result, $data, $fields);
 		$this->validateFilterCondition($result, $data, $fields);
+		$this->validateFilterDistinct($result, $data, $fields);
 
 		return $result;
 	}
@@ -234,6 +235,62 @@ class EditForm extends Market\Component\Model\EditForm
 		}
 	}
 
+	protected function validateFilterDistinct(Main\Entity\Result $result, $data, array $fields = null)
+	{
+		if (!empty($data['IBLOCK_LINK']))
+		{
+			foreach ($data['IBLOCK_LINK'] as $iblockLinkIndex => $iblockLink)
+			{
+				$filterFieldName = 'IBLOCK_LINK_' . $iblockLinkIndex . '_FILTER';
+				$filterInputName = 'IBLOCK_LINK[' . $iblockLinkIndex . '][FILTER]';
+
+				if (!isset($fields[$filterFieldName]) || empty($iblockLink['FILTER'])) { continue; }
+
+				foreach ($iblockLink['FILTER'] as $filterRow)
+				{
+					if (empty($filterRow['FILTER_CONDITION'])) { continue; }
+
+					$filter = Market\Export\Filter\Model::initialize($filterRow);
+					$sourceFilter = $filter->getSourceFilter();
+
+					foreach ($sourceFilter as $type => $filter)
+					{
+						$source = Market\Export\Entity\Manager::getSource($type);
+						$queryFilter = $source->getQueryFilter($filter, []);
+
+						if (empty($queryFilter['DISTINCT'])) { continue; }
+
+						foreach ($queryFilter['DISTINCT'] as $distinctRule)
+						{
+							$isValid = true;
+							$ruleType = null;
+
+							if (isset($distinctRule['TAG'], $distinctRule['ATTRIBUTE']))
+							{
+								$isValid = $this->hasFilledTagSource($iblockLink, $distinctRule['TAG'], $distinctRule['ATTRIBUTE']);
+								$ruleType = 'ATTRIBUTE';
+							}
+							else if (isset($distinctRule['TAG']))
+							{
+								$isValid = $this->hasFilledTagSource($iblockLink, $distinctRule['TAG']);
+								$ruleType = 'TAG';
+							}
+
+							if (!$isValid)
+							{
+								$result->addError(new Market\Error\EntityError(
+									Market\Config::getLang('COMPONENT_SETUP_EDIT_FORM_ERROR_DISTINCT_REQUIRE_' . $ruleType, $distinctRule),
+									0,
+									[ 'FIELD' => $filterInputName ]
+								));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public function extend($data, array $select = [])
 	{
 		$result = $data;
@@ -365,6 +422,47 @@ class EditForm extends Market\Component\Model\EditForm
 				{
 					$result = true;
 					break;
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	protected function hasFilledTagSource($iblockLink, $tagName, $attributeName = null)
+	{
+		$result = false;
+
+		if (!empty($iblockLink['PARAM']))
+		{
+			foreach ($iblockLink['PARAM'] as $param)
+			{
+				if ($param['XML_TAG'] !== $tagName || empty($param['PARAM_VALUE'])) { continue; }
+
+				foreach ($param['PARAM_VALUE'] as $paramValue)
+				{
+					if ($attributeName !== null)
+					{
+						$isMatch = (
+							$paramValue['XML_TYPE'] === 'attribute'
+							&& $paramValue['XML_ATTRIBUTE_NAME'] === $attributeName
+						);
+					}
+					else
+					{
+						$isMatch = $paramValue['XML_TYPE'] === 'value';
+					}
+
+					if (
+						$isMatch
+						&& isset($paramValue['SOURCE_TYPE'], $paramValue['SOURCE_FIELD'])
+						&& (string)$paramValue['SOURCE_TYPE'] !== ''
+						&& (string)$paramValue['SOURCE_FIELD'] !== ''
+					)
+					{
+						$result = true;
+						break 2;
+					}
 				}
 			}
 		}

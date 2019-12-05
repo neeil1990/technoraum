@@ -25,20 +25,53 @@ else
 {
 	if($arResult["AUTODETECT_ENABLE"] == "Y" || $arParams["RIGHT_ENABLE"] == "Y")
 	{
-		// On-line auto detection
-		$arDataO = CAltasibGeoBase::GetCodeByAddr();
 
-		if($arResult["AUTODETECT_ENABLE"] == "Y")
-		{
-			if($arDataO["CITY"]["NAME"] != GetMessage("ALTASIB_GEOBASE_KLADR_CITY_NAME")){
-				$arResult["AUTODETECT"] = $arDataO;
-				$arSelCodes[] = $arDataO["CODE"];
+		if(COption::GetOptionString($mid, "show_nearest_select_city", "N") == "Y"){
+			// ------- begin nearest block --------
+			$arNData = CAltasibGeoBaseSelected::GetNearestCityFromSelected("all", false);
+
+			if(!empty($arNData["R_ID"]) && !empty($arNData["C_NAME"])){
+				$arRegion = array(
+					"ID" => $arNData["R_ID"],
+					"FULL_NAME" => $arNData["R_FNAME"],
+					"NAME" => $arNData["R_NAME"],
+					"SOCR" => $arNData["R_SOCR"],
+					"CODE" => $arNData["R_ID"],
+				);
+				$arNFormat = CAltasibGeoBase::GetFormatKladrData($arRegion, $arNData["C_NAME"]);
+
+				if(!empty($arNFormat)){
+					if($arResult["AUTODETECT_ENABLE"] == "Y") {
+						if($arNFormat["CITY"]["NAME"] != GetMessage("ALTASIB_GEOBASE_KLADR_CITY_NAME")){
+							$arResult["AUTODETECT"] = $arNFormat;
+							$arSelCodes[] = $arNFormat["CODE"];
+						}
+					}
+					else {
+						if($arNFormat["CITY"]["NAME"] != GetMessage("ALTASIB_GEOBASE_KLADR_CITY_NAME")){
+							$arResult["AUTODETECT"] = $arNFormat;
+						}
+					}
+					$arResult["NEAREST_CITY_ENABLE"] = "Y";
+				}
 			}
+			// ------- end nearest block ----------
 		}
-		else
-		{
-			if($arDataO["CITY"]["NAME"] != GetMessage("ALTASIB_GEOBASE_KLADR_CITY_NAME")){
-				$arResult["AUTODETECT"] = $arDataO;
+		else {
+
+			// On-line auto detection
+			$arDataO = CAltasibGeoBase::GetCodeByAddr();
+
+			if($arResult["AUTODETECT_ENABLE"] == "Y") {
+				if($arDataO["CITY"]["NAME"] != GetMessage("ALTASIB_GEOBASE_KLADR_CITY_NAME")){
+					$arResult["AUTODETECT"] = $arDataO;
+					$arSelCodes[] = $arDataO["CODE"];
+				}
+			}
+			else {
+				if($arDataO["CITY"]["NAME"] != GetMessage("ALTASIB_GEOBASE_KLADR_CITY_NAME")){
+					$arResult["AUTODETECT"] = $arDataO;
+				}
 			}
 		}
 	}

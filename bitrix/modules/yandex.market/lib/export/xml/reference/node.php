@@ -273,10 +273,24 @@ abstract class Node
 	abstract public function detachNode(\SimpleXMLElement $parent, \SimpleXMLElement $node = null);
 
 	/**
+	 * Конвертируем значение для сравнения
+	 *
+	 * @param $value
+	 * @param array $context
+	 * @param Market\Result\XmlValue|null $nodeValue
+	 *
+	 * @return string
+	 */
+	public function compareValue($value, array $context = [], Market\Result\XmlValue $nodeValue = null)
+	{
+		return $this->formatValue($value, $context);
+	}
+
+	/**
 	 * Форматируем значение на основании типа значения
 	 *
 	 * @param                                    $value
-	 * @param                                    $context array
+	 * @param array                              $context
 	 * @param Market\Result\XmlNode|null         $nodeResult
 	 * @param array|null                         $settings
 	 *

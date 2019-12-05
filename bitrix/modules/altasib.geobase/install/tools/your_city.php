@@ -10,4 +10,7 @@ elseif ($incMod == '3')
 	return false;
 else
 	echo CAltasibGeoBase::GetYourCity();
+
+if(isset($_REQUEST['set_loc']) && $_REQUEST['set_loc'] == 'Y')
+	require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_after.php");
 ?>

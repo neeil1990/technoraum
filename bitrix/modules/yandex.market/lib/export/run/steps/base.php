@@ -135,22 +135,40 @@ abstract class Base
 	public function validateAction($action)
 	{
 		$result = true;
-		$initTime = $this->getParameter('initTime');
-		$isValidInitTime = ($initTime && $initTime instanceof Main\Type\Date);
 
-		switch ($action)
+		if (!$this->isSupported())
 		{
-			case 'change':
-				$changes = $this->getChanges();
-				$result = ($isValidInitTime && !empty($changes));
-			break;
+			$result = false;
+		}
+		else
+		{
+			$initTime = $this->getParameter('initTime');
+			$isValidInitTime = ($initTime && $initTime instanceof Main\Type\Date);
 
-			case 'refresh':
-				$result = $isValidInitTime;
-			break;
+			switch ($action)
+			{
+				case 'change':
+					$changes = $this->getChanges();
+					$result = ($isValidInitTime && !empty($changes));
+				break;
+
+				case 'refresh':
+					$result = $isValidInitTime;
+				break;
+			}
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Поддерживается ли шаг
+	 *
+	 * @return bool
+	 */
+	protected function isSupported()
+	{
+		return ($this->getTag() !== null);
 	}
 
 	/**
@@ -175,8 +193,6 @@ abstract class Base
 	 */
 	protected function writeData($tagValuesList, $elementList, array $context = [], array $data = null, $limit = null)
 	{
-		$this->extendData($tagValuesList, $elementList, $context, $data);
-
 		$tagResultList = $this->buildTagList($tagValuesList, $context);
 
 		$this->writeDataUserEvent($tagResultList, $elementList, $context, $data);
@@ -247,20 +263,37 @@ abstract class Base
 	{
 		$document = null;
 		$isTypedTag = $this->isTypedTag();
+		$readyDistinctValues = [];
 		$result = [];
 
 		foreach ($tagValuesList as $elementId => $tagValue)
 		{
+			$tagDistinct = $tagValue->getDistinct();
 			$tagType = ($isTypedTag ? $tagValue->getType() : null);
 			$tagData = $tagValue->getTagData();
 			$tag = $this->getTag($tagType);
 
-			if ($document === null)
+			if ($tagDistinct !== null && isset($readyDistinctValues[$tagDistinct]))
 			{
-				$document = $tag->exportDocument();
+				$tagResult = new Market\Result\XmlNode();
+				$tagResult->invalidate();
+			}
+			else
+			{
+				if ($document === null)
+				{
+					$document = $tag->exportDocument();
+				}
+
+				$tagResult = $tag->exportTag($tagData, $context, $document);
+
+				if ($tagDistinct !== null && $tagResult->isSuccess())
+				{
+					$readyDistinctValues[$tagDistinct] = true;
+				}
 			}
 
-			$result[$elementId] = $tag->exportTag($tagData, $context, $document);
+			$result[$elementId] = $tagResult;
 		}
 
 		return $result;
@@ -587,9 +620,13 @@ abstract class Base
 							Market\Error\XmlNode::XML_NODE_HASH_COLLISION
 						));
 					}
-				}
 
-				$fieldsList[] = $fields;
+					$fieldsList[] = $fields;
+				}
+				else if (isset($existMap[$elementId]) || $tagResult->hasErrors() || $tagResult->hasWarnings())
+				{
+					$fieldsList[] = $fields;
+				}
 			}
 
 			// check hash collision from already stored data

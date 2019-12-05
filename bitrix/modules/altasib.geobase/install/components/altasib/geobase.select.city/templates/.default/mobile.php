@@ -158,10 +158,18 @@ altasib_geobase.bitrix_sessid='<?=bitrix_sessid();?>';
 								$iLi++;
 							?></a><?
 						?></li><?
+						} else if(!empty($arUsrCh["C_CODE"])) {
+						?><li class="altasib_geobase_mb_act"><?
+							?><a href="#" title="<?=$usrChoiceTitle;?>" id="altasib_geobase_mb_list_<?=$arUsrCh["C_CODE"]?>" onclick="altasib_geobase.sc_onclk('<?=$arUsrCh["C_CODE"]?>');"><?
+								echo $usrSelCity;
+								$iLi++;
+							?></a><?
+						?></li><?
 						}
-						?>
 
-						<?if(isset($arAutoDt['CODE']) && !in_array($arAutoDt["CITY"]["NAME"], $arCity) && $arResult['AUTODETECT_ENABLE'] == "Y"){
+
+
+						if(isset($arAutoDt['CODE']) && !in_array($arAutoDt["CITY"]["NAME"], $arCity) && $arResult['AUTODETECT_ENABLE'] == "Y"){
 						?><li class="altasib_geobase_mb_auto"><?
 							?><a href="#" title="<?echo $arAutoDt["CITY"]["SOCR"].'. '.$arAutoDt["CITY"]["NAME"].', '.$arAutoDt["REGION"]["FULL_NAME"]
 							.(!empty($arAutoDt['DISTRICT']['SOCR']) ? ', '.$arAutoDt['DISTRICT']['NAME'].' '.$arAutoDt['DISTRICT']['SOCR'].'.' : '');?>" id="altasib_geobase_mb_list_<?=$arAutoDt["CODE"];?>" onclick="altasib_geobase.sc_onclk('<?=$arAutoDt["CODE"];?>');"><?

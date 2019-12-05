@@ -7,6 +7,7 @@ use Yandex\Market;
 class Manual extends Base
 {
 	protected $excludeList = [];
+	protected $distinctList = [];
 
 	public function start()
 	{
@@ -41,7 +42,11 @@ class Manual extends Base
 
 			while ($element = $queryElementList->Fetch())
 			{
-				if ($context['CATALOG_TYPE_COMPATIBILITY'])
+				if ($context['USE_DISTINCT'] && isset($this->distinctList[$element['ID']]))
+				{
+					// nothing
+				}
+				else if ($context['CATALOG_TYPE_COMPATIBILITY'])
 				{
 					$parentList[$element['ID']] = true;
 
@@ -88,7 +93,10 @@ class Manual extends Base
 				{
 					$offerElementId = (int)$offer[$skuPropertyValueKey];
 
-					if (isset($parentList[$offerElementId]))
+					if (
+						isset($parentList[$offerElementId])
+						&& (!$context['USE_DISTINCT'] || !isset($this->distinctList[$offerElementId]))
+					)
 					{
 						if ($context['CATALOG_TYPE_COMPATIBILITY'] && isset($this->excludeList[$offerElementId]))
 						{
@@ -100,6 +108,11 @@ class Manual extends Base
 						{
 							$this->excludeList[$offer['ID']] = true;
 							++$result;
+						}
+
+						if ($context['USE_DISTINCT'])
+						{
+							$this->distinctList[$offerElementId] = true;
 						}
 					}
 				}
@@ -113,6 +126,7 @@ class Manual extends Base
 	public function finish()
 	{
 		$this->excludeList = [];
+		$this->distinctList = [];
 	}
 
 	protected function getElementSelect($context)

@@ -104,6 +104,8 @@
 .b-link,
 .b-link-complex__target {
 	border-bottom: 1px solid;
+
+	color: #2675d7;
 	text-decoration: none !important;
 
 	cursor: pointer;

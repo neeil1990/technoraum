@@ -711,7 +711,7 @@ $tabControl = new CAdminTabControl('YANDEX_MARKET_ADMIN_PROMO_RUN', $tabs, true,
 						foreach ($promoList as $promo)
 						{
 							?>
-							<option value="<?= $promo['ID']; ?>" <?= isset($requestPromoList[$promo['ID']]) ? 'selected' : ''; ?>>[<?= $promo['ID']; ?>] <?= $promo['NAME']; ?></option>
+							<option value="<?= $promo['ID']; ?>" <?= isset($requestPromoList[$promo['ID']]) ? 'selected' : ''; ?>>[<?= $promo['ID']; ?>] <?= Market\Utils::htmlEscape($promo['NAME']); ?></option>
 							<?
 						}
 						?>

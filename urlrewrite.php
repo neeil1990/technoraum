@@ -64,20 +64,20 @@ $arUrlRewrite=array (
     'PATH' => '/service/index.php',
     'SORT' => 100,
   ),
-  144 => 
-  array (
-    'CONDITION' => '#^/catalog/#',
-    'RULE' => '',
-    'ID' => 'bitrix:catalog',
-    'PATH' => '/catalog/index.php',
-    'SORT' => 100,
-  ),
   150 => 
   array (
     'CONDITION' => '#^/actions/#',
     'RULE' => '',
     'ID' => 'bitrix:news',
     'PATH' => '/actions/index.php',
+    'SORT' => 100,
+  ),
+  151 => 
+  array (
+    'CONDITION' => '#^/catalog/#',
+    'RULE' => '',
+    'ID' => 'bitrix:catalog',
+    'PATH' => '/catalog/index.php',
     'SORT' => 100,
   ),
   9 => 

@@ -6,3 +6,5 @@ $MESS['YANDEX_MARKET_COMPONENT_SETUP_EDIT_FORM_ERROR_CHILD_DELIVERY_OPTIONS_WITH
 $MESS['YANDEX_MARKET_COMPONENT_SETUP_EDIT_FORM_ERROR_FILTER_CONDITION_EMPTY'] = 'Не указаны условия для фильтра';
 $MESS['YANDEX_MARKET_COMPONENT_SETUP_EDIT_FORM_COPY_NAME_MARKER'] = '(копия)';
 $MESS['YANDEX_MARKET_COMPONENT_SETUP_EDIT_FORM_ERROR_IBLOCK_LINK_EXPORT_EMPTY'] = 'Выберите опцию &laquo;Выгружать все товары&raquo; или создайте &laquo;Группу товаров&raquo; для инфоблока';
+$MESS['YANDEX_MARKET_COMPONENT_SETUP_EDIT_FORM_ERROR_DISTINCT_REQUIRE_TAG'] = 'Для выбора предложения необходимо выбрать источник тега TAG на шаге &laquo;Сопоставление полей&raquo;';
+$MESS['YANDEX_MARKET_COMPONENT_SETUP_EDIT_FORM_ERROR_DISTINCT_REQUIRE_ATTRIBUTE'] = 'Для выбора предложения необходимо выбрать источник атрибута ATTRIBUTE тега TAG на шаге &laquo;Сопоставление полей&raquo;';

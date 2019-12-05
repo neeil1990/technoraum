@@ -25,7 +25,7 @@ abstract class Table extends Main\Entity\DataManager
 		return true;
 	}
 
-	public static function addBatch(array $dataList, $isUpdateOnDuplicate = false)
+	public static function addBatch(array $dataList, $updateOnDuplicate = false)
 	{
 		$result = new Main\Entity\AddResult();
 
@@ -67,39 +67,59 @@ abstract class Table extends Main\Entity\DataManager
 
 			if ($issetFieldsPart) // has data to insert
 			{
-				$sql =
-					'INSERT INTO ' . $tableName . '(' . $sqlFieldPart . ') ' .
-					'VALUES ' . $sqlValuePart;
+				$insertRule = 'INSERT INTO';
+				$duplicateSql = '';
 
-				if ($isUpdateOnDuplicate)
+				if ($updateOnDuplicate !== false)
 				{
-					$primaryArray = $entity->getPrimaryArray();
-					$primaryMap = array_flip($primaryArray);
-					$tableFields = $connection->getTableFields($tableName);
-					$duplicateSql = '';
-
-					foreach ($usedFields as $fieldName)
+					if (is_array($updateOnDuplicate))
 					{
-						if (!isset($primaryMap[$fieldName]) && isset($tableFields[$fieldName]))
+						$duplicateFields = $updateOnDuplicate;
+					}
+					else
+					{
+						$tableFields = $connection->getTableFields($tableName);
+						$primaryArray = $entity->getPrimaryArray();
+						$primaryMap = array_flip($primaryArray);
+						$duplicateFields = [];
+
+						foreach ($usedFields as $fieldName)
 						{
-							$fieldNameQuoted = $helper->quote($fieldName);
-
-							if ($duplicateSql !== '')
+							if (!isset($primaryMap[$fieldName]) && isset($tableFields[$fieldName]))
 							{
-								$duplicateSql .= ', ';
+								$duplicateFields[] = $fieldName;
 							}
-
-							$duplicateSql .= $fieldNameQuoted . ' = VALUES(' . $fieldNameQuoted . ')';
 						}
 					}
 
-					if ($duplicateSql !== '')
+					foreach ($duplicateFields as $fieldName)
 					{
-						$sql .=
+						$fieldNameQuoted = $helper->quote($fieldName);
+
+						if ($duplicateSql !== '')
+						{
+							$duplicateSql .= ', ';
+						}
+
+						$duplicateSql .= $fieldNameQuoted . ' = VALUES(' . $fieldNameQuoted . ')';
+					}
+
+					if ($duplicateSql === '')
+					{
+						$insertRule = 'INSERT IGNORE INTO';
+					}
+					else
+					{
+						$duplicateSql =
 							PHP_EOL . 'ON DUPLICATE KEY UPDATE'
 							. PHP_EOL . $duplicateSql;
 					}
 				}
+
+				$sql =
+					$insertRule . ' ' . $tableName . '(' . $sqlFieldPart . ') ' .
+					'VALUES ' . $sqlValuePart
+					. $duplicateSql;
 
 				$connection->queryExecute($sql);
 			}

@@ -2,6 +2,8 @@
 
 namespace Yandex\Market\Ui\UserField;
 
+use Yandex\Market;
+
 class EnumerationType extends \CUserTypeEnum
 {
 	function GetList($arUserField)
@@ -104,7 +106,7 @@ class EnumerationType extends \CUserTypeEnum
 					if ($option['ID'] == $arHtmlControl['VALUE'])
 					{
 						$isFoundResult = true;
-						$result = $option['VALUE'];
+						$result = Market\Utils::htmlEscape($option['VALUE']);
 						break;
 					}
 				}
@@ -112,7 +114,7 @@ class EnumerationType extends \CUserTypeEnum
 
 			if (!$isFoundResult)
 			{
-				$result = '[' . $arHtmlControl['VALUE'] . ']';
+				$result = '[' . Market\Utils::htmlEscape($arHtmlControl['VALUE']) . ']';
 			}
 		}
 
@@ -135,7 +137,7 @@ class EnumerationType extends \CUserTypeEnum
 				{
 					if (isset($valueMap[$option['ID']]))
 					{
-						$result .= ($result !== '' ? ' / ' : '') . $option['VALUE'];
+						$result .= ($result !== '' ? ' / ' : '') . Market\Utils::htmlEscape($option['VALUE']);
 					}
 				}
 			}

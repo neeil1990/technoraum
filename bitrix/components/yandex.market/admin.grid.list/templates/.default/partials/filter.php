@@ -4,6 +4,7 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) { die(); }
 /** @var $component \Yandex\Market\Components\AdminGridList */
 
 use Bitrix\Main\Localization\Loc;
+use Yandex\Market;
 
 $viewFilter = $component->getViewFilter();
 
@@ -33,7 +34,7 @@ $viewFilter = $component->getViewFilter();
 							foreach ($filter['items'] as $optionId => $optionValue)
 							{
 								?>
-								<option value="<?= $optionId; ?>" <?= $optionId == $filter['value'] ? 'selected' : ''; ?>><?= $optionValue; ?></option>
+								<option value="<?= $optionId; ?>" <?= $optionId == $filter['value'] ? 'selected' : ''; ?>><?= Market\Utils::htmlEscape($optionValue); ?></option>
 								<?
 							}
 							?>

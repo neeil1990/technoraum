@@ -385,7 +385,7 @@ $tabControl = new CAdminTabControl('YANDEX_MARKET_ADMIN_SETUP_RUN', $tabs, true,
 				foreach ($setupList as $setup)
 				{
 					?>
-					<option value="<?= $setup['ID']; ?>" <?= (int)$setup['ID'] === $requestSetup ? 'selected' : ''; ?>>[<?= $setup['ID']; ?>] <?= $setup['NAME']; ?></option>
+					<option value="<?= $setup['ID']; ?>" <?= (int)$setup['ID'] === $requestSetup ? 'selected' : ''; ?>>[<?= $setup['ID']; ?>] <?= Market\Utils::htmlEscape($setup['NAME']); ?></option>
 					<?
 				}
 				?>

@@ -68,10 +68,10 @@ Class CAltasibGeoBaseSelected extends CAltasibGeoBaseAllSelected
 						}
 						else
 						{
-							$sUFtable .= '<tr>
-								<td class="adm-detail-content-cell-l">'.$sUFname.'</td>
-								<td class="adm-detail-content-cell-r" width="50%">'.htmlspecialcharsEx($aField["VALUE"]).'</td>
-							</tr>';
+							$sUFtable .= '<tr><td class="adm-detail-content-cell-l">'.$sUFname.'</td>
+								<td class="adm-detail-content-cell-r" width="50%">';
+							$sUFtable .= $USER_FIELD_MANAGER->getPublicView($aField);
+							$sUFtable .= '</td></tr>';
 						}
 					}
 				}
@@ -854,12 +854,12 @@ Class CAltasibGeoBaseSelected extends CAltasibGeoBaseAllSelected
 		$arRpl = array();
 		if($bInvert)
 		{
-			for($i=0, $sm = 'ALTASIB_RL_'; $i<5; $i++)
+			for($i=0, $sm = 'ALTASIB_RL_'; $i<=8; $i++)
 				$arRpl[GetMessage($sm.$i."_V")] = GetMessage($sm.$i);
 		}
 		else
 		{
-			for($i=0, $sm = 'ALTASIB_RL_'; $i<5; $i++)
+			for($i=0, $sm = 'ALTASIB_RL_'; $i<=8; $i++)
 				$arRpl[GetMessage($sm.$i)] = GetMessage($sm.$i."_V");
 		}
 		return $arRpl;

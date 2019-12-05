@@ -14,6 +14,7 @@ $templateAvailableTags = [
 	'name' => true,
 	'model' => true,
 	'dimensions' => true,
+	'param' => true,
 ];
 
 /** @var Market\Export\Xml\Tag\Base $tag */

@@ -11,6 +11,22 @@ class Currency
 	protected static $currencyPrecision = [];
 	protected static $isCurrencyLoaded;
 
+	public static function getBaseCurrency()
+	{
+		if (static::loadCurrencyModule())
+		{
+			$result = Bitrix\Currency\CurrencyManager::getBaseCurrency();
+		}
+		else
+		{
+			/** @var Market\Type\CurrencyType $typeCurrency */
+			$typeCurrency = Market\Type\Manager::getType(Market\Type\Manager::TYPE_CURRENCY);
+			$result = $typeCurrency->getDefaultBase();
+		}
+
+		return $result;
+	}
+
 	public static function getCurrency($currency)
 	{
 		if (!isset(static::$currencyMap[$currency]))
@@ -35,12 +51,18 @@ class Currency
 			}
 			else
 			{
+				/** @var Market\Type\CurrencyType $typeCurrency */
 				$typeCurrency = Market\Type\Manager::getType(Market\Type\Manager::TYPE_CURRENCY);
 				$formatCurrency = $typeCurrency->format($currency);
+				$revertCurrency = $typeCurrency->revert($currency);
 
 				if (isset($currencyList[$formatCurrency]))
 				{
 					$result = $formatCurrency;
+				}
+				else if (isset($currencyList[$revertCurrency]))
+				{
+					$result = $revertCurrency;
 				}
 			}
 		}

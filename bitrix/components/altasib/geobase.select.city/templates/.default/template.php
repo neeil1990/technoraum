@@ -59,9 +59,7 @@ if($_REQUEST["AUTOLOAD"] != 'Y'):
 	?><span class="altasib_geobase_link_prefix"><?
 		if(isset($arParams["SPAN_LEFT"])){
 			if(!empty($arParams["SPAN_LEFT"]) && trim($arParams["SPAN_LEFT"] != ''))
-			{
-				?><img src="<?=SITE_TEMPLATE_PATH?>/img/point.png" /><?
-			}
+				echo $arParams["SPAN_LEFT"]."&nbsp;";
 		}
 		else
 			echo GetMessage("ALTASIB_GEOBASE_MY_".$sMode)."&nbsp;";
@@ -151,6 +149,13 @@ altasib_geobase.bitrix_sessid='<?=bitrix_sessid();?>';
 <?						?><li class="altasib_geobase_act"><?
 							?><a href="#" title="<?=$usrChoiceTitle;?>" id="altasib_geobase_list_<?echo str_replace(' ','_', $cityID);?>" onclick="altasib_geobase.sc_onclk('<?=$cityID;?>','<?=$arUsrCh["COUNTRY_CODE"];?>','<?=$cityID;?>');"><?
 								echo $usrChoiceTitle;
+								$iLi++;
+							?></a><?
+						?></li><?
+						} else if(!empty($arUsrCh["C_CODE"])) {
+						?><li class="altasib_geobase_act"><?
+							?><a href="#" title="<?=$usrChoiceTitle;?>" id="altasib_geobase_list_<?=$arUsrCh["C_CODE"]?>" onclick="altasib_geobase.sc_onclk('<?=$arUsrCh["C_CODE"]?>');"><?
+								echo $usrSelCity;
 								$iLi++;
 							?></a><?
 						?></li><?
@@ -283,7 +288,7 @@ altasib_geobase.bitrix_sessid='<?=bitrix_sessid();?>';
 	if($arResult["SHOW_SMALL"] == "Y"):?>
 <script type="text/javascript">
 var a='<div class="altasib_geobase_sml_win"><div class="altasib_geobase_sml_win_block"><div class="altasib_geobase_sml_ctr"><div class="altasib_geobase_sml_block">'+
-	'<span class="altasib_geobase_sml_your">Ваш город <?=$_SESSION["ALTASIB_GEOBASE"]["CITY_NAME"]?>?</span>'+
+	'<span class="altasib_geobase_sml_your"><?echo (!empty($arParams["SMALL_TEXT"]) ? $arParams["SMALL_TEXT"] : GetMessage('ALTASIB_GEOBASE_THIS'));?></span>'+
 	'</div>'+
 	'<a class="altasib_geobase_sml_yes altasib_geobase_sml_btn" onclick="altasib_geobase.sc_onclk(\'<?echo(!empty($arAutoDt["CODE"])? $arAutoDt["CODE"] : $arAutoDt["REGION"]["CODE"]);?>\'<?echo(!empty($arAutoDt["REGION"]["CODE"]) ? ",\'".$arAutoDt["REGION"]["CODE"]."\'" : "");?>); return false;" href="#"><?=GetMessage('ALTASIB_GEOBASE_Y')?></a>'+
 	'<a class="altasib_geobase_sml_no altasib_geobase_sml_btn" href="#" onclick="altasib_geobase.sml_no();return false;"><?=GetMessage('ALTASIB_GEOBASE_N')?></a>'+

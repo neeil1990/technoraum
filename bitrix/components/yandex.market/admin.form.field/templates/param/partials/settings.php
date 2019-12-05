@@ -117,7 +117,7 @@ if ($settings !== null)
 					foreach ($setting['VALUES'] as $option)
 					{
 						?>
-						<option value="<?= $option['ID'] ?>" <?= $option['ID'] == $inputValue ? 'selected' : ''; ?>><?= $option['VALUE']; ?></option>
+						<option value="<?= $option['ID'] ?>" <?= $option['ID'] == $inputValue ? 'selected' : ''; ?>><?= Market\Utils::htmlEscape($option['VALUE']); ?></option>
 						<?
 					}
 					?>
@@ -175,7 +175,7 @@ if ($settings !== null)
 							}
 
 							?>
-							<option value="<?= $typeEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?> <?= $isDefault ? 'data-default="true"' : ''; ?>><?= $typeEnum['VALUE']; ?></option>
+							<option value="<?= $typeEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?> <?= $isDefault ? 'data-default="true"' : ''; ?>><?= Market\Utils::htmlEscape($typeEnum['VALUE']); ?></option>
 							<?
 						}
 						?>
@@ -224,10 +224,15 @@ if ($settings !== null)
 					else
 					{
 						?>
-						<select class="b-param-table__input js-param-node__field js-param-node__input" data-name="FIELD" data-type="select" <?
+						<select
+							class="b-param-table__input js-param-node__field js-param-node__input <?= $inputName !== null && !$arResult['MINIMAL_UI'] && $arParams['ACTIVE_TAB'] ? 'js-plugin' : '' ?>"
+							data-name="FIELD"
+							data-type="select"
+							<?
 
 							if ($inputName !== null)
 							{
+								echo ' data-plugin="Ui.Input.TagInput" data-width="100%" data-tags="false"';
 								echo 'name="' . $inputName . '[FIELD]' . '"';
 							}
 
@@ -241,7 +246,7 @@ if ($settings !== null)
 									$isSelected = ($fieldEnum['ID'] === $sourceField);
 
 									?>
-									<option value="<?= $fieldEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?>><?= $fieldEnum['VALUE']; ?></option>
+									<option value="<?= $fieldEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?>><?= Market\Utils::htmlEscape($fieldEnum['VALUE']); ?></option>
 									<?
 								}
 							}

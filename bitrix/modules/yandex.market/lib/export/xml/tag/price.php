@@ -39,4 +39,22 @@ class Price extends Base
 
 		return $result;
 	}
+
+	public function compareValue($value, array $context = [], Market\Result\XmlValue $nodeValue = null)
+	{
+		if ($nodeValue !== null)
+		{
+			$tagCurrencyId = (string)$nodeValue->getTagValue('currencyId');
+
+			if ($tagCurrencyId !== '')
+			{
+				$currencyId = (string)Market\Data\Currency::getCurrency($tagCurrencyId);
+				$baseCurrencyId = (string)Market\Data\Currency::getBaseCurrency();
+
+				$value = Market\Data\Currency::convert($value, $currencyId, $baseCurrencyId);
+			}
+		}
+
+		return $this->formatValue($value);
+	}
 }

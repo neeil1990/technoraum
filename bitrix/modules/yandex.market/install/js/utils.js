@@ -28,6 +28,16 @@
 			return titles[ (number%100>4 && number%100<20) ? 2 : cases[Math.min(number%10, 5)] ];
 		},
 
+		escape: function(text) {
+			if (typeof text === 'string') {
+				text = text.replace(/"/g, "&quot;");
+				text = text.replace(/</g, "&lt;");
+				text = text.replace(/>/g, "&gt;");
+			}
+
+			return text;
+		},
+
 		compileTemplate: function(template, replaces) {
 			var replaceKey;
 			var replaceValue;

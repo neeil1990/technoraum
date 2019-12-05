@@ -62,7 +62,12 @@
 	display: block;
 }
 
-.js-params--hidden-tags a {
+.js-params--show-hidden-tags:focus-within .js-params--hidden-tags {
+	display: block;
+}
+
+.js-params--hidden-tags a,
+.js-params--hidden-tags span {
 	background: transparent;
 	border: 0;
 	color: #fff;
@@ -73,6 +78,7 @@
 	white-space: pre;
 }
 
-.js-params--hidden-tags a:hover {
+.js-params--hidden-tags a:hover,
+.js-params--hidden-tags span:hover {
 	background-color: #333;
 }

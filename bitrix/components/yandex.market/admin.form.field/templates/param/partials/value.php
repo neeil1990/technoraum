@@ -184,12 +184,12 @@ else
 			}
 			?>
 			<select
-				class="b-param-table__input js-param-node__field js-param-node__input <?= !$isDefined && $arParams['ACTIVE_TAB'] ? 'js-plugin' : '' ?>"
+				class="b-param-table__input js-param-node__field js-param-node__input <?= !$isDefined && !$arResult['MINIMAL_UI'] && $arParams['ACTIVE_TAB'] ? 'js-plugin' : '' ?>"
 				<?= $isDefined ? 'disabled' : ''; ?>
 				data-name="SOURCE_FIELD"
 				data-type="select"<?
 
-				if (!$isDefined && $arParams['ACTIVE_TAB'])
+				if (!$isDefined && !$arResult['MINIMAL_UI'] && $arParams['ACTIVE_TAB'])
 				{
 					echo ' data-plugin="Ui.Input.TagInput" data-width="100%" data-tags="false"';
 				}
@@ -214,7 +214,7 @@ else
 						$isSelected = (!$isTagPlaceholder && !$isAttributePlaceholder && $fieldEnum['ID'] === $attributeValue['SOURCE_FIELD']);
 
 						?>
-						<option value="<?= $fieldEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?>><?= $fieldEnum['VALUE']; ?></option>
+						<option value="<?= $fieldEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?>><?= Market\Utils::htmlEscape($fieldEnum['VALUE']); ?></option>
 						<?
 					}
 				}
@@ -227,7 +227,7 @@ else
 							$isSelected = (!$isTagPlaceholder && !$isAttributePlaceholder && $fieldEnum['ID'] === $attributeValue['SOURCE_FIELD']);
 
 							?>
-							<option value="<?= $fieldEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?>><?= $fieldEnum['VALUE']; ?></option>
+							<option value="<?= $fieldEnum['ID'] ?>" <?= $isSelected ? 'selected': ''; ?>><?= Market\Utils::htmlEscape($fieldEnum['VALUE']); ?></option>
 							<?
 						}
 					}

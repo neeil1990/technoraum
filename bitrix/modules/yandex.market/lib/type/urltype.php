@@ -71,8 +71,28 @@ class UrlType extends AbstractType
 		if (preg_match('#[^A-Za-z0-9-_.~/?=&]#', $path)) // has invalid chars
 		{
 			$charset = $this->getCharset();
+			$parts = preg_split("#(://|:\\d+/|/|\\?|=|&)#", $path, -1, PREG_SPLIT_DELIM_CAPTURE);
+			$result = '';
 
-			$result = \CHTTP::urnEncode($path, $charset);
+			foreach ($parts as $partIndex => $part)
+			{
+				if ($partIndex % 2 === 0)
+				{
+					if (preg_match('/%[0-9A-F]{2}/', $part)) // has encoded chars
+					{
+						$part = rawurldecode($part);
+					}
+
+					if ($charset !== false)
+					{
+						$part = Main\Text\Encoding::convertEncoding($part, LANG_CHARSET, $charset);
+					}
+
+					$part = rawurlencode($part);
+				}
+
+				$result .= $part;
+			}
 		}
 
 		return $result;

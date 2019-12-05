@@ -150,7 +150,7 @@ altasib_geobase.replace=function(){
 		if(altasib_geobase.attempts>=3)
 			return;
 		var itr=5;
-		var interval=setInterval(function(){
+		altasib_geobase.interval=setInterval(function(){
 			if(typeof altasib_geobase.pt_vals!='undefined'&&typeof e!='undefined'&&e!=null)
 				var lfield=altasib_geobase.pt_vals[$(e.target).attr('value')];
 			else if(typeof altasib_geobase.pt[0]!='undefined')
@@ -199,7 +199,8 @@ altasib_geobase.replace=function(){
 							}
 						}
 
-						clearInterval(interval);
+						if(altasib_geobase.interval!='undefined')
+							clearInterval(altasib_geobase.interval);
 						if(altasib_geobase.timeoutId!='undefined')
 							clearTimeout(altasib_geobase.timeoutId);
 
@@ -243,7 +244,7 @@ altasib_geobase.replace=function(){
 				});
 			}
 			else if(--itr<=0){
-				clearInterval(interval);
+				clearInterval(altasib_geobase.interval);
 			}
 
 			if(!altasib_geobase.bNewVers&&fLocVal.length>0){
@@ -271,6 +272,18 @@ altasib_geobase.replace=function(){
 		altasib_geobase.attempts=0;
 		altasib_geobase.ctr_attempts=0;
 	});
+
+	if(typeof(altasib_geobase.pt)!='undefined'&&typeof(altasib_geobase.pt_vals)!='undefined'){
+		for(var i=0,len=altasib_geobase.pt.length;i<len;++i){
+			$('body').on('change','form [name="'+altasib_geobase.pt_vals[altasib_geobase.pt[i]]+'"]',function(e){
+				if(altasib_geobase.timeoutId!='undefined')
+					clearTimeout(altasib_geobase.timeoutId);
+
+				if(altasib_geobase.interval!='undefined')
+					clearInterval(altasib_geobase.interval);
+			});
+		}
+	}
 }
 
 altasib_geobase.parse_city=function(){
@@ -383,6 +396,9 @@ altasib_geobase.chrun=function(){
 	if(altasib_geobase.timeoutId!='undefined')
 		clearTimeout(altasib_geobase.timeoutId);
 
+	if(altasib_geobase.interval!='undefined')
+		clearInterval(altasib_geobase.interval);
+
 	if(typeof altasib_geobase.replace_handler=='function'){
 		altasib_geobase.replace_handler();
 	}
@@ -427,5 +443,6 @@ altasib_geobase.check_ctrvalue=function(v){
 
 	if(typeof v!='undefined'&&v!=null&&v!=''&&v.length!=0)
 		altasib_geobase.ctr_attempts++;
+
 	return res;
 }

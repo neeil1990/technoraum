@@ -16,7 +16,9 @@ $arClassesList = array(
 	"CAltasibGeoBaseIPTools" => "classes/general/iptools.php",
 	"CAltasibGeoBaseMobile_Detect" => "classes/general/Mobile_Detect.php",
 	"CAltasibGeoBaseCityLookup" => "classes/general/city_loockup.php",
-	"CAltasibGeoBaseImport" => "classes/".$DBType."/import.php"
+	"CAltasibGeoBaseImport" => "classes/".$DBType."/import.php",
+	"CAltasibGeoBaseJSPopup" => "classes/general/jspopup.php",
+	"CAltasibGeobaseArchiver" => "classes/general/archiver.php"
 );
 
 Class CAltasibGeoBase
@@ -24,6 +26,7 @@ Class CAltasibGeoBase
 	const CITY_INC = "/upload/altasib/geobase/src/geoipcity.inc";
 	const REG_VARS = "/upload/altasib/geobase/src/geoipregionvars.php";
 	const GEO_LITE = "/upload/altasib/geobase/GeoLiteCity.dat";
+	const GEO_LITE2 = "/upload/altasib/geobase/GeoLite2/GeoLite2-City.mmdb";
 	const MID = "altasib.geobase";
 
 	function __construct($num1)
@@ -76,12 +79,18 @@ Class CAltasibGeoBase
 						if(!empty($arDataM["COUNTRY_CODE"]))
 							$arData = $arDataM;
 					}
+					if(empty($arData["CITY_NAME"]))
+					{
+						$arDataM = CAltasibGeoBase::GetMaxmindGeoLite2Data($ip);
+						if(!empty($arDataM["COUNTRY_CODE"]))
+							$arData = $arDataM;
+					}
 
 					if(COption::GetOptionString(self::MID, "set_cookie", "Y") == "Y")
 					{
 						$sData = CAltasibGeoBase::CodeJSON($arData);
 						$APPLICATION->set_cookie("ALTASIB_LAST_IP", $ip, time() + 31104000); //60*60*24*30*12
-						$APPLICATION->set_cookie("ALTASIB_GEOBASE", $sData, time() + 31104000); //60*60*24*30*12
+						$APPLICATION->set_cookie("ALTASIB_GEOBASE", $sData, time() + 31104000, "/", self::GetCookieServerName(), false, true); //60*60*24*30*12
 					}
 
 					$_SESSION["ALTASIB_GEOBASE"] = $arData;
@@ -138,10 +147,8 @@ Class CAltasibGeoBase
 
 	function iconvArrUtfTo1251($arr)
 	{
-		if(is_array($arr))
-		{
-			foreach($arr as $key=>$Prop)
-			{
+		if(is_array($arr)){
+			foreach($arr as $key=>$Prop){
 				if(is_array($Prop))
 					$arProp[$key] = CAltasibGeoBase::iconvArrUtfTo1251($Prop);
 				else
@@ -167,8 +174,7 @@ Class CAltasibGeoBase
 			return false;
 
 		$upLink = trim(COption::GetOptionString(self::MID, "section_link", "/personal/order/make/"));
-		if($upLink != "")
-		{
+		if($upLink != ""){
 			$dir = $APPLICATION->GetCurDir();
 
 			if(substr($dir, 0, 8) == "/bitrix/")
@@ -178,8 +184,7 @@ Class CAltasibGeoBase
 			if(!is_array($arLink))
 				return false;
 
-			foreach($arLink as $v)
-			{
+			foreach($arLink as $v){
 				$v = trim($v);
 				if($v == "")
 					continue;
@@ -187,8 +192,7 @@ Class CAltasibGeoBase
 					$v = "/".$v;
 
 				$subDir = substr($dir, 0, strlen($v));
-				if($subDir == $v)
-				{
+				if($subDir == $v){
 					CAltasibGeoBase::addScriptsOnSite();
 					return true;
 				}
@@ -204,8 +208,7 @@ Class CAltasibGeoBase
 	function addScriptsOnSite()
 	{
 		global $APPLICATION;
-		if(ADMIN_SECTION !== true)
-		{
+		if(ADMIN_SECTION !== true){
 			$jQEn = COption::GetOptionString(self::MID, "enable_jquery", "ON");
 			if($jQEn == "ON")
 				CJSCore::Init(array('jquery'));
@@ -230,11 +233,9 @@ Class CAltasibGeoBase
 		if(!empty($intLoc))
 		{
 			$bxLoc = "altasib_geobase.bx_loc='".intval($intLoc)."';";
-			if(CModule::IncludeModule('sale'))
-			{
+			if(CModule::IncludeModule('sale')){
 				$dbVars = CSaleLocation::GetList(array("SORT" => "ASC"), array("ID" => $intLoc), false, false, array("CODE"));
-				if($vars = $dbVars->Fetch())
-				{
+				if($vars = $dbVars->Fetch()){
 					$bxLoc .= "altasib_geobase.bx_loc_code='".$vars["CODE"]."';";
 				}
 			}
@@ -246,50 +247,43 @@ Class CAltasibGeoBase
 			$arLVals = array();
 			$sLocTpl = COption::GetOptionString(self::MID, "location_template", "ORDER_PROP_");
 			$rsPType = CSalePersonType::GetList(Array("SORT" => "ASC"), Array("ACTIVE"=>'Y', "LID"=>SITE_ID), false, false, array("ID"));
-			while($arPType = $rsPType->Fetch())
-			{
+			while($arPType = $rsPType->Fetch()){
 				$arLocs[] = $arPType["ID"];
 
 				$sLVals = COption::GetOptionString(self::MID, "field_loc_".$arPType["ID"], "");
 				if(!empty($sLVals))
 					$arLVals[$arPType["ID"]] = $sLocTpl.$sLVals;
 			}
-			if(!empty($arLocs))
-			{
+			if(!empty($arLocs)){
 				$strPT = "altasib_geobase.pt=".CUtil::PhpToJSObject($arLocs).";";
 			}
-			if(!empty($arLVals))
-			{
+			if(!empty($arLVals)){
 				$sPTvals = "altasib_geobase.pt_vals=".CUtil::PhpToJSObject($arLVals).";";
 			}
 
 			$arLDefs = array();
 			$arLDefCode = array();
 			$dbPr = CSaleOrderProps::GetList(array("SORT" => "ASC"), array("IS_LOCATION"=>'Y'), false, false, array("DEFAULT_VALUE", "DEFAULT_VALUE_ORIG"));
-			while($arProps = $dbPr->Fetch())
-			{
+			while($arProps = $dbPr->Fetch()){
 				if(!empty($arProps["DEFAULT_VALUE"]))
 					$arLDefs[] = $arProps["DEFAULT_VALUE"];
 				if(!empty($arProps["DEFAULT_VALUE_ORIG"]))
 					$arLDefCode[] = $arProps["DEFAULT_VALUE_ORIG"];
 			}
 
-			if(!empty($arLDefs))
-			{
+			if(!empty($arLDefs)){
 				$strPV = "altasib_geobase.pv_default=".CUtil::PhpToJSObject($arLDefs).";";
 			}
-			if(!empty($arLDefCode))
-			{
+			if(!empty($arLDefCode)){
 				$strPV .= "altasib_geobase.pv_def_code=".CUtil::PhpToJSObject($arLDefCode).";";
 			}
 		}
 
-		if(empty($strPT))
-		{
+		if(empty($strPT)){
 			$strPT = "altasib_geobase.pt=['1','2'];";
 		}
-		if(empty($sPTvals))
-		{
+
+		if(empty($sPTvals)){
 			$sPTvals = "altasib_geobase.pt_vals={"
 				."'1':'".htmlspecialcharsbx(trim(COption::GetOptionString(self::MID, "field_loc_ind", "ORDER_PROP_2")))."',"
 				."'2':'".htmlspecialcharsbx(trim(COption::GetOptionString(self::MID, "field_loc_leg", "ORDER_PROP_3")))."'};";
@@ -318,11 +312,9 @@ Class CAltasibGeoBase
 		if(!empty($_SESSION["ALTASIB_GEOBASE_CODE"]) || !empty($arDataC)){
 			$arDtKLADR = CAltasibGeoBase::GetDataKladr();
 		}
-		else
-		{
+		else{
 			$arData = CAltasibGeoBase::GetCodeByAddr();
-			if($arData)
-			{
+			if($arData){
 				if($arData["CITY"]["NAME"] != GetMessage('ALTASIB_GEOBASE_KLADR_CITY_NAME'))
 					$arDtKLADR = $arData;
 			}
@@ -392,18 +384,29 @@ Class CAltasibGeoBase
 			return CAltasibGeoBase::GetStatisticData();
 		elseif($source == "maxmind")
 			return CAltasibGeoBase::GetMaxmindData($ip);
+		elseif($source == "maxmind_gl2")
+			return CAltasibGeoBase::GetMaxmindGeoLite2Data($ip);
 		elseif($source == "ipgb_mm"){
 			$arData = CAltasibGeoBase::GetGeoData($ip);
-			if(empty($arData["CITY_NAME"]))
+			if(empty($arData["CITY_NAME"])){
 				$arMM = CAltasibGeoBase::GetMaxmindData($ip);
-			if(!empty($arMM["COUNTRY_CODE"]))
-				$arData = $arMM;
+				if(!empty($arMM["COUNTRY_CODE"]))
+					$arData = $arMM;
+			}
+			if(empty($arData["CITY_NAME"])){
+				$arMM = CAltasibGeoBase::GetMaxmindGeoLite2Data($ip);
+				if(!empty($arMM["COUNTRY_CODE"]))
+					$arData = $arMM;
+			}
 			return $arData;
 		}
 	}
 
 	function GetMaxmindData($ip)
 	{
+		if(empty($ip))
+			return;
+
 		if(file_exists($_SERVER["DOCUMENT_ROOT"].self::CITY_INC))
 			require_once($_SERVER["DOCUMENT_ROOT"].self::CITY_INC);
 		if(file_exists($_SERVER["DOCUMENT_ROOT"].self::REG_VARS))
@@ -433,6 +436,48 @@ Class CAltasibGeoBase
 		return $arData;
 	}
 
+	function GetMaxmindGeoLite2Data($ip)
+	{
+		if(empty($ip))
+			return;
+
+		if(!file_exists($_SERVER["DOCUMENT_ROOT"].self::GEO_LITE2))
+			return;
+
+		$reader = new \Altasib\Geobase\Maxmind\Reader($_SERVER["DOCUMENT_ROOT"].self::GEO_LITE2);
+
+		$record = $reader->get($ip);
+		$arRec = (array)$record;
+		$reader->close();
+
+		$arData = array(
+			"CONTINENT_CODE" => $arRec["continent"]["code"],
+			"CONTINENT_NAME" => $arRec["continent"]["names"]["en"],
+			"CONTINENT_NAME_RU" => $arRec["continent"]["names"]["ru"],
+			"COUNTRY_ID" => $arRec["country"]["geoname_id"],
+			"COUNTRY_CODE" => $arRec["country"]["iso_code"],
+			"COUNTRY_NAME" => $arRec["country"]["names"]["en"],
+			"COUNTRY_NAME_RU" => $arRec["country"]["names"]["ru"],
+			"REGION_ID" => $arRec["subdivisions"][0]["geoname_id"],
+			"REGION_CODE" => $arRec["subdivisions"][0]["iso_code"],
+			"REGION_NAME" => $arRec["subdivisions"][0]["names"]["en"],
+			"REGION_NAME_RU" => $arRec["subdivisions"][0]["names"]["ru"],
+			"CITY_ID" => $arRec["city"]["geoname_id"],
+			"CITY_NAME" => $arRec["city"]["names"]["en"],
+			"CITY_NAME_RU" => $arRec["city"]["names"]["ru"],
+			"POSTINDEX" => $arRec["postal"]["code"],
+			"latitude" => $arRec["location"]["latitude"],
+			"longitude" => $arRec["location"]["longitude"],
+			"acc_radius" => $arRec["location"]["accuracy_radius"],
+			"time_zone" => $arRec["location"]["time_zone"],
+		);
+
+		if(ToLower(LANG_CHARSET) == 'windows-1251' && !empty($arData))
+			$arData = CAltasibGeoBase::iconvArrUtfTo1251($arData);
+
+		return $arData;
+	}
+
 	function GetGeoData($ip)
 	{
 		global $DB;
@@ -452,33 +497,75 @@ Class CAltasibGeoBase
 		return $arData;
 	}
 
-	function GetIsUpdateDataFile($Host, $Path, $File, $lFName)
+	function GetIsUpdateDataFile($Host, $Path, $File, $lFName, $isHttps = true)
 	{
-		$resp = "N";
-		if(file_exists($lFName)){
-			$res = @fsockopen($Host, 80, $errno, $errstr, 3);
+		$resp = false;
+		$url = ($isHttps ? "https" : "http")."://".$Host.$Path.$File;
 
-			if($res){
-				$sReq = "HEAD ".$Path.$File." HTTP/1.1\r\n";
-				$sReq.= "Host: ".$Host."\r\n";
-				$sReq.= "\r\n";
+		if(ini_get('allow_url_fopen')){
 
-				fputs($res, $sReq);
-				while($line = fgets($res, 4096)){
-					if(@preg_match("/Content-Length: *([0-9]+)/i", $line, $regs)){
-						if(@filesize($lFName) != trim($regs[1]))
-							$resp = true;
-						else
-							$resp = false;
+			$file_headers = @get_headers($url);
+			if (strpos($file_headers[0], '200 OK') !== false){
+				if(file_exists($lFName)){
+					$res = @fsockopen($Host, 80, $errno, $errstr, 3);
 
-						break;
+					if($res){
+						$sReq = "HEAD ".$Path.$File." HTTP/1.1\r\n";
+						$sReq.= "Host: ".$Host."\r\n";
+						$sReq.= "\r\n";
+
+						fputs($res, $sReq);
+						while($line = fgets($res, 4096)){
+							if(@preg_match("/Content-Length: *([0-9]+)/i", $line, $regs)){
+								if(@filesize($lFName) != trim($regs[1]))
+									$resp = true; // new size of file
+
+								break;
+							}
+						}
+						fclose($res);
 					}
+				} else {
+					$resp = true;
 				}
-				fclose($res);
 			}
-		} else
-			$resp = true;
+		} else {
+			$rsHeads = self::GetWebPageHeaders($url);
+			if($rsHeads && $rsHeads["http_code"] == "200"){
+				if(file_exists($lFName)){
+					if(@filesize($lFName) != trim($rsHeads["size_download"]))
+						$resp = true; // new size of file
+					else
+						$resp = false;
+				} else {
+					$resp = true;
+				}
+			}
+		}
+
 		return $resp;
+	}
+
+	function GetWebPageHeaders($url){
+		if (!function_exists('curl_init')){
+			return false;
+		}
+		$options = array(
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_HEADER => true,
+		);
+		$ch = curl_init($url);
+		curl_setopt_array($ch, $options);
+		$rough_content = curl_exec($ch);
+		$err = curl_errno($ch);
+		$errmsg = curl_error($ch);
+		$header = curl_getinfo($ch);
+		curl_close($ch);
+		$header_content = substr($rough_content, 0, $header['header_size']);
+		$header['errno'] = $err;
+		$header['errmsg'] = $errmsg;
+		$header['headers'] = $header_content;
+		return $header;
 	}
 
 	function SetUpdateAgent()
@@ -493,7 +580,7 @@ Class CAltasibGeoBase
 		if(!CAltasibGeoBaseIP::CheckServiceAccess($protocol.LOAD_HOST.LOAD_PATH.LOAD_FILE))
 			return "CAltasibGeoBase::SetUpdateAgent();";
 
-		$strFile = $_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geoip/".basename($protocol.LOAD_HOST.LOAD_PATH.LOAD_FILE);
+		$strFile = $_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geobase/".basename($protocol.LOAD_HOST.LOAD_PATH.LOAD_FILE);
 
 		if(CAltasibGeoBase::GetIsUpdateDataFile(LOAD_HOST, LOAD_PATH, LOAD_FILE, $strFile)){
 			include_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/admin_notify.php");
@@ -948,6 +1035,8 @@ Class CAltasibGeoBase
 					$rezData = CAltasibGeoBase::GetDataFromKLADR($city, true, 7, $bOnlyLarge);
 				elseif($citylen == 3)
 					$rezData = CAltasibGeoBase::GetDataFromKLADR($city, false, 20, $bOnlyLarge);
+				elseif($citylen > 6)
+					$rezData = CAltasibGeoBase::GetDataFromKLADR($city, false, false, $bOnlyLarge, true);
 				elseif($citylen > 3)
 					$rezData = CAltasibGeoBase::GetDataFromKLADR($city, false, false, $bOnlyLarge);
 
@@ -1213,6 +1302,17 @@ Class CAltasibGeoBase
 		return $data;
 	}
 
+	function GetDistrictByCode($code, $afields)
+	{
+		global $DB;
+		$code = $DB->ForSql($code);
+		$data = $DB->Query('SELECT '.implode(',', $afields)
+			.' FROM altasib_geobase_kladr_districts'
+			.' WHERE LOWER(code) LIKE "'.$code.'" LIMIT 1'
+		);
+		return $data;
+	}
+
 	function GetDataSearch($city, $strict=false, $limit=false) //ipgeobase.ru - DB
 	{
 		global $DB;
@@ -1229,7 +1329,7 @@ Class CAltasibGeoBase
 			return false;
 	}
 
-	function GetDataFromKLADR($city, $strict=false, $limit=false, $onlyLarge=false)
+	function GetDataFromKLADR($city, $strict=false, $limit=false, $onlyLarge=false, $bPrefix=false)
 	{
 		global $DB;
 		$city = $DB->ForSql($city);
@@ -1253,9 +1353,9 @@ Class CAltasibGeoBase
 			LEFT JOIN altasib_geobase_kladr_region AS t2
 				ON SUBSTRING(t1.ID_DISTRICT,1,2) = t2.CODE
 			WHERE LOWER(t1.NAME) LIKE '
-				.($strict != false ? '"'.strtolower($city).'" ' : '"'.strtolower($city).'%" ')
+				.($strict != false ? '"'.strtolower($city).'" ' : '"'. ($bPrefix ? '%':'') .strtolower($city).'%" ')
 				.($onlyLarge != false ? 'AND (t1.STATUS > 0 OR t1.SOCR="'.$g.'" OR t1.SOCR="'.$pgt.'" OR t1.SOCR="'.$rp.'" OR t1.SOCR="'.$town.'") ' : '')
-				.'AND t1.ACTIVE = "Y" ORDER BY t1.SORTINDEX, t2.CODE, t1.NAME '
+				.'AND t1.ACTIVE = "Y" ORDER BY t1.SORTINDEX DESC, t1.STATUS DESC, t2.CODE, t1.NAME '
 				.($limit != false ? 'LIMIT '.$limit : '')
 		);
 		return $rsKLADR;
@@ -1456,43 +1556,56 @@ Class CAltasibGeoBase
 			}
 			if($arRegion)
 			{
-				$arInfo["REGION"] = array(
-					"CODE" => $arRegion["CODE"],
+				$arInfo = self::GetFormatKladrData($arRegion, $arGeo["CITY_NAME"]);
+			}
+		}
+		return $arInfo;
+	}
+
+	function GetFormatKladrData($arRegion, $cityName)
+	{
+		$arInfo = array();
+		if($arRegion)
+		{
+			$arInfo["REGION"] = array(
+				"CODE" => $arRegion["CODE"],
+				"NAME" => $arRegion["NAME"],
+				"FULL_NAME" => $arRegion["FULL_NAME"],
+				"SOCR" => $arRegion["SOCR"]
+			);
+			$arInfo["DISTRICT"] = array( //default
+				"CODE" => $arRegion["CODE"].'000',
+				"NAME" => '',
+				"SOCR" => ''
+			);
+
+			if($arRegion["CODE"] == 77 || $arRegion["CODE"] == 78
+				|| $arRegion["CODE"] == 92 || $arRegion["CODE"] == 99 //Mosqow SPb, Sevastopol, Baykonur
+			)
+			{
+				$arInfo["CITY"] = array(
+					"ID" => $arRegion["CODE"].'000000000',
 					"NAME" => $arRegion["NAME"],
-					"FULL_NAME" => $arRegion["FULL_NAME"],
-					"SOCR" => $arRegion["SOCR"]
+					"SOCR" => $arRegion["SOCR"],
+					"POSTINDEX" => $arRegion["POSTINDEX"],
+					"ID_DISTRICT" => $arRegion["CODE"].'000'
 				);
-				$arInfo["DISTRICT"] = array( //default
-					"CODE" => $arRegion["CODE"].'000',
-					"NAME" => '',
-					"SOCR" => ''
-				);
-				if($arRegion["CODE"] == 77 || $arRegion["CODE"] == 78
-					|| $arRegion["CODE"] == 92 || $arRegion["CODE"] == 99 //Mosqow SPb, Sevastopol, Baykonur
-				)
-				{
+				$arInfo["CODE"] = $arRegion["CODE"].'000000000';
+
+				$rsCity = CAltasibGeoBase::GetCityByNameReg(trim(htmlspecialcharsEx($cityName)),
+					array('ID', 'NAME', 'SOCR', 'POSTINDEX', 'ID_DISTRICT', 'CODE'), $arRegion["CODE"], false, false);
+				if($arCity = $rsCity->Fetch()){
 					$arInfo["CITY"] = array(
-						"ID" => $arRegion["CODE"].'000000000',
-						"NAME" => $arRegion["NAME"],
-						"SOCR" => $arRegion["SOCR"],
-						"POSTINDEX" => $arRegion["POSTINDEX"],
-						"ID_DISTRICT" => $arRegion["CODE"].'000'
+						"ID" => $arCity["ID"],
+						"NAME" => $arCity["NAME"],
+						"SOCR" => $arCity["SOCR"],
+						"POSTINDEX" => $arCity["POSTINDEX"],
+						"ID_DISTRICT" => $arCity["ID_DISTRICT"]
 					);
-					$arInfo["CODE"] = $arRegion["CODE"].'000000000';
+					$arInfo["CODE"] = $arCity["CODE"];
 
-					$rsCity = CAltasibGeoBase::GetCityByNameReg(trim(htmlspecialcharsEx($arGeo["CITY_NAME"])),
-						array('ID', 'NAME', 'SOCR', 'POSTINDEX', 'ID_DISTRICT', 'CODE'), $arRegion["CODE"], false, false);
-					if($arCity = $rsCity->Fetch()){
-						$arInfo["CITY"] = array(
-							"ID" => $arCity["ID"],
-							"NAME" => $arCity["NAME"],
-							"SOCR" => $arCity["SOCR"],
-							"POSTINDEX" => $arCity["POSTINDEX"],
-							"ID_DISTRICT" => $arCity["ID_DISTRICT"]
-						);
-						$arInfo["CODE"] = $arCity["CODE"];
-
-						$rsDistr = CAltasibGeoBase::GetDistrictByName($arCity["ID_DISTRICT"],
+					if(!empty($arCity["ID_DISTRICT"])){
+						$rsDistr = CAltasibGeoBase::GetDistrictByCode($arCity["ID_DISTRICT"],
 							array('NAME', 'SOCR', 'CODE'), false, false);
 						if($arDistr = $rsDistr->Fetch()){
 							$arInfo["DISTRICT"] = array(
@@ -1503,45 +1616,47 @@ Class CAltasibGeoBase
 						}
 					}
 				}
-				else //others cities
+			}
+			else //others cities
+			{
+				if(COption::GetOptionString(self::MID, "mode_location", "cities") != "regions")
 				{
-					if(COption::GetOptionString(self::MID, "mode_location", "cities") != "regions")
+					$cName = trim(htmlspecialcharsEx($cityName));
+					$arSlct = array('ID', 'NAME', 'SOCR', 'POSTINDEX', 'ID_DISTRICT', 'CODE');
+					$rsCity = CAltasibGeoBase::GetCityByNameReg($cName, $arSlct, $arRegion["CODE"], false, false);
+					$arCity = $rsCity->Fetch();
+					if(!$arCity)
 					{
-						$cName = trim(htmlspecialcharsEx($arGeo["CITY_NAME"]));
-						$arSlct = array('ID', 'NAME', 'SOCR', 'POSTINDEX', 'ID_DISTRICT', 'CODE');
+						$posCName = strpos($cName, "-");
+						if($posCName !== FALSE)
+							$cName = trim(substr($cName, 0, $posCName));
 						$rsCity = CAltasibGeoBase::GetCityByNameReg($cName, $arSlct, $arRegion["CODE"], false, false);
 						$arCity = $rsCity->Fetch();
-						if(!$arCity)
-						{
-							$posCName = strpos($cName, "-");
-							if($posCName !== FALSE)
-								$cName = trim(substr($cName, 0, $posCName));
-							$rsCity = CAltasibGeoBase::GetCityByNameReg($cName, $arSlct, $arRegion["CODE"], false, false);
-							$arCity = $rsCity->Fetch();
-						}
-						if(!$arCity)
-						{
-							$posComa = strpos($cName, ".");
-							if($posComa !== FALSE)
-								$cName = trim(substr($cName, $posComa+1));
-							$rsCity = CAltasibGeoBase::GetCityByNameReg($cName, $arSlct, $arRegion["CODE"], false, false);
-							$arCity = $rsCity->Fetch();
-						}
-						if($arCity)
-						{
-							$arInfo["CITY"] = array(
-								"ID" => $arCity["ID"],
-								"NAME" => $arCity["NAME"],
-								"SOCR" => $arCity["SOCR"],
-								"POSTINDEX" => $arCity["POSTINDEX"],
-								"ID_DISTRICT" => $arCity["ID_DISTRICT"]
-							);
-							$arInfo["CODE"] = $arCity["CODE"];
+					}
+					if(!$arCity)
+					{
+						$posComa = strpos($cName, ".");
+						if($posComa !== FALSE)
+							$cName = trim(substr($cName, $posComa+1));
+						$rsCity = CAltasibGeoBase::GetCityByNameReg($cName, $arSlct, $arRegion["CODE"], false, false);
+						$arCity = $rsCity->Fetch();
+					}
+					if($arCity)
+					{
+						$arInfo["CITY"] = array(
+							"ID" => $arCity["ID"],
+							"NAME" => $arCity["NAME"],
+							"SOCR" => $arCity["SOCR"],
+							"POSTINDEX" => $arCity["POSTINDEX"],
+							"ID_DISTRICT" => $arCity["ID_DISTRICT"]
+						);
+						$arInfo["CODE"] = $arCity["CODE"];
 
-							$rsDistr = CAltasibGeoBase::GetDistrictByName($arCity["ID_DISTRICT"],
+						if(!empty($arCity["ID_DISTRICT"])){
+							$rsDistr = CAltasibGeoBase::GetDistrictByCode($arCity["ID_DISTRICT"],
 								array('NAME', 'SOCR', 'CODE'), false, false);
-							if($arDistr = $rsDistr->Fetch())
-							{
+
+							if($arDistr = $rsDistr->Fetch()){
 								$arInfo["DISTRICT"] = array(
 									"CODE" => $arDistr["CODE"],
 									"NAME" => $arDistr["NAME"],
@@ -2365,6 +2480,41 @@ Class CAltasibGeoBase
 		return $arResult;
 	}
 
+	function SearchSaleLocationsByZip($postCode, $locName)
+	{
+		if(!\Bitrix\Main\Loader::includeModule('sale'))
+			return;
+
+		$arRes = array();
+
+		$parameters['filter'][] = array(
+			'LOGIC' => 'OR',
+			array('=SERVICE.CODE' => 'ZIP'),
+			array('=SERVICE.CODE' => 'ZIP_LOWER')
+		);
+		$parameters['filter']['=XML_ID'] = $postCode;
+		$parameters['filter']['=LOCATION.NAME.LANGUAGE_ID'] = 'ru';
+		$parameters['order']['SERVICE_CODE'] = 'ASC';
+		// $parameters['select'][] = '*';
+		$parameters['select']['SERVICE_CODE'] = 'SERVICE.CODE';
+		$parameters['select'][] = 'LOCATION.NAME';
+		$parameters['select'][] = 'LOCATION_ID';
+		$parameters['limit'] = '200';
+		$res = \Bitrix\Sale\Location\ExternalTable::getList($parameters);
+		while($item = $res->fetch()){
+			$Cmp = similar_text($locName, $item["SALE_LOCATION_EXTERNAL_LOCATION_NAME_NAME_UPPER"], $iPercent);
+			if (($iPercent > $PercentMax) || ($PercentMax == 0)){
+				$PercentMax = $iPercent;
+				$gRes = array("ID" => $item["LOCATION_ID"], "NAME" => $item["SALE_LOCATION_EXTERNAL_LOCATION_NAME_NAME"]);
+			}
+		}
+		if(!empty($gRes)){
+			$arRes[] = $gRes;
+		}
+
+		return $arRes;
+	}
+
 	function SearchLocation($search, $country=false, $region=false, $strLang = LANGUAGE_ID)
 	{
 		$arRes = array();
@@ -2500,7 +2650,7 @@ Class CAltasibGeoBase
 		return $arRes;
 	}
 
-	function GetBXLocations($city = "", $country = "", $region = "")
+	function GetBXLocations($city = "", $country = "", $region = "", $district = "", $postCode = "")
 	{
 		if(!CModule::IncludeModule(self::MID))
 			return;
@@ -2513,7 +2663,9 @@ Class CAltasibGeoBase
 			if(!empty($usrChoice["CITY"]["SOCR"]))
 			{
 				$city = $usrChoice["CITY"]["NAME"];
-				$region = $usrChoice["REGION"]["NAME"];
+				$region = $usrChoice["REGION"]["FULL_NAME"];
+				$regionScr = $usrChoice["REGION"]["NAME"];
+				$postCode = $usrChoice["CITY"]["POSTINDEX"];
 				$country = GetMessage("ALTASIB_GEOBASE_RUSSIA");
 			}
 			elseif(!empty($usrChoice["REGION"]["FULL_NAME"]))
@@ -2534,20 +2686,138 @@ Class CAltasibGeoBase
 				$country_ru = ((!empty($usrChoice["COUNTRY_RU"])) ? $usrChoice["COUNTRY_RU"] : '');
 				$region = ((!empty($usrChoice["region"])) ? $usrChoice["region"] : '');
 			}
+			elseif(!empty($auto["CITY_NAME_RU"]))
+			{
+				$city = $auto["CITY_NAME_RU"];
+				$country = $auto["COUNTRY_NAME_RU"];
+				$region = $auto["REGION_NAME_RU"];
+			}
 			elseif(!empty($auto["CITY_NAME"]))
 			{
 				$city = $auto["CITY_NAME"];
 				$country = $auto["COUNTRY_NAME"];
 				$region = $auto["REGION_NAME"];
 			}
+
+			if(empty($district) && !empty($usrChoice["DISTRICT"]["NAME"])){
+				$district = $usrChoice["DISTRICT"]["NAME"]." ".$usrChoice["DISTRICT"]["SOCR"];
+			}
 		}
 
-		if(!empty($country))
-		{
+		if($region == $city && strpos($city, GetMessage("ALTASIB_GEOBASE_GOROD"))!==false){
+			$city = trim(str_replace(GetMessage("ALTASIB_GEOBASE_GOROD"), '', $city));
+		}
+
+		$arRe = CAltasibGeoBaseSelected::GetArReplaceLocations();
+		if(!empty($region) && isset($arRe[$region])){
+			$region = $arRe[$region];
+		} else {
+			$findR = GetMessage("ALTASIB_GEOBASE_RESPUBLIC");
+			if(strpos($region, $findR)!==false && strpos($region, GetMessage("ALTASIB_GEOBASE_SKA_R"))==false){
+				$region = $findR.' '.trim(str_replace($findR, '', $region));
+			}
+		}
+
+		if(!empty($city) && !empty($country) && !empty($region)){
+			$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, $country, $region);
+			if(empty($arLocsTwo)){
+				$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, $country, "%".$region."%");
+			}
+		}
+
+		if(empty($arLocsTwo) && !empty($city) && !empty($region)){
+			$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, $country_ru, $region);
+		}
+		if(empty($arLocsTwo) && !empty($district)){
+			$distr = str_replace(GetMessage("ALTASIB_GEOBASE_D_SOCR"), GetMessage("ALTASIB_GEOBASE_DISTR"), $district);
+			if($distr == $district){
+				if(stripos($district, GetMessage("ALTASIB_GEOBASE_U_SOCR")) === strlen($district)-strlen(GetMessage("ALTASIB_GEOBASE_U_SOCR"))){
+					$distr = str_replace(GetMessage("ALTASIB_GEOBASE_U_SOCR"), GetMessage("ALTASIB_GEOBASE_U_FULL"), $district);
+				}
+				elseif(stripos($district, GetMessage("ALTASIB_GEOBASE_P_SOCR")) === strlen($district)-strlen(GetMessage("ALTASIB_GEOBASE_P_SOCR"))){
+					$distr = str_replace(GetMessage("ALTASIB_GEOBASE_P_SOCR"), GetMessage("ALTASIB_GEOBASE_P_FULL"), $district);
+				}
+			}
+
+			if(\Bitrix\Main\Loader::includeModule('sale')){
+
+				$regionName = ToUpper($region);
+
+				/* find VILLAGE (selo) */
+				$res = Bitrix\Sale\Location\LocationTable::getList(array(
+					'filter' => array('%NAME.NAME' => $city, '=PARENT.NAME.NAME' => $distr, '=NAME.LANGUAGE_ID' => LANGUAGE_ID,
+							'%PARENT.PARENT.NAME.NAME_UPPER' => $regionName, '=PARENT.NAME.LANGUAGE_ID' => LANGUAGE_ID),
+					'select' => array('ID' => 'ID', 'CODE' => 'CODE', 'NAME_RU' => 'NAME.NAME', 'TYPE_CODE' => 'TYPE.CODE')
+				));
+				if($item = $res->fetch()){
+					$item["NAME"] = $item["NAME_RU"];
+					unset($item["NAME_RU"]);
+					$arLocsTwo[] = $item;
+				}
+				/* find SUBREGION (rajon) */
+				if(empty($arLocsTwo)){
+					$res = Bitrix\Sale\Location\LocationTable::getList(array(
+						'filter' => array('=NAME.NAME' => $distr, '=NAME.LANGUAGE_ID' => LANGUAGE_ID,
+								'%PARENT.NAME.NAME_UPPER' => $regionName, '=PARENT.NAME.LANGUAGE_ID' => LANGUAGE_ID),
+						'select' => array('ID' => 'ID', 'CODE' => 'CODE', 'NAME_RU' => 'NAME.NAME', 'TYPE_CODE' => 'TYPE.CODE')
+					));
+					if($item = $res->fetch()){
+						$item["NAME"] = $item["NAME_RU"];
+						unset($item["NAME_RU"]);
+						$arLocsTwo[] = $item;
+					}
+				}
+			}
+		}
+
+		if(empty($arLocsTwo) && empty($district) && !empty($city) && !empty($region)){
+			if(\Bitrix\Main\Loader::includeModule('sale')){
+
+				$regionName = ToUpper($region);
+
+				/* find VILLAGE without district */
+				$res = Bitrix\Sale\Location\LocationTable::getList(array(
+					'filter' => array('%NAME.NAME' => $city, '=NAME.LANGUAGE_ID' => LANGUAGE_ID,
+							'%PARENT.PARENT.NAME.NAME_UPPER' => $regionName, '=PARENT.NAME.LANGUAGE_ID' => LANGUAGE_ID),
+					'select' => array('ID' => 'ID', 'CODE' => 'CODE', 'NAME_RU' => 'NAME.NAME', 'TYPE_CODE' => 'TYPE.CODE')
+				));
+				if($item = $res->fetch()){
+					$item["NAME"] = $item["NAME_RU"];
+					unset($item["NAME_RU"]);
+					$arLocsTwo[] = $item;
+				}
+			}
+		}
+		/* find by post index - zip code */
+		if(empty($arLocsTwo) && !empty($postCode)){
+			if(\Bitrix\Main\Loader::includeModule('sale')){
+				$arLocsTwo = CSaleLocation::GetByZIP($postCode);
+			}
+
+			/* ext search by zip code */
+			if(empty($arLocsTwo)){
+
+				$findName = $city;
+				if(empty($findName))
+					$findName = $region;
+				if(empty($findName))
+					$findName = $country;
+
+				$arLocsTwo = CAltasibGeoBase::SearchSaleLocationsByZip($postCode, $findName);
+			}
+		}
+		/* find region */
+		if(empty($arLocsTwo) && !empty($region)){
+			$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($region, SITE_ID, $country_ru);
+		}
+
+		/* find in country without region */
+		if(empty($arLocsTwo) && !empty($country)){
 			$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, $country);
 			if(empty($arLocsTwo)){
 				$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, $country, false, "ru");
 			}
+
 			if(empty($arLocsTwo) && !empty($city_ru)){
 				$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city_ru, SITE_ID, $country);
 			}
@@ -2555,122 +2825,104 @@ Class CAltasibGeoBase
 			if(empty($arLocsTwo)){
 				if($country_ru == GetMessage("ALTASIB_GEOBASE_RF") || $country == "Russian Federation")
 					$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, "Russia");
-					if(empty($arLocsTwo))
+
+					if(empty($arLocsTwo)){
 						$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, GetMessage("ALTASIB_GEOBASE_RUSSIA"));
-					if(empty($arLocsTwo))
+					}
+					if(empty($arLocsTwo)){
 						$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city_ru, SITE_ID, GetMessage("ALTASIB_GEOBASE_RUSSIA"));
+					}
 			}
 		}
 		if(empty($arLocsTwo) && !empty($country_ru)){
 			$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID, $country_ru);
-			if(empty($arLocsTwo) && !empty($city_ru))
+
+			if(empty($arLocsTwo) && !empty($city_ru)){
 				$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($city_ru, SITE_ID, $country_ru);
+			}
 		}
-		if(empty($arLocsTwo) && !empty($region)){
-			$arLocsTwo = CAltasibGeoBase::SearchSaleLocations($region, SITE_ID, $country_ru);
-		}
-		//simplify
+
+		/* simplify */
 		if(empty($arLocsTwo)){
 			$arLocs = CAltasibGeoBase::SearchSaleLocations($city, SITE_ID);
+
 			if(!empty($city_ru))
 				$arLocs[] = CAltasibGeoBase::SearchSaleLocations($city_ru, SITE_ID);
 
 			if(empty($arLocs)){
 				$arLocs = CAltasibGeoBase::SearchSaleLocations($country, SITE_ID);
+
 				if(empty($arLocs) && !empty($country_ru)){
 					$arLocs = CAltasibGeoBase::SearchSaleLocations($country_ru, SITE_ID);
 				}
 			}
 		}
-
-		if($city == $region)
-		{
-
-			$arRe = CAltasibGeoBaseSelected::GetArReplaceLocations();
-
-			if(isset($arRe[$city]))
-			{
+		if($city == $region){
+			if(isset($arRe[$city])){
 				$city = $region = $arRe[$city];
 			}
-			else
-			{
+			else{
 				$findR = GetMessage("ALTASIB_GEOBASE_RESPUBLIC");
-				if(strpos($city, $findR)!==false && strpos($city, GetMessage("ALTASIB_GEOBASE_SKA_R"))==false)
-				{
+				if(strpos($city, $findR)!==false && strpos($city, GetMessage("ALTASIB_GEOBASE_SKA_R"))==false){
 					$city = $region = $findR.' '.trim(str_replace($findR, '', $city));
 				}
 			}
 		}
 
-		if(empty($arLocsTwo))
-		{
+		if(empty($arLocsTwo)){
 			if(!empty($country) && $country == GetMessage("ALTASIB_GEOBASE_RUSSIA"))
 				$country = GetMessage("ALTASIB_GEOBASE_R_F");
 
 			$arLocsTwo = CAltasibGeoBase::SearchLocation($city, $country, $region);
 		}
-		if(empty($arLocsTwo))
-		{
+		if(empty($arLocsTwo)){
 			$arLocsTwo = CAltasibGeoBase::SearchLocation($city, false, $region);
 		}
-		if(empty($arLocsTwo))
-		{
+		if(empty($arLocsTwo)){
 			$arLocsTwo = CAltasibGeoBase::SearchLocation($city, false, false);
 		}
-		if(empty($arLocsTwo) && !empty($cityScr))
-		{
+		if(empty($arLocsTwo) && !empty($cityScr)){
 			$arLocsTwo = CAltasibGeoBase::SearchLocation('%'.$cityScr, false, false);
 		}
 
-		if(!empty($arLocsTwo))
-		{
-			foreach($arLocsTwo as $unit)
-			{
-				if(!empty($unit["NAME"]))
-				{
+		if(!empty($arLocsTwo)){
+			foreach($arLocsTwo as $unit){
+				if(!empty($unit["NAME"])){
 					$rez = $unit["ID"]; break;
 				}
 			}
 			if(empty($rez))
 				foreach($arLocsTwo as $unit)
 				{
-					if(!empty($unit["ID"]))
-					{
+					if(!empty($unit["ID"])){
 						$rez = $unit["ID"]; break;
 					}
 				}
 		}
-		if(!empty($arLocs) && empty($rez))
-		{
-			foreach($arLocs as $unit)
-			{
-				if(!empty($unit["NAME"]))
-				{
+		if(!empty($arLocs) && empty($rez)){
+			foreach($arLocs as $unit){
+				if(!empty($unit["NAME"])){
 					$rez = $unit["ID"]; break;
 				}
 			}
-			if(empty($rez))
-			{
-				foreach($arLocs as $unit)
-				{
-					foreach($unit as $elem)
-					{
-						if(!empty($elem["ID"]))
-						{
+			if(empty($rez)){
+				foreach($arLocs as $unit){
+					foreach($unit as $elem){
+						if(!empty($elem["ID"])){
 							$rez = $elem["ID"]; break;
 						}
 					}
 				}
 			}
-			if(empty($rez))
-				foreach($arLocs as $unit)
-				{
-					if(!empty($unit["ID"]))
-					{
+			if(empty($rez)){
+				foreach($arLocs as $unit){
+					if(!empty($unit["ID"])){
 						$rez = $unit["ID"]; break;
 					}
 				}
+			}
 		}
+
 		if(!empty($rez))
 			return $rez;
 		else
@@ -2814,7 +3066,7 @@ Class CAltasibGeoBaseAllSelected extends CAltasibGeoBase
 		if(COption::GetOptionString(self::MID, "set_sql", "Y") == "Y")
 			$DB->Query("SET SQL_BIG_SELECTS=1");
 		$strSql = 'SELECT t1.ID, t1.ACTIVE, t1.SORT, t1.NAME AS C_NAME, t1.NAME_EN AS C_NAME_EN, t1.CODE AS C_CODE, t1.ID_DISTRICT, t1.SOCR AS C_SOCR,
-			t2.FULL_NAME AS R_FNAME, t2.NAME AS R_NAME, t3.NAME AS D_NAME, t3.SOCR AS D_SOCR, t1.COUNTRY_CODE AS CTR_CODE, '
+			t2.FULL_NAME AS R_FNAME, t2.NAME AS R_NAME, t2.SOCR AS R_SOCR, t3.NAME AS D_NAME, t3.SOCR AS D_SOCR, t1.COUNTRY_CODE AS CTR_CODE, '
 			.($mm_exsts ? ' t4.name_ru AS CTR_NAME_RU,' : ''). ' t1.ID_REGION AS R_ID
 			FROM altasib_geobase_selected AS t1
 			LEFT JOIN altasib_geobase_kladr_districts AS t3
@@ -2834,12 +3086,10 @@ Class CAltasibGeoBaseAllSelected extends CAltasibGeoBase
 	function GetMoreCacheCities()
 	{
 		$obCache = new CPHPCache();
-		if($obCache->InitCache(86400, "GetMoreCacheCities", "/altasib/geobase/"))
-		{
+		if($obCache->InitCache(86400, "GetMoreCacheCities", "/altasib/geobase/")){
 			$arCities = $obCache->GetVars();
 		}
-		elseif($obCache->StartDataCache())
-		{
+		elseif($obCache->StartDataCache()){
 			$arCities = array();
 			$rsCity = CAltasibGeoBaseAllSelected::GetMoreCities(true);
 			while($arCity = $rsCity->Fetch()){
@@ -2866,8 +3116,7 @@ Class CAltasibGeoBaseIP extends CAltasibGeoBase
 			return;
 		if(!CAltasibGeoBaseIP::CheckServiceAccess(self::ipgeobase))
 			return;
-		if(!function_exists('curl_init'))
-		{
+		if(!function_exists('curl_init')){
 			if(!$text = file_get_contents(self::ipgeobase.'?ip='.$ip))
 				return false;
 		}
@@ -2918,19 +3167,29 @@ Class CAltasibGeoBaseIP extends CAltasibGeoBase
 		if(!CAltasibGeoBaseIP::CheckServiceAccess(self::geoip_top))
 			return;
 
-		$siteCode = COption::GetOptionString(self::MID, "geoip_top_code_".SITE_ID, "");
+		$siteCode='';
+
+		if(defined("ADMIN_SECTION") && ADMIN_SECTION === true){ // if "ru" || "en"
+			$w1 = "sort";
+			$w2 = "asc";
+			$rs = CSite::GetList($w1, $w2, array("ACTIVE" => "Y"));
+			while($ar = $rs->Fetch()){
+				$siteCode = COption::GetOptionString(self::MID, "geoip_top_code_".$ar["ID"], "");
+				break;
+			}
+		}
+		if(empty($siteCode))
+			$siteCode = COption::GetOptionString(self::MID, "geoip_top_code_".SITE_ID, "");
 
 		$strUrl = self::geoip_top.'?ip='.$ip.'&hex=3f'; //3ffd
 		if(!empty($siteCode))
 			$strUrl .= "&sid=".$siteCode;
 
-		if(!function_exists('curl_init'))
-		{
+		if(!function_exists('curl_init')){
 			if(!$text = file_get_contents($strUrl))
 				return false;
 		}
-		else
-		{
+		else{
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $strUrl);
 			curl_setopt($ch, CURLOPT_HEADER, TRUE);
@@ -2978,8 +3237,7 @@ Class CAltasibGeoBaseIP extends CAltasibGeoBase
 			)
 		);
 		$headers = @get_headers($address);
-		if($headers === false)
-		{
+		if($headers === false){
 			$headers = self::get_headers_curl($address);
 			if($headers === false)
 				return "Not connection";
@@ -3027,10 +3285,8 @@ Class CAltasibGeoBaseIP extends CAltasibGeoBase
 		);
 		foreach($headers as $header)
 		{
-			if(isset($_SERVER[$header]))
-			{
-				foreach(explode(',', $_SERVER[$header]) as $ip)
-				{
+			if(isset($_SERVER[$header])){
+				foreach(explode(',', $_SERVER[$header]) as $ip){
 					$ip = trim($ip);
 					if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false)
 					{
@@ -3044,7 +3300,7 @@ Class CAltasibGeoBaseIP extends CAltasibGeoBase
 	}
 }
 
-if(method_exists(CModule, "AddAutoloadClasses")){
+if(method_exists("CModule", "AddAutoloadClasses")){
 	CModule::AddAutoloadClasses(
 		"altasib.geobase",
 		$arClassesList

@@ -102,7 +102,10 @@ if(!empty($arResult["UF"]) && count($arResult["UF"]) > 0):
 	<div class="altasib_geobase_uf_list <?=$code?>">
 <?		if(is_array($field["VALUE"]) && count($field["VALUE"]) > 0
 			|| (!is_array($field["VALUE"]) && strlen($field["VALUE"]) > 0)
-			|| (empty($field["VALUE"]) && $bShowDef && strlen(trim($field["SETTINGS"]["DEFAULT_VALUE"])) > 0)
+			|| (empty($field["VALUE"]) && $bShowDef
+				&& (!empty($field["SETTINGS"]["DEFAULT_VALUE"])
+					|| (!is_array($field["SETTINGS"]["DEFAULT_VALUE"]) && strlen(trim($field["SETTINGS"]["DEFAULT_VALUE"])) > 0))
+				)
 		): // not empty value or default ?>
 <?
 			if(is_array($field["VALUE"]) || is_array($field["DISPLAY_VALUE"])):?>
@@ -153,8 +156,12 @@ if(!empty($arResult["UF"]) && count($arResult["UF"]) > 0):
 		<span class="altasib_geobase_uf_value"><?=$field["DISPLAY_VALUE"]?></span>
 <?				elseif(strlen(trim($field["VALUE"])) > 0):?>
 		<span class="altasib_geobase_uf_value"><?=$field["VALUE"]?></span>
-<?				elseif($bShowDef && strlen(trim($field["SETTINGS"]["DEFAULT_VALUE"]))>0):?>
+<?				elseif($bShowDef && !is_array($field["SETTINGS"]["DEFAULT_VALUE"])
+						&& strlen(trim($field["SETTINGS"]["DEFAULT_VALUE"]))>0):?>
 		<span class="altasib_geobase_uf_value"><?=trim($field["SETTINGS"]["DEFAULT_VALUE"]);?></span>
+<?				elseif($bShowDef && is_array($field["SETTINGS"]["DEFAULT_VALUE"])
+						&& !empty($field["SETTINGS"]["DEFAULT_VALUE"]["VALUE"])):?>
+		<span class="altasib_geobase_uf_value"><?=trim($field["SETTINGS"]["DEFAULT_VALUE"]["VALUE"]);?></span>
 <?				endif;?>
 <?			endif;?>
 <?		else: // empty value and default ?>

@@ -15,7 +15,7 @@ class OldPrice extends Price
 	{
 		$result = parent::validate($value, $context, $siblingsValues, $nodeResult);
 
-		if ($result)
+		if ($result && $siblingsValues !== null)
 		{
 			$priceValue = $this->getTagValues($siblingsValues, 'price', false);
 

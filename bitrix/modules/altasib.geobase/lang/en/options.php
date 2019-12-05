@@ -4,7 +4,7 @@
  * Developer: adumnov
  * Site: http://www.altasib.ru
  * E-mail: dev@altasib.ru
- * @copyright (c) 2006-2017 ALTASIB
+ * @copyright (c) 2006-2019 ALTASIB
  */ 
 
 $CookiePX = COption::GetOptionString("main", "cookie_name", "BITRIX_SM");
@@ -173,7 +173,7 @@ $MESS['ALTASIB_TITLE_UNPACK_FILE'] = "Unpacking:";
 $MESS['ALTASIB_TITLE_DB_UPDATE'] = "Database Update (<a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a>):";
 
 $MESS['ALTASIB_NOTICE_UPDATE_AVAILABLE'] = "Available updated archive of data from the website <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a>.";
-$MESS['ALTASIB_NOTICE_UPDATE_NOT_AVAILABLE'] = "No update is available on the website <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a>.";
+$MESS['ALTASIB_NOTICE_UPDATE_NOT_AVAILABLE'] = "No update is available on the website <a href='http://ipgeobase.ru/' target='_blank' title='#MTITLE#'>ipgeobase.ru</a>.";
 $MESS['ALTASIB_NOTICE_DBUPDATE_SUCCESSFUL'] = "Database Update from site <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a> completed successfully.";
 $MESS['ALTASIB_GEOBASE_GET_UPDATE'] = "Check for updates archives database locations on site <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a> automatically:";
 $MESS["ALTASIB_NOTICE_UPDATE_MANUAL_MODE"] = "To check for updates from the site <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a> click \"Check for updates\"";
@@ -183,10 +183,15 @@ $MESS["ALTASIB_GEOBASE_SOURCE"] = "Source location:";
 $MESS["ALTASIB_GEOBASE_NOT_USING"] = "Do not use a local database";
 $MESS["ALTASIB_GEOBASE_LOCAL_DB"] = "Use the local database ipgeobase.ru";
 $MESS["ALTASIB_GEOBASE_STATISTIC"] = "Use Web analytics Bitrix";
+$MESS["ALTASIB_GEOBASE_SOURCE_MM"] = "Local database MaxMind Lite";
+$MESS["ALTASIB_GEOBASE_SOURCE_MM_GL2"] = "Local database MaxMind GeoLite2";
+$MESS["ALTASIB_GEOBASE_IPGEOBASE_MM"] = "Local database ipgeobase.ru and maxmind.com";
+
 $MESS["ALTASIB_GEOBASE_UPDATE"] = "Update";
 $MESS["ALTASIB_GEOBASE_CHECK_UPDATE"] = "Check for updates";
 $MESS["ALTASIB_GEOBASE_WIN_YOUR_CITY_ENABLE"] = "Enable <b>automatic show</b> a popup window \"Your city\":";
-$MESS["ALTASIB_GEOBASE_ONLY_SELECT_CITIES"] = 'Use only city from <a title="Favorites Cities" onclick="tabControl.SelectTab(\'edit3\'); return false;"> list of favorites cities</a>, without a field Search:';
+$MESS["ALTASIB_GEOBASE_ONLY_SELECT_CITIES"] = 'Use only city from <a title="Favorites Cities" onclick="tabControl.SelectTab(\'edit3\'); return false;">list of favorites cities</a>, without a field Search:';
+$MESS["ALTASIB_GEOBASE_SHOW_NEAREST_SC"] = 'Show instead of automatically determined city the nearest city from <a title="Favorites Cities" onclick="tabControl.SelectTab(\'edit3\'); return false;">list of favorites cities</a>:';
 
 $MESS['ALTASIB_TITLE_CITIES_LIST'] = "List of cities (regions)";
 $MESS['ALTASIB_TABLE_CITY_DELETE'] = "Delete";
@@ -226,13 +231,15 @@ $MESS['ALTASIB_GEOBASE_JQUERY_YES'] = "Yes, connect";
 $MESS['ALTASIB_GEOBASE_JQUERY_2'] = "Connect jQuery v.2";
 $MESS['ALTASIB_GEOBASE_FIELD_LOC_IND'] = "The ID of the input field the location of an individual on the checkout page:";
 $MESS['ALTASIB_GEOBASE_FIELD_LOC_LEG'] = "The ID of the input field location of the legal entity on the checkout page:";
-$MESS['ALTASIB_NOTICE_MM_UPDATE_AVAILABLE'] = "Available updated GeoLite data archive site <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a>. ";
-$MESS['ALTASIB_NOTICE_MM_UPDATE_NOT_AVAILABLE'] = "An update is available on the website <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> found . ";
-$MESS['ALTASIB_NOTICE_MM_DBUPDATE_SUCCESSFUL'] = "Update database file GeoLite site <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> completed successfully. ";
-$MESS['ALTASIB_GEOBASE_MM_GET_UPDATE'] = "Check for updates GeoLite database online <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> automatically: ";
-$MESS["ALTASIB_NOTICE_MM_UPDATE_MANUAL_MODE"] = "To check for updates from the site <a href='http://dev.maxmind.com/' target='_blank'>maxmind.com</a> click \" Check for Updates \"";
-$MESS['ALTASIB_TITLE_MM_DB_UPDATE'] = "Updating the database (<a href='http://dev.maxmind.com/' target='_blank'>maxmind.com</a>):";
-$MESS["ALTASIB_CHECK_MM_UPDATES"] = "Check for updates online <a href='http://dev.maxmind.com/' target='_blank'>maxmind.com</a> ...";
+$MESS['ALTASIB_NOTICE_MM_UPDATE_AVAILABLE'] = "Available updated GeoLite2 data archive site <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a>. ";
+$MESS['ALTASIB_NOTICE_MM_UPDATE_NOT_AVAILABLE'] = "An available update #DBNAME# on the website <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> not found. ";
+$MESS['ALTASIB_NOTICE_MM_DBUPDATE_SUCCESSFUL'] = "Update database file #DB# of site <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> completed successfully. ";
+$MESS['ALTASIB_GEOBASE_MM_GET_UPDATE'] = "Check for updates GeoLite database online <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> automatically: ";
+$MESS["ALTASIB_NOTICE_MM_UPDATE_MANUAL_MODE"] = "To check for updates from the site <a href='https://dev.maxmind.com/' target='_blank'>maxmind.com</a> click \"Check for Updates\"";
+$MESS["ALTASIB_NOTICE_MM2_UPDATE_MANUAL_MODE"] = "To check for updates from the site <a href='https://dev.maxmind.com/geoip/geoip2/geolite2/' target='_blank'>maxmind.com</a> click \"Check for Updates\"";
+$MESS['ALTASIB_TITLE_MM_DB_UPDATE'] = "Updating the database (<a href='https://dev.maxmind.com/' target='_blank'>maxmind.com</a>):";
+$MESS["ALTASIB_CHECK_MM_UPDATES"] = "Check for updates online <a href='https://dev.maxmind.com/' target='_blank'>maxmind.com</a> ...";
+$MESS["ALTASIB_CHECK_MM2_UPDATES"] = "Check for updates GeoLite2 online <a href='https://dev.maxmind.com/geoip/geoip2/geolite2/' target='_blank'>maxmind.com</a>...";
 
 $MESS['ALTASIB_GEOBASE_DEMO_MODE'] = "The module works in demo mode. <a target='_blank' href='http://marketplace.1c-bitrix.ru/tobasket.php?ID=#MODULE#'>Buy a version without limitation</a>";
 $MESS['ALTASIB_GEOBASE_DEMO_EXPIRED'] = "Demo period of the module ended. <a target='_blank' href='http://marketplace.1c-bitrix.ru/tobasket.php?ID=#MODULE#'>Buy module</a>";
@@ -274,6 +281,7 @@ $MESS['ALTASIB_GEOBASE_RDR_MONTH']	= "1 month";
 $MESS['ALTASIB_GEOBASE_RDR_YEAR']	= "1 year";
 
 $MESS['ALTASIB_GEOBASE_NOT_SET'] = "<not set>";
+$MESS['ALTASIB_GEOBASE_NOT_DATA'] = "<no data>";
 $MESS['ALTASIB_GEOBASE_SPREAD_COOKIE'] = "Spread cookie selected cities on all domains";
 
 $MESS['ALTASIB_GEOBASE_LOOCKUP'] = "Definition of cities and countries in the Statistics module";
@@ -281,7 +289,7 @@ $MESS['ALTASIB_GEOBASE_LOOCKUP_USR'] = "Use the data set by the user in determin
 
 $MESS['ALTASIB_GEOBASE_SRV'] = 'Printing global array keys $_SERVER';
 $MESS['ALTASIB_GEOBASE_SRV_NOTE'] = "Verify that the server sends data about the visitor's IP address.<br/>";
-$MESS['ALTASIB_GEOBASE_SRV_DETECT'] = "Defined <u>#IP#</u> address.";
+$MESS['ALTASIB_GEOBASE_SRV_DETECT'] = "Defined <u>#IP#</u> IP address.";
 $MESS['ALTASIB_GEOBASE_SRV_ND'] = "Global client IP address <u>not defined</u>. Need to contact the hoster.";
 $MESS['ALTASIB_GEOBASE_KEY'] = "Key";
 $MESS['ALTASIB_GEOBASE_VAL'] = "Value";
@@ -320,3 +328,28 @@ $MESS['AGB_COLOR_OTHER'] = "Another color, in the format #XXXXXX";
 $MESS['ALTASIB_GEOBASE_COLOR_SHM'] = "Color Settings";
 
 $MESS['ALTASIB_GEOBASE_COLOR_NOTE'] = "To set the color manually, select an <a href='#' onclick='#ON_CLICK#'>empty</a> color scheme.";
+$MESS['ALTASIB_GEOBASE_DATA_STATISTIC'] = "Database Statistics";
+$MESS['ALTASIB_GEOBASE_STR_STATISTIC'] = "<table cellspacing = '15'>
+<tr><td><b>IPGeoBase</b></td><td><b>KLADR</b></td><td><b>MaxMind</b></td><td><b>Selected</b></td></tr>
+<tr><td>City: #IPGB_CITY#</td><td>City: #KLADR_CITY#<br>District: #KLADR_DISTR#<br>Region: #KLADR_REGION#</td><td>City: #MM_CITY#<br>Region: #MM_REGION#<br>Country: #MM_COUNTRY#</td><td>City or region: #SELECTED#<br></td></tr>
+</table>";
+
+$MESS['ALTASIB_GEOBASE_DATA_IPGB'] = "<i>IP address:</i> #IP#<br>Country code: #C_CODE#<br>Region: #R_NAME#<br>County: #CNT_NAME#<br>City: #C_NAME#<br>City ID: #C_ID#<br>Latitude: #BR#<br>Longitude: #LONG#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_SERV_IPGB'] = "Country code: #C_CODE#<br>Region: #R_NAME#<br>County: #CNT_NAME#<br>City: #C_NAME#<br>Latitude: #BR#<br>Longitude: #LONG#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_TOP'] = "IP address: #IP#<br>Name of country: #CTR_NAME#<br>Region: #R_NAME#<br>City: #C_NAME#<br>Latitude: #BR#<br>Longitude: #LONG#<br>Time zone: #TZ#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_STAT'] = "IP address: #IP#<br>Country code: #CTR_CODE#<br>Name of country: #CTR_NAME#<br>Region: #R_NAME#<br>City: #C_NAME#<br>";
+$MESS['ALTASIB_GEOBASE_BX_LOC'] = "<a href='#HREF_LOC#'>#LOC_NAME#</a>";
+$MESS['ALTASIB_GEOBASE_DATA_MM'] = "Continent code: #CNT_CODE#<br>Country code: #CTR_CODE#<br>Name of country: #CTR_NAME#<br>Region code: #R_CODE#<br>Region: #R_NAME#<br>City: #C_NAME#<br>Postcode: #P_IND#<br>Latitude: #BR#<br>Longitude: #LONG#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_MM_GL2'] = "Continent code: #CNT_CODE#<br>Continent: #CNT_NAME#<br>Country code: #CTR_CODE#<br>Country: #CTR_NAME#<br>ID region: #R_ID#<br>Region code: #R_CODE#<br>Region: #R_NAME#<br>ID city: #C_ID#<br>City: #C_NAME#<br>Postcode: #P_IND#<br>Latitude: #BR#<br>Longitude: #LONG#<br>Radius: #RAD#<br>Time zone: #TZ#<br>";
+
+$MESS['ALTASIB_GEOBASE_TBL_H1'] = "Local database<br>ipgeobase.ru";
+$MESS['ALTASIB_GEOBASE_TBL_H2'] = "Online service<br>ipgeobase.ru";
+$MESS['ALTASIB_GEOBASE_TBL_H3'] = "Online service<br>geoip.top";
+$MESS['ALTASIB_GEOBASE_TBL_H4'] = "Statistics module";
+$MESS['ALTASIB_GEOBASE_TBL_H5'] = "Bitrix locations";
+$MESS['ALTASIB_GEOBASE_TBL_H6'] = "MaxMind Lite";
+$MESS['ALTASIB_GEOBASE_TBL_H7'] = "MaxMind GeoLite2";
+$MESS['ALTASIB_GEOBASE_DATA_TBL'] = "<table cellspacing = '15'>
+<tr><td><b>#HEAD_1#</b></td><td><b>#HEAD_2#</b></td><td><b>#HEAD_3#</b></td><td><b>#HEAD_4#</b></td><td><b>#HEAD_5#</b></td><td><b>#HEAD_6#</b></td><td><b>#HEAD_7#</b></td></tr>
+<tr><td>#BODY_1#</td><td>#BODY_2#</td><td>#BODY_3#</td><td>#BODY_4#</td><td>#BODY_5#</td><td>#BODY_6#</td><td>#BODY_7#</td></tr>
+</table>";

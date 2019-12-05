@@ -12,6 +12,14 @@ class Utils
 		return $titles[ ($number%100>4 && $number%100<20)? 2: $cases[min($number%10, 5)] ];
 	}
 
+	public static function htmlEscape($string)
+	{
+		static $search = [ '"', '<', '>' ];
+		static $replace = [ '&quot;', '&lt;', '&gt;' ];
+
+		return str_replace($search, $replace, $string);
+	}
+
 	public static function jsonEncode($data, $options = null)
 	{
 		$result = Main\Web\Json::encode($data, $options);

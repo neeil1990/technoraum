@@ -23,6 +23,7 @@ class Data
 	const TYPE_CURRENCY = 'CURRENCY';
 	const TYPE_CURRENCY_CONVERT = 'CURRENCY_CONVERT';
 	const TYPE_DELIVERY_OPTIONS = 'DELIVERY_OPTIONS';
+	const TYPE_DISTINCT = 'DISTINCT';
 
 	const COMPARE_EQUAL = 'equal';
 	const COMPARE_NOT_EQUAL = 'notEqual';
@@ -247,7 +248,13 @@ class Data
 					Market\Type\Manager::TYPE_DELIVERY_OPTIONS
 				],
 				'COMPARE' => []
-			]
+			],
+			static::TYPE_DISTINCT => [
+				'DATA' => [],
+				'COMPARE' => [
+					static::COMPARE_EQUAL,
+				]
+			],
 		];
 	}
 

@@ -401,6 +401,51 @@ class Offer extends Base
 		return true;
 	}
 
+	protected function getTagResultHash($tagResult, $useHashCollision = false)
+	{
+		$result = '';
+		$xmlContents = $tagResult->getXmlContents();
+
+		if ($xmlContents !== null)
+		{
+			if ($useHashCollision)
+			{
+				$xmlContents = preg_replace('/^(<[^ ]+) id="[^"]*?"/', '$1', $xmlContents); // remove id attr for check tag contents
+				$xmlContents = preg_replace_callback('/(<url>.*?\?)(.*?)(#.*)?(<\/url>)/', static function($matches) {
+					$utmMarker = 'utm_';
+					$queryString = $matches[2];
+
+					if (strpos($queryString, $utmMarker) !== false)
+					{
+						$glue = '&amp;';
+						$isChanged = false;
+						$queryParameters = explode($glue, $queryString);
+
+						foreach ($queryParameters as $queryParameterIndex => $queryParameter)
+						{
+							if (strpos($queryParameter, $utmMarker) === 0)
+							{
+								$isChanged = true;
+								unset($queryParameters[$queryParameterIndex]);
+							}
+						}
+
+						if ($isChanged)
+						{
+							$queryString = implode($glue, $queryParameters);
+						}
+					}
+
+					return $matches[1] . $queryString . $matches[3] . $matches[4];
+				}, $xmlContents); // remove utm from url
+			}
+
+			$result = md5($xmlContents);
+		}
+
+		return $result;
+	}
+
 	protected function getStorageDataClass()
 	{
 		return Market\Export\Run\Storage\OfferTable::getClassName();
@@ -659,12 +704,17 @@ class Offer extends Base
 	protected function exportIblockFilter($sourceFilter, $sourceSelect, $querySelect, $tagDescriptionList, $context, $changesFilter = null, $queryOffset = null, $limit = null, $successCount = 0)
 	{
 		$queryFilter = $this->makeQueryFilter($sourceFilter, $sourceSelect, $context, $changesFilter);
+		$queryDistinct = !empty($queryFilter['DISTINCT']) ? $queryFilter['DISTINCT'] : null;
+		$useDistinct = ($queryDistinct !== null);
 		$hasLimit = ($limit > 0);
-		$chunkSize = ($hasLimit ? $limit : 500);
+		$sourceChunkSize = 500;
+		$processChunkSize = ($hasLimit ? $limit : $sourceChunkSize);
 		$result = [
 			'OFFSET' => null,
 			'SUCCESS_COUNT' => 0
 		];
+
+		$context['USE_DISTINCT'] = $useDistinct;
 
 		do
 		{
@@ -673,15 +723,43 @@ class Offer extends Base
 
 			$this->processExportElementList($queryResult['ELEMENT'], $queryResult['PARENT'], $context);
 
-			foreach (array_chunk($queryResult['ELEMENT'], $chunkSize, true) as $elementChunk)
+			foreach ($this->chunkElementList($queryResult['ELEMENT'], $processChunkSize, $useDistinct) as $elementChunk)
 			{
-				$writeLimit = ($hasLimit ? $limit - $successCount : null);
-				$sourceValueList = $this->extractElementListValues($sourceSelect, $elementChunk, $queryResult['PARENT'], $context);
-				$tagValuesList = $this->buildTagValuesList($tagDescriptionList, $sourceValueList, $context);
+				$sourceValueList = null;
 
-				$writeResultList = $this->writeData($tagValuesList, $elementChunk, $context, [
-					'PARENT_LIST' => $queryResult['PARENT']
-				], $writeLimit);
+				// load source value
+
+				foreach (array_chunk($elementChunk, $sourceChunkSize, true) as $elementsPart)
+				{
+					$partSourceValueList = $this->extractElementListValues($sourceSelect, $elementsPart, $queryResult['PARENT'], $context);
+
+					if ($sourceValueList === null)
+					{
+						$sourceValueList = $partSourceValueList;
+					}
+					else
+					{
+						$sourceValueList += $partSourceValueList;
+					}
+				}
+
+				// write
+
+				$writeLimit = ($hasLimit ? $limit - $successCount : null);
+				$tagValuesList = $this->buildTagValuesList($tagDescriptionList, $sourceValueList, $context);
+				$writeData = [
+					'PARENT_LIST' => $queryResult['PARENT'],
+					'SOURCE_VALUE' => $sourceValueList,
+				];
+
+				$this->extendData($tagValuesList, $elementChunk, $context, $writeData);
+
+				if ($useDistinct)
+				{
+					$tagValuesList = $this->resolveDistinctGroups($queryDistinct, $elementChunk, $sourceValueList, $tagValuesList, $context);
+				}
+
+				$writeResultList = $this->writeData($tagValuesList, $elementChunk, $context, $writeData, $writeLimit);
 
 				foreach ($writeResultList as $writeResult)
 				{
@@ -892,6 +970,7 @@ class Offer extends Base
 		$countContext = $queryContext;
 		$countContext['PAGE_SIZE'] = (int)($this->getParameter('offerPageSize') ?: Market\Config::getOption('export_count_offer_page_size') ?: 100);
 		$countContext['CATALOG_TYPE_COMPATIBILITY'] = $queryContext['HAS_OFFER'] && $this->isCatalogTypeCompatibility($queryContext);
+		$countContext['USE_DISTINCT'] = !empty($queryFilter['DISTINCT']);
 
 		return $counter->count($queryFilter, $countContext);
 	}
@@ -1102,6 +1181,13 @@ class Offer extends Base
 			$filter[] = [
 				'!ID' => $this->getQueryExcludeFilter($context)
 			];
+
+			if ($context['HAS_OFFER'] && !empty($context['USE_DISTINCT']))
+			{
+				$filter[] = [
+					'!ID' => $this->getQueryExcludeFilter($context, 'PARENT_ID')
+				];
+			}
 		}
 	}
 
@@ -1258,6 +1344,13 @@ class Offer extends Base
 			{
 				$result['OFFERS'] = $this->getFilterDefaults('OFFERS', $iblockIds['OFFERS']);
 			}
+		}
+
+		// distinct
+
+		if (!empty($result['DISTINCT']))
+		{
+			$result['DISTINCT'] = call_user_func_array('array_merge', $result['DISTINCT']);
 		}
 
 		$result = $this->applyQueryFilterModifications($result);
@@ -1435,23 +1528,25 @@ class Offer extends Base
 	 * Исключаем уже выгруженные элементы
 	 *
 	 * @param $queryContext
+	 * @param $field
 	 *
 	 * @return Market\Export\Run\Helper\ExcludeFilter
 	 */
-	protected function getQueryExcludeFilter($queryContext)
+	protected function getQueryExcludeFilter($queryContext, $field = 'ELEMENT_ID')
 	{
 		$primary = $this->getQueryExcludeFilterPrimary($queryContext);
+		$cacheKey = $primary . ':' . $field;
 
-		if (!isset($this->queryExcludeFilterList[$primary]))
+		if (!isset($this->queryExcludeFilterList[$cacheKey]))
 		{
-			$this->queryExcludeFilterList[$primary] = new Market\Export\Run\Helper\ExcludeFilter(
+			$this->queryExcludeFilterList[$cacheKey] = new Market\Export\Run\Helper\ExcludeFilter(
 				$this->getStorageDataClass(),
-				'ELEMENT_ID',
+				$field,
 				$this->getStorageReadyFilter($queryContext)
 			);
 		}
 
-		return $this->queryExcludeFilterList[$primary];
+		return $this->queryExcludeFilterList[$cacheKey];
 	}
 
 	/**
@@ -1793,11 +1888,129 @@ class Offer extends Base
 	}
 
 	/**
+	 * Разбиваем результаты выборки по частям с учетом группировки предложений
+	 *
+	 * @param $elementList
+	 * @param $limit
+	 * @param $useDistinct
+	 *
+	 * @return array
+	 */
+	protected function chunkElementList($elementList, $limit, $useDistinct)
+	{
+		if ($useDistinct)
+		{
+			$result = [];
+			$chunk = [];
+			$chunkSize = 0;
+			$parentElements = [];
+			$parentElementsCount = 0;
+			$currentParentId = null;
+
+			// sort by PARENT_ID
+
+			uasort($elementList, static function($aElement, $bElement) {
+				$aParentId = isset($aElement['PARENT_ID']) ? $aElement['PARENT_ID'] : null;
+				$bParentId = isset($bElement['PARENT_ID']) ? $bElement['PARENT_ID'] : null;
+
+				if ($aParentId === $bParentId)
+				{
+					return $aElement['ID'] < $bElement['ID'] ? -1 : 1;
+				}
+
+				return $aParentId < $bParentId ? -1 : 1;
+			});
+
+			// build chunks
+
+			foreach ($elementList as $elementId => $element)
+			{
+				$parentId = isset($element['PARENT_ID']) ? $element['PARENT_ID'] : null;
+
+				if ($parentId === null)
+				{
+					$chunk[$elementId] = $element;
+					++$chunkSize;
+
+					if ($chunkSize >= $limit)
+					{
+						$result[] = $chunk;
+
+						$chunk = [];
+						$chunkSize = 0;
+					}
+				}
+				else
+				{
+					if ($parentId !== $currentParentId)
+					{
+						if ($chunkSize + $parentElementsCount < $limit)
+						{
+							$chunk += $parentElements;
+							$chunkSize += $parentElementsCount;
+						}
+						else if ($parentElementsCount > $chunkSize)
+						{
+							$result[] = $parentElements;
+						}
+						else
+						{
+							$result[] = $chunk;
+
+							$chunk = $parentElements;
+							$chunkSize = $parentElementsCount;
+						}
+
+						$parentElements = [];
+						$parentElementsCount = 0;
+						$currentParentId = $parentId;
+					}
+
+					$parentElements[$elementId] = $element;
+					++$parentElementsCount;
+				}
+			}
+
+			if ($parentElementsCount > 0)
+			{
+				if ($chunkSize + $parentElementsCount < $limit)
+				{
+					$chunk += $parentElements;
+					$chunkSize += $parentElementsCount;
+				}
+				else if ($parentElementsCount > $chunkSize)
+				{
+					$result[] = $parentElements;
+				}
+				else
+				{
+					$result[] = $chunk;
+
+					$chunk = $parentElements;
+					$chunkSize = $parentElementsCount;
+				}
+			}
+
+			if ($chunkSize > 0)
+			{
+				$result[] = $chunk;
+			}
+		}
+		else
+		{
+			$result = array_chunk($elementList, $limit, true);
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Получаем значения из источников на основе результатов запроса к базе данных
 	 *
-	 * @param $sourceSelectList
+	 * @param $sourceSelect
 	 * @param $elementList
 	 * @param $parentList
+	 * @param $queryContext
 	 *
 	 * @return array
 	 * @throws \Bitrix\Main\ObjectNotFoundException
@@ -1898,5 +2111,288 @@ class Offer extends Base
 			&& Market\Config::getOption('export_offer_process_all_elements', 'N') === 'Y'
 			&& !$this->isCatalogTypeCompatibility($context)
 		);
+	}
+
+	/**
+	 * Сортировка групп тегов по значениям
+	 *
+	 * @param array $rules
+	 * @param array $elementList
+	 * @param array $sourceValuesList
+	 * @param Market\Result\XmlValue[] $tagValuesList
+	 * @param array $context
+	 *
+	 * @return Market\Result\XmlValue[]
+	 */
+	protected function resolveDistinctGroups($rules, $elementList, $sourceValuesList, $tagValuesList, $context)
+	{
+		$elementGroups = $this->getElementGroups($elementList);
+		$elementsWithGroup = $this->flattenElementGroups($elementGroups, 1);
+
+		if (!empty($elementsWithGroup))
+		{
+			$elementsDistinctValues = $this->getDistinctValues($elementsWithGroup, $rules, $sourceValuesList, $tagValuesList, $context);
+			$sortedGroups = $this->sortDistinctGroups($elementGroups, $elementsDistinctValues, $rules);
+
+			$result = $this->applyDistinctGroups($tagValuesList, $sortedGroups);
+		}
+		else
+		{
+			$result = $tagValuesList;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Группировка предложений по родительскому элементу
+	 *
+	 * @param array $elementList
+	 *
+	 * @return int[][]
+	 */
+	protected function getElementGroups($elementList)
+	{
+		$result = [];
+
+		foreach ($elementList as $elementId => $element)
+		{
+			if (isset($element['PARENT_ID']))
+			{
+				$groupId = $element['PARENT_ID'];
+
+				if (!isset($result[$groupId])) { $result[$groupId] = []; }
+
+				$result[$groupId][] = $elementId;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Список элементов в группах, количество элементов в которых больше минимального количества
+	 *
+	 * @param int[][] $groups
+	 * @param int $minimalGroupCount
+	 *
+	 * @return int[]
+	 */
+	protected function flattenElementGroups($groups, $minimalGroupCount = 0)
+	{
+		$result = [];
+
+		foreach ($groups as $group)
+		{
+			if ($minimalGroupCount === 0 || count($group) > $minimalGroupCount)
+			{
+				foreach ($group as $elementId)
+				{
+					$result[] = $elementId;
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Получение значений тегов для сортировки
+	 *
+	 * @param int[] $elementIds
+	 * @param array $rules
+	 * @param array $sourceValuesList
+	 * @param Market\Result\XmlValue[] $tagValuesList
+	 * @param array $context
+	 *
+	 * @return mixed[][]
+	 */
+	protected function getDistinctValues($elementIds, $rules, $sourceValuesList, $tagValuesList, $context)
+	{
+		$result = [];
+		$exportTag = $this->getTag();
+
+		foreach ($rules as $ruleIndex => $rule)
+		{
+			$ruleValues = array_fill_keys($elementIds, null);
+
+			if (isset($rule['TAG']))
+			{
+				$useAttribute = false;
+				$ruleNode = (
+					$exportTag->getName() === $rule['TAG']
+						? $exportTag
+						: $exportTag->getChild($rule['TAG'])
+				);
+
+				if (isset($rule['ATTRIBUTE']))
+				{
+					$useAttribute = true;
+					$ruleNode = $ruleNode !== null ? $ruleNode->getAttribute($rule['ATTRIBUTE']) : null;
+				}
+
+				foreach ($elementIds as $elementId)
+				{
+					$tagValues = $tagValuesList[$elementId];
+
+					if ($useAttribute)
+					{
+						$ruleValue = $tagValues->getTagAttribute($rule['TAG'], $rule['ATTRIBUTE']);
+					}
+					else
+					{
+						$ruleValue = $tagValues->getTagValue($rule['TAG']);
+					}
+
+					if (!$this->isEmptyXmlValue($ruleValue))
+					{
+						if ($ruleNode === null)
+						{
+							$ruleValues[$elementId] = $ruleValue;
+						}
+						else if ($ruleNode->validate($ruleValue, $context))
+						{
+							$ruleValues[$elementId] = $ruleNode->compareValue($ruleValue, $context, $tagValues);
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach ($elementIds as $elementId)
+				{
+					if (!isset($sourceValuesList[$elementId][$rule['SOURCE']][$rule['FIELD']])) { continue; }
+
+					$ruleValue = $sourceValuesList[$elementId][$rule['SOURCE']][$rule['FIELD']];
+
+					if (!$this->isEmptyXmlValue($ruleValue))
+					{
+						$ruleValues[$elementId] = $ruleValue;
+					}
+				}
+			}
+
+			$result[$ruleIndex] = $ruleValues;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Сортиворка групп
+	 *
+	 * @param int[][] $groups
+	 * @param mixed[][] $elementValues
+	 * @param array $rules
+	 *
+	 * @return int[][]
+	 */
+	protected function sortDistinctGroups($groups, $elementValues, $rules)
+	{
+		$sortSigns = $this->getDistinctRulesSign($rules);
+
+		foreach ($groups as &$group)
+		{
+			usort($group, static function($aElementId, $bElementId) use ($elementValues, $sortSigns)
+			{
+				foreach ($sortSigns as $ruleIndex => $sortSign)
+				{
+					$aValue = $elementValues[$ruleIndex][$aElementId];
+					$bValue = $elementValues[$ruleIndex][$bElementId];
+
+					if ($aValue !== $bValue)
+					{
+						if ($aValue === null)
+						{
+							$result = 1;
+						}
+						else if ($bValue === null)
+						{
+							$result = -1;
+						}
+						else
+						{
+							$result = ($aValue < $bValue ? -1 : 1) * $sortSign;
+						}
+
+						return $result;
+					}
+				}
+
+				return $aElementId < $bElementId ? -1 : 1; // all equal
+			});
+		}
+		unset($group);
+
+		return $groups;
+	}
+
+	/**
+	 * Знак сравнения для группировки тегов
+	 *
+	 * @param array $rules
+	 *
+	 * @return int[]
+	 */
+	protected function getDistinctRulesSign($rules)
+	{
+		$result = [];
+
+		foreach ($rules as $ruleIndex => $rule)
+		{
+			if (strtolower($rule['ORDER']) === 'desc')
+			{
+				$result[$ruleIndex] = -1;
+			}
+			else
+			{
+				$result[$ruleIndex] = 1;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Применение результатов группировки к тегам
+	 *
+	 * @param Market\Result\XmlValue[] $tagValuesList
+	 * @param array $groups
+	 *
+	 * @return Market\Result\XmlValue[]
+	 */
+	protected function applyDistinctGroups($tagValuesList, $groups)
+	{
+		$priority = [];
+
+		// apply distinct and fill priority
+
+		foreach ($groups as $groupId => $group)
+		{
+			foreach ($group as $index => $elementId)
+			{
+				$tagValues = $tagValuesList[$elementId];
+
+				$tagValues->setDistinct($groupId);
+				$priority[$elementId] = $index;
+			}
+		}
+
+		// sort tagValuesList
+
+		uksort($tagValuesList, static function($aElementId, $bElementId) use ($priority)
+		{
+			$aPriority = isset($priority[$aElementId]) ? $priority[$aElementId] : 0;
+			$bPriority = isset($priority[$bElementId]) ? $priority[$bElementId] : 0;
+
+			if ($aPriority === $bPriority)
+			{
+				return $aElementId < $bElementId ? -1 : 1;
+			}
+
+			return $aPriority < $bPriority ? -1 : 1;
+		});
+
+		return $tagValuesList;
 	}
 }

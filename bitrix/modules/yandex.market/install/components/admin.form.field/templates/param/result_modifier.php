@@ -4,6 +4,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) { die(); }
 $this->IncludeLangFile('template.php');
 
 $arResult['ERRORS'] = [];
+$arResult['MINIMAL_UI'] = (!empty($arParams['VALUE']) && count($arParams['VALUE']) > 50);
 
 include __DIR__ . '/modifier/tags.php';
 include __DIR__ . '/modifier/source-type-enum.php';

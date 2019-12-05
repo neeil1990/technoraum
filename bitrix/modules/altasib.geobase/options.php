@@ -4,17 +4,20 @@
  * Developer: adumnov
  * Site: http://www.altasib.ru
  * E-mail: dev@altasib.ru
- * @copyright (c) 2006-2017 ALTASIB
+ * @copyright (c) 2006-2019 ALTASIB
  */
 
 IncludeModuleLangFile(__FILE__);
 IncludeModuleLangFile($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/options.php");
-CUtil::InitJSCore(Array("jquery", "window"));
+CUtil::InitJSCore(Array("jquery", "window", "popup"));
 
 if(!$USER->IsAdmin())
 	return;
 
 $module_id = "altasib.geobase";
+
+$incMod = CModule::IncludeModuleEx($module_id);
+
 $update_mode = (COption::GetOptionString($module_id, "get_update", "N") == "Y");
 $updModeMM = (COption::GetOptionString($module_id, "mm_get_update", "N") == "Y");
 
@@ -91,6 +94,7 @@ $useSource = array(
 	"local_db" => GetMessage("ALTASIB_GEOBASE_LOCAL_DB"),
 	"statistic" => GetMessage("ALTASIB_GEOBASE_STATISTIC"),
 	"maxmind" => GetMessage("ALTASIB_GEOBASE_SOURCE_MM"),
+	"maxmind_gl2" => GetMessage("ALTASIB_GEOBASE_SOURCE_MM_GL2"),
 	"ipgb_mm" => GetMessage("ALTASIB_GEOBASE_IPGEOBASE_MM")
 );
 
@@ -151,6 +155,153 @@ elseif($colorScheme == "PALE")
 	);
 }
 
+$sStatist = '';
+if ($incMod != '0' && $incMod != '3'){
+	$arRes = CAltasibGeoBaseIPTools::GetRowsCount();
+	if(!empty($arRes)){
+		$sStatist = GetMessage("ALTASIB_GEOBASE_STR_STATISTIC", array(
+				"#IPGB_CITY#" => number_format($arRes["altasib_geobase_cities"], 0, '', ' '),
+				"#KLADR_CITY#" => number_format($arRes["altasib_geobase_kladr_cities"], 0, '', ' '),
+				"#KLADR_DISTR#" => number_format($arRes["altasib_geobase_kladr_districts"], 0, '', ' '),
+				"#KLADR_REGION#" => number_format($arRes["altasib_geobase_kladr_region"], 0, '', ' '),
+				"#MM_CITY#" => number_format($arRes["altasib_geobase_mm_city"], 0, '', ' '),
+				"#MM_REGION#" => number_format($arRes["altasib_geobase_mm_region"], 0, '', ' '),
+				"#MM_COUNTRY#" => number_format($arRes["altasib_geobase_mm_country"], 0, '', ' '),
+				"#SELECTED#" => number_format($arRes["altasib_geobase_selected"], 0, '', ' '),
+			)
+		);
+	}
+}
+
+if ($incMod != '0' && $incMod != '3'){
+	$dip = CAltasibGeoBaseIP::getUserHostIP();
+
+	$sDetect = "";
+
+	if(!empty($dip)){
+		// local_db
+		$arIPGB = CAltasibGeoBase::GetGeoData($dip);
+		// online service
+		$arServIPGB = CAltasibGeoBaseIP::GetGeoDataIpgeobase_ru($dip);
+		// geoip.top
+		if(empty($_SESSION["ALTASIB_GEOBASE_GEOIP_TOP"])){
+			$arElib = CAltasibGeoBaseIP::GetGeoDataGeoip_Elib_ru($dip);
+			$_SESSION["ALTASIB_GEOBASE_GEOIP_TOP"] = $arElib;
+		}
+		else {
+			$arElib = $_SESSION["ALTASIB_GEOBASE_GEOIP_TOP"];
+		}
+
+		// maxmind
+		$arMaxMind = CAltasibGeoBase::GetMaxmindData($dip);
+		// maxmind GeoLite2
+		$arMaxMindGL2 = CAltasibGeoBase::GetMaxmindGeoLite2Data($dip);
+		// statistic
+		$arStat = CAltasibGeoBase::GetStatisticData();
+
+		$idBXLoc = CAltasibGeoBase::GetBXLocations();
+		$arBXLoc = array();
+		$sBXLoc = '-';
+		if(CModule::IncludeModule('sale')){
+			if(!empty($idBXLoc)){
+				$arBXLoc = CSaleLocation::GetByID($idBXLoc, LANGUAGE_ID);
+				$sBXLoc = implode(', ',array_diff(array($arBXLoc["CITY_NAME"], $arBXLoc["REGION_NAME"], $arBXLoc["COUNTRY_NAME"]), array(0,null)));
+			}
+		}
+
+		$sDetect = GetMessage("ALTASIB_GEOBASE_DATA_TBL", array(
+				"#HEAD_1#" => GetMessage("ALTASIB_GEOBASE_TBL_H1"),
+				"#HEAD_2#" => GetMessage("ALTASIB_GEOBASE_TBL_H2"),
+				"#HEAD_3#" => GetMessage("ALTASIB_GEOBASE_TBL_H3"),
+				"#HEAD_4#" => GetMessage("ALTASIB_GEOBASE_TBL_H4"),
+				"#HEAD_5#" => GetMessage("ALTASIB_GEOBASE_TBL_H5"),
+				"#HEAD_6#" => GetMessage("ALTASIB_GEOBASE_TBL_H6"),
+				"#HEAD_7#" => GetMessage("ALTASIB_GEOBASE_TBL_H7"),
+				"#BODY_1#" => GetMessage("ALTASIB_GEOBASE_DATA_IPGB", array(
+						"#IP#" => $dip,
+						"#C_CODE#" => $arIPGB["COUNTRY_CODE"],
+						"#CTR_NAME#" => '',
+						"#R_NAME#" => $arIPGB["REGION_NAME"],
+						"#CNT_NAME#" => $arIPGB["COUNTY_NAME"],
+						"#C_NAME#" => $arIPGB["CITY_NAME"],
+						"#C_ID#" => $arIPGB["CITY_ID"],
+						"#BR#" => $arIPGB["BREADTH_CITY"],
+						"#LONG#" => $arIPGB["LONGITUDE_CITY"],
+					)
+				),
+				"#BODY_2#" => (!empty($arServIPGB) ? GetMessage("ALTASIB_GEOBASE_DATA_SERV_IPGB", array(
+							"#C_CODE#" => $arServIPGB["COUNTRY_CODE"],
+							"#CTR_NAME#" => '',
+							"#R_NAME#" => $arServIPGB["REGION_NAME"],
+							"#CNT_NAME#" => $arServIPGB["COUNTY_NAME"],
+							"#C_NAME#" => $arServIPGB["CITY_NAME"],
+							"#BR#" => $arServIPGB["BREADTH_CITY"],
+							"#LONG#" => $arServIPGB["LONGITUDE_CITY"],
+						)
+					) : GetMessage("ALTASIB_GEOBASE_NOT_DATA")
+				),
+				"#BODY_3#" => (!empty($arElib) ? GetMessage("ALTASIB_GEOBASE_DATA_TOP", array(
+							"#IP#" => $arElib["IP_ADDR"],
+							"#CTR_NAME#" => $arElib["COUNTRY"],
+							"#R_NAME#" => $arElib["REGION_NAME"],
+							"#C_NAME#" => $arElib["CITY_NAME"],
+							"#BR#" => $arElib["BREADTH_CITY"],
+							"#LONG#" => $arElib["LONGITUDE_CITY"],
+							"#TZ#" => $arElib["TIME_ZONE"],
+						)
+					) : GetMessage("ALTASIB_GEOBASE_NOT_DATA")
+				),
+				"#BODY_4#" => (CModule::IncludeModule("statistic") ? GetMessage("ALTASIB_GEOBASE_DATA_STAT", array(
+							"#IP#" => $arStat["BLOCK_ADDR"],
+							"#CTR_CODE#" => $arStat["COUNTRY_CODE"],
+							"#CTR_NAME#" => $arStat["COUNTRY"],
+							"#R_NAME#" => $arStat["REGION_NAME"],
+							"#C_NAME#" => $arStat["CITY_NAME"],
+						)
+					) : GetMessage("ALTASIB_GEOBASE_NOT_SET")
+				),
+				"#BODY_5#" => (CModule::IncludeModule("sale") ? GetMessage("ALTASIB_GEOBASE_BX_LOC", array(
+							"#HREF_LOC#" => "/bitrix/admin/sale_location_node_edit.php?id=".$arBXLoc["ID"],
+							"#LOC_NAME#" => $sBXLoc,
+						)
+					) : GetMessage("ALTASIB_GEOBASE_NOT_SET")
+				),
+				"#BODY_6#" => (!empty($arMaxMind) ? GetMessage("ALTASIB_GEOBASE_DATA_MM", array(
+							"#CNT_CODE#" => $arMaxMind["CONTINENT_CODE"],
+							"#CTR_CODE#" => $arMaxMind["COUNTRY_CODE"] . " / " . $arMaxMind["COUNTRY_CODE3"],
+							"#CTR_NAME#" => $arMaxMind["COUNTRY_NAME"],
+							"#R_CODE#" => $arMaxMind["REGION_CODE"],
+							"#R_NAME#" => $arMaxMind["REGION_NAME"],
+							"#C_NAME#" => $arMaxMind["CITY_NAME"],
+							"#P_IND#" => $arMaxMind["POSTINDEX"],
+							"#BR#" => $arMaxMind["latitude"],
+							"#LONG#" => $arMaxMind["longitude"],
+						)
+					) : GetMessage("ALTASIB_GEOBASE_NOT_DATA")
+				),
+				"#BODY_7#" => (!empty($arMaxMindGL2) ? GetMessage("ALTASIB_GEOBASE_DATA_MM_GL2", array(
+							"#CNT_CODE#" => $arMaxMindGL2["CONTINENT_CODE"],
+							"#CNT_NAME#" => $arMaxMindGL2["CONTINENT_NAME"] . " / " . $arMaxMindGL2["CONTINENT_NAME_RU"],
+							"#CTR_CODE#" => $arMaxMindGL2["COUNTRY_CODE"],
+							"#CTR_NAME#" => $arMaxMindGL2["COUNTRY_NAME"] . " / " . $arMaxMindGL2["COUNTRY_NAME_RU"],
+							"#R_ID#" => $arMaxMindGL2["REGION_ID"],
+							"#R_CODE#" => $arMaxMindGL2["REGION_CODE"],
+							"#R_NAME#" => $arMaxMindGL2["REGION_NAME"] . " / " . $arMaxMindGL2["REGION_NAME_RU"],
+							"#C_ID#" => $arMaxMindGL2["CITY_ID"],
+							"#C_NAME#" => $arMaxMindGL2["CITY_NAME"] . " / " . $arMaxMindGL2["CITY_NAME_RU"],
+							"#P_IND#" => $arMaxMindGL2["POSTINDEX"],
+							"#BR#" => $arMaxMindGL2["latitude"],
+							"#LONG#" => $arMaxMindGL2["longitude"],
+							"#RAD#" => $arMaxMindGL2["acc_radius"],
+							"#TZ#" => $arMaxMindGL2["time_zone"],
+						)
+					) : GetMessage("ALTASIB_GEOBASE_NOT_DATA")
+				),
+			)
+		);
+	}
+}
+
 $arAllOptions = array(
 	"main" => Array(
 		Array("set_cookie", GetMessage("ALTASIB_GEOBASE_SET_COOKIE"), "Y", Array("checkbox")),
@@ -165,6 +316,10 @@ $arAllOptions = array(
 	),
 	"services" => Array(
 		Array("note" => GetMessage("ALTASIB_GEOBASE_GEOIP_REG")),
+	),
+	"data_statistic" => Array(
+		$sStatist ? Array("note" => $sStatist) : array(),
+		$sDetect ? Array("note" => $sDetect) : array(),
 	),
 	"loockup" => Array(
 		Array("loockup_user", GetMessage("ALTASIB_GEOBASE_LOOCKUP_USR"), "Y", Array("checkbox")),
@@ -189,6 +344,7 @@ $arAllOptions = array(
 		Array("popup_back", GetMessage("ALTASIB_GEOBASE_POPUP_BACK"), "Y", Array("checkbox")),
 		Array("region_disable", GetMessage("ALTASIB_GEOBASE_REGION_DISABLE"), "N", Array("checkbox")),
 		Array("only_select_cities", GetMessage("ALTASIB_GEOBASE_ONLY_SELECT_CITIES"), "N", Array("checkbox")),
+		Array("show_nearest_select_city", GetMessage("ALTASIB_GEOBASE_SHOW_NEAREST_SC"), "N", Array("checkbox")),
 		Array("cities_only_large", GetMessage("ALTASIB_GEOBASE_CITIES_ONLY_LARGE"), "N", Array("checkbox")),
 		Array("autodetect_enable", GetMessage("ALTASIB_GEOBASE_AUTODETECT_EN"), "Y", Array("checkbox")),
 		Array("cities_world_enable", GetMessage("ALTASIB_GEOBASE_CITIES_WORLD_ENABLE"), "Y", Array("checkbox")),
@@ -373,7 +529,6 @@ if ($REQUEST_METHOD == "POST" && strlen($Update . $Apply . $RestoreDefaults) > 0
 </div>';
 
 	$strDemoStatus = '';
-	$incMod = CModule::IncludeModuleEx($module_id);
 	if ($incMod == '0')
 	{
 		$strDemoStatus = CAdminMessage::ShowMessage(Array("MESSAGE"=>GetMessage("ALTASIB_GEOBASE_NF", Array("#MODULE#" => $module_id)), "HTML"=>true, "TYPE"=>"ERROR"));
@@ -488,11 +643,7 @@ if ($REQUEST_METHOD == "POST" && strlen($Update . $Apply . $RestoreDefaults) > 0
 	right:2px;
 	text-align:right
 }
-#progress{
-	height:15px;
-	background:#637f9c;
-}
-#progress_MM{
+#progress, #progress_MM, #progress_MM2{
 	height:15px;
 	background:#637f9c;
 }
@@ -573,6 +724,7 @@ td #altasib_geobase_btn{
 $(document).ready(function(){
 	$('#alxManualUpdate').html("<?=GetMessage("ALTASIB_CHECK_UPDATES")?>");
 	$('#alxManualUpdateMM').html("<?=GetMessage("ALTASIB_CHECK_MM_UPDATES")?>");
+	$('#alxManualUpdateMM2').html("<?=GetMessage("ALTASIB_CHECK_MM2_UPDATES")?>");
 
 	$.ajax({
 		type: "POST",
@@ -582,8 +734,10 @@ $(document).ready(function(){
 			if(data == ''){
 				$('#alxManualUpdate').hide();
 				$('#alxManualUpdateMM').hide();
+				$('#alxManualUpdateMM2').hide();
 				$('#alxUpdateUI').show();
 				$('#alxUpdateUI_MM').show();
+				$('#alxUpdateUI_MM2').show();
 				return;
 			}
 			objData = JSON.parse(data);
@@ -601,6 +755,14 @@ $(document).ready(function(){
 				document.getElementById('alxNoticesMM').innerHTML = "<?=GetMessage("ALTASIB_GEOBASE_URL_NOT_FOUND")?>";
 				$('#alxManualUpdateMM').hide();
 				$('#alxUpdateUI_MM').hide();
+			}
+
+			if(objData.MAXMIND2 == 1){
+				BX.ajax.post('/bitrix/admin/altasib_geobase_update.php',{'action':'UPDATE','database':'MaxMind2'},obHandler);
+			} else {
+				document.getElementById('alxNoticesMM2').innerHTML = "<?=GetMessage("ALTASIB_GEOBASE_URL_NOT_FOUND")?>";
+				$('#alxManualUpdateMM2').hide();
+				$('#alxUpdateUI_MM2').hide();
 			}
 		}
 	});
@@ -652,7 +814,7 @@ $('select[name=color_theme]').change(function(){
 
 var timer, obData, updateMode, updateMM;
 obHandler = function (data){
-	var progress, value, title, send, MM, notices, loader;
+	var progress, value, title, send, MM, MM2, notices, loader;
 	updateMode = <?=($update_mode ? 'true' : 'false')?>;
 	updateMM = <?=($updModeMM ? 'true' : 'false')?>;
 	obData = JSON.parse(data);
@@ -663,6 +825,13 @@ obHandler = function (data){
 		title = document.getElementById('title_MM');
 		notices = document.getElementById('alxNoticesMM');
 		loader = document.getElementById('alxLoaderUI_MM');
+	} else if(obData.DATABASE == "MaxMind2"){
+		MM2 = true;
+		progress = document.getElementById('progress_MM2');
+		value = document.getElementById('value_MM2');
+		title = document.getElementById('title_MM2');
+		notices = document.getElementById('alxNoticesMM2');
+		loader = document.getElementById('alxLoaderUI_MM2');
 	} else {
 		MM = false;
 		progress = document.getElementById('progress');
@@ -678,6 +847,8 @@ obHandler = function (data){
 		};
 		if(MM)
 			send.database = 'MaxMind';
+		else if(MM2)
+			send.database = 'MaxMind2';
 		progress.style.width = obData.PROGRESS + '%';
 		value.innerHTML = obData.PROGRESS + '%';
 		if(typeof obData.FILENAME != 'undefined')
@@ -694,6 +865,8 @@ obHandler = function (data){
 		};
 		if(MM)
 			send.database = 'MaxMind';
+		else if(MM2)
+			send.database = 'MaxMind2';
 		progress.style.width = obData.PROGRESS + '%';
 		value.innerHTML = obData.PROGRESS + '%';
 		if (obData.PROGRESS == 100){
@@ -720,6 +893,8 @@ obHandler = function (data){
 		};
 		if(MM)
 			send.database = 'MaxMind';
+		else if(MM2)
+			send.database = 'MaxMind2';
 		progress.style.width = obData.PROGRESS + '%';
 		value.innerHTML = obData.PROGRESS + '%';
 		if (obData.PROGRESS == 100){
@@ -736,8 +911,9 @@ obHandler = function (data){
 	}
 	else if (obData.STATUS == 0){
 		loader.style.display = 'none';
-		notices.innerHTML = (MM ? "<?=GetMessage("ALTASIB_NOTICE_MM_DBUPDATE_SUCCESSFUL")?>"
-			: "<?=GetMessage("ALTASIB_NOTICE_DBUPDATE_SUCCESSFUL")?>");
+		notices.innerHTML = (MM ? "<?=GetMessage("ALTASIB_NOTICE_MM_DBUPDATE_SUCCESSFUL", array("#DB#"=>"GeoLite"))?>"
+			: (MM2 ? "<?=GetMessage("ALTASIB_NOTICE_MM_DBUPDATE_SUCCESSFUL", array("#DB#"=>"GeoLite2"))?>"
+			: "<?=GetMessage("ALTASIB_NOTICE_DBUPDATE_SUCCESSFUL")?>"));
 
 		notices.style.display = 'block';
 	}
@@ -746,20 +922,26 @@ obHandler = function (data){
 			document.getElementById('alxUpdateUI_MM').style.display		= 'block';
 			document.getElementById('alxManualUpdateMM').style.display	= 'none';
 		}
-		if (!MM && !updateMode){
+		if(MM2 && !updateMM){
+			document.getElementById('alxUpdateUI_MM2').style.display		= 'block';
+			document.getElementById('alxManualUpdateMM2').style.display	= 'none';
+		}
+		if (!MM && !MM2 && !updateMode){
 			document.getElementById('alxUpdateUI').style.display	 = 'block';
 			document.getElementById('alxManualUpdate').style.display = 'none';
 		}
 	}
 	else if (obData.UPDATE == "N"){
-		notices.innerHTML = (MM ? "<?=GetMessage("ALTASIB_NOTICE_MM_UPDATE_NOT_AVAILABLE")?>"
-			: "<?=GetMessage("ALTASIB_NOTICE_UPDATE_NOT_AVAILABLE")?>");
-		if(!$('#dbupdater').is(':visible') && !$('#dbupdaterMM').is(':visible'))
+		notices.innerHTML = (MM ? "<?=GetMessage("ALTASIB_NOTICE_MM_UPDATE_NOT_AVAILABLE", array("#DBNAME#"=>"MaxMind Lite"))?>"
+			: MM2 ? "<?=GetMessage("ALTASIB_NOTICE_MM_UPDATE_NOT_AVAILABLE", array("#DBNAME#"=>"MaxMind GeoLite2"))?>"
+			: "<?=GetMessage("ALTASIB_NOTICE_UPDATE_NOT_AVAILABLE")?>").replace('#MTITLE#', 'File from ' + (obData.MTIME ? obData.MTIME : ''));
+		if(!$('#dbupdater').is(':visible') && !$('#dbupdaterMM').is(':visible') && !$('#dbupdaterMM2').is(':visible'))
 			document.getElementsByName('set_timeout')[0].disabled = true;
 		else
 			document.getElementsByName('set_timeout')[0].disabled = false;
 	}
 };
+
 function updateDB(dst){
 	document.getElementsByName('set_timeout')[0].disabled = true;
 	if(dst == 'Maxmind'){
@@ -767,6 +949,12 @@ function updateDB(dst){
 		document.getElementById('alxLoaderUI_MM').style.display = 'block';
 		BX.ajax.post('/bitrix/admin/altasib_geobase_update.php',
 			{'action':'LOAD', 'database':'MaxMind',
+				"timeout":document.getElementsByName('set_timeout')[0].value}, obHandler);
+	} else if(dst == 'Maxmind2'){
+		document.getElementById('alxNoticesMM2').style.display = 'none';
+		document.getElementById('alxLoaderUI_MM2').style.display = 'block';
+		BX.ajax.post('/bitrix/admin/altasib_geobase_update.php',
+			{'action':'LOAD', 'database':'MaxMind2',
 				"timeout":document.getElementsByName('set_timeout')[0].value}, obHandler);
 	} else{
 		document.getElementById('alxNotices').style.display = 'none';
@@ -837,6 +1025,35 @@ function updateDB(dst){
 						<span id="value_MM">0%</span>
 					</span>
 				</div>
+
+				<div id="alxNoticesMM2" class="adm-info-message" style="display: block">
+					<?if ($updModeMM): ?>
+						<?=GetMessage("ALTASIB_NOTICE_MM_UPDATE_AVAILABLE")?>
+						<br><br>
+						<input id="dbupdaterMM2" type="button" value="<?=GetMessage("ALTASIB_GEOBASE_UPDATE");?>" onclick="updateDB('Maxmind2')">
+						<script>BX.ajax.post('/bitrix/admin/altasib_geobase_update.php', {'action':'UPDATE', 'database':'MaxMind2'}, obHandler);</script>
+					<?else:?>
+						<div style="display: none;" id="alxUpdateUI_MM2">
+							<?=GetMessage("ALTASIB_NOTICE_MM_UPDATE_AVAILABLE")?>
+							<br><br>
+							<input id="dbupdaterMM2" type="button" value="<?=GetMessage("ALTASIB_GEOBASE_UPDATE");?>" onclick="updateDB('Maxmind2')">
+						</div>
+						<div id="alxManualUpdateMM2">
+							<?=GetMessage("ALTASIB_NOTICE_MM2_UPDATE_MANUAL_MODE")?>
+							<br><br>
+							<input type="button" onclick="BX.ajax.post('/bitrix/admin/altasib_geobase_update.php', {'action':'UPDATE', 'database':'MaxMind2'}, obHandler); return false;" value="<?=GetMessage("ALTASIB_GEOBASE_CHECK_UPDATE");?>">
+						</div>
+					<?endif;?>
+				</div>
+				<div class="alx-gbase-main-box" id="alxLoaderUI_MM2">
+					<h3 id="title_MM2"><?=GetMessage("ALTASIB_TITLE_LOAD_FILE")?></h3>
+					<span class="alx-gbase-progress-bar">
+						<span>
+							<span id="progress_MM2"></span>
+						</span>
+						<span id="value_MM2">0%</span>
+					</span>
+				</div>
 			</div>
 		</td>
 	</tr>
@@ -854,17 +1071,21 @@ function updateDB(dst){
 	<?ShowParamsHTMLByArray($arAllOptions["loockup"]);?>
 <?	endif;?>
 
+	<tr class="heading">
+		<td colspan="2"><?=GetMessage("ALTASIB_GEOBASE_DATA_STATISTIC")?></td>
+	</tr>
+
+	<?ShowParamsHTMLByArray($arAllOptions["data_statistic"]);?>
+
+
 	<tr class="heading" id="arrServer">
 		<td colspan="2"><?=GetMessage("ALTASIB_GEOBASE_SRV_CHK")?></td>
 	</tr>
 	<tr>
 		<td colspan="2" align="center">
 <?
+if ($incMod != '0' && $incMod != '3'){
 	echo BeginNote();
-	if ($incMod == '1')
-	{
-		$dip = CAltasibGeoBaseIP::getUserHostIP();
-	}
 
 	echo GetMessage("ALTASIB_GEOBASE_SRV_NOTE");
 
@@ -917,6 +1138,7 @@ function updateDB(dst){
 		</table>
 <?
 	echo EndNote();
+}
 ?>
 		</td>
 	</tr>
@@ -1151,7 +1373,7 @@ function altasib_geobase_selKey(e){ // called when a key is pressed in Select
 	}
 	if(e.keyCode == 38 && t.selectedIndex == 0){ // up arrow
 		$('.altasib_geobase_find input[name=altasib_geobase_search]').focus();
-		$("#altasib_geobase_info").animate({ height: 'hide' }, "fast");
+		$("#altasib_geobase_info").animate({height: 'hide'}, "fast");
 	}
 }
 
@@ -1236,7 +1458,7 @@ function altasib_geobase_uf(id){
 			'ID': id,
 			'sessid': BX.message('bitrix_sessid')
 		},
-		'height': '420',
+		'height': '445',
 		'width': '700',
 		'min_height': '270',
 		'min_width': '500',

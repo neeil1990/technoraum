@@ -21,6 +21,7 @@ class Manager
 	const EXPORT_FORMAT_MEDICINE = 'medicine';
 	const EXPORT_FORMAT_TOUR = 'tour';
 	const EXPORT_FORMAT_ALCO = 'alco';
+	const EXPORT_FORMAT_PRICE = 'price';
 
 	protected static $customServiceList;
 
@@ -75,7 +76,8 @@ class Manager
 
 			case static::EXPORT_SERVICE_BERU_RU:
 				$result = [
-					static::EXPORT_FORMAT_VENDOR_MODEL
+					static::EXPORT_FORMAT_VENDOR_MODEL,
+					static::EXPORT_FORMAT_PRICE,
 				];
 			break;
 

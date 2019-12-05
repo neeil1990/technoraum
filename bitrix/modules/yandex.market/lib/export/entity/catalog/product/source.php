@@ -362,7 +362,7 @@ class Source extends Market\Export\Entity\Reference\Source
 			{
 				foreach ($splitFields[$field] as $partField)
 				{
-					if ($entity->hasField($field))
+					if ($entity->hasField($partField))
 					{
 						$querySelect[] = $partField;
 					}

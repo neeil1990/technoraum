@@ -106,6 +106,8 @@ class Promo extends Base
             if (!empty($sourceValueList) && ($isTimeExpired || count($sourceValueList) >= $flushLimit))
             {
                 $tagValuesList = $this->buildTagValuesList($tagDescriptionList, $sourceValueList, $context);
+
+                $this->extendData($tagValuesList, $elementList, $context);
                 $this->writeData($tagValuesList, $elementList, $context);
 
                 $sourceValueList = [];
@@ -122,6 +124,8 @@ class Promo extends Base
         if (!empty($sourceValueList))
         {
             $tagValuesList = $this->buildTagValuesList($tagDescriptionList, $sourceValueList, $context);
+
+			$this->extendData($tagValuesList, $elementList, $context);
             $this->writeData($tagValuesList, $elementList, $context);
         }
 

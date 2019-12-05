@@ -152,6 +152,13 @@ altasib_geobase.bitrix_sessid='<?=bitrix_sessid();?>';
 								$iLi++;
 							?></a><?
 						?></li><?
+						} else if(!empty($arUsrCh["C_CODE"])) {
+						?><li class="altasib_geobase_act"><?
+							?><a href="#" title="<?=$usrChoiceTitle;?>" id="altasib_geobase_list_<?=$arUsrCh["C_CODE"]?>" onclick="altasib_geobase.sc_onclk('<?=$arUsrCh["C_CODE"]?>');"><?
+								echo $usrSelCity;
+								$iLi++;
+							?></a><?
+						?></li><?
 						}
 
 

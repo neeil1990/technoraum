@@ -50,6 +50,11 @@ class CurrencyType extends AbstractType
 		return $this->convertValue($value);
 	}
 
+	public function revert($value)
+	{
+		return $this->revertValue($value);
+	}
+
 	public function getAvailableList()
 	{
 		return static::$availableValues;
@@ -79,6 +84,19 @@ class CurrencyType extends AbstractType
 		if (isset(static::$convertMap[$result]))
 		{
 			$result = static::$convertMap[$result];
+		}
+
+		return $result;
+	}
+
+	protected function revertValue($value)
+	{
+		$result = strtoupper($value);
+		$mapKey = array_search($result, static::$convertMap, true);
+
+		if ($mapKey !== false)
+		{
+			$result = $mapKey;
 		}
 
 		return $result;

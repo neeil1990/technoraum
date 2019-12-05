@@ -7,6 +7,7 @@
 	var Condition = BX.namespace('YandexMarket.Field.Condition');
 	var Source = BX.namespace('YandexMarket.Source');
 	var Ui = BX.namespace('YandexMarket.Ui');
+	var utils = BX.namespace('YandexMarket.Utils');
 
 	var constructor = Condition.Item = Reference.Base.extend({
 
@@ -247,7 +248,7 @@
 				for (i = 0; i < enumList.length; i++) {
 					enumItem = enumList[i];
 
-					content += '<option value="' + enumItem['ID'] + '">' + enumItem['VALUE'] + '</option>';
+					content += '<option value="' + enumItem['ID'] + '">' + utils.escape(enumItem['VALUE']) + '</option>';
 				}
 			} else if (isAutocomplete) {
 				needTagName = 'autocomplete';

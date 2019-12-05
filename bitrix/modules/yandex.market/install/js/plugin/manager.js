@@ -7,7 +7,8 @@
 
 		defaults: {
 			pluginElement: '.js-plugin',
-			clickPluginElement: '.js-plugin-click'
+			clickPluginElement: '.js-plugin-click',
+			delayedPluginElement: '.js-plugin-delayed'
 		},
 
 		initialize: function() {
@@ -41,7 +42,7 @@
 		},
 
 		onDocumentReady: function() {
-			this.initializeContext(document);
+			this.initializeContext(document, false);
 			this.handleDocumentReady(false);
 			this.handleAjaxSuccessFinish(false);
 		},
@@ -62,16 +63,16 @@
 			}
 		},
 
-		initializeContext: function(context) {
-			this.callElementList('initializeElement', context);
+		initializeContext: function(context, includeDelayed) {
+			this.callElementList('initializeElement', context, includeDelayed);
 		},
 
-		destroyContext: function(context) {
-			this.callElementList('destroyElement', context);
+		destroyContext: function(context, includeDelayed) {
+			this.callElementList('destroyElement', context, includeDelayed);
 		},
 
-		callElementList: function(method, context) {
-			var elementList = this.getContextPluginElementList(context);
+		callElementList: function(method, context, includeDelayed) {
+			var elementList = this.getContextPluginElementList(context, includeDelayed);
 			var element;
 			var i;
 
@@ -134,11 +135,23 @@
 			return pluginNamespace[pluginName];
 		},
 
-		getContextPluginElementList: function(contextNode) {
+		getContextPluginElementList: function(contextNode, includeDelayed) {
 			var context = contextNode instanceof $ ? contextNode : $(contextNode);
 			var pluginSelector = this.getElementSelector('plugin');
+			var delayedSelector;
+			var delayedElements;
+			var result = context.filter(pluginSelector).add(context.find(pluginSelector));
 
-			return context.filter(pluginSelector).add(context.find(pluginSelector));
+			if (includeDelayed == null || includeDelayed) {
+				delayedSelector = this.getElementSelector('delayedPlugin');
+				delayedElements = context.filter(delayedSelector).add(context.find(delayedSelector));
+
+				if (delayedElements.length > 0) {
+					result = result.add(delayedElements);
+				}
+			}
+
+			return result;
 		},
 
 	});

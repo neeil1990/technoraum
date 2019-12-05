@@ -210,7 +210,7 @@
 
 			if (displayValue['NAME'].length > 0) {
 				result += ' ' + this.getLang('NAME', {
-					'NAME': displayValue['NAME']
+					'NAME': Utils.escape(displayValue['NAME'])
 				});
 			}
 

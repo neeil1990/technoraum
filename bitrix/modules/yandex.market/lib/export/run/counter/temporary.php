@@ -257,9 +257,19 @@ class Temporary extends Base
 			$connection = $this->getConnection();
 			$sqlHelper = $connection->getSqlHelper();
 			$tableName = $this->getOfferTableName();
+
+			if ($context['USE_DISTINCT'])
+			{
+				$countField = 'DISTINCT ' . $sqlHelper->quote('PARENT_ID');
+			}
+			else
+			{
+				$countField = $sqlHelper->quote('ID');
+			}
+
 			$sql =
-				'SELECT COUNT(' . $sqlHelper->quote('ID') . ') as CNT '
-				. 'FROM ' . $sqlHelper->quote($tableName);
+				'SELECT COUNT(' . $countField . ') as CNT'
+				. ' FROM ' . $sqlHelper->quote($tableName);
 
 			$queryResult = $connection->query($sql);
 			$row = $queryResult->fetch();

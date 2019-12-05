@@ -111,6 +111,22 @@ if(\Bitrix\Main\Loader::includeModule('sale'))
 
 		if(empty($arResult))
 		{
+			// find VILLAGE
+			$res = Bitrix\Sale\Location\LocationTable::getList(array(
+				'filter' => array('%NAME.NAME' => $search, '=NAME.LANGUAGE_ID' => LANGUAGE_ID),
+				'select' => array('ID' => 'ID', 'CODE' => 'CODE', 'NAME_RU' => 'NAME.NAME', 'TYPE_CODE' => 'TYPE.CODE')
+			));
+			if($item = $res->fetch()){
+				$arResult[] = array(
+					"ID" => $item["ID"],
+					"NAME" => $item["NAME_RU"],
+					"CODE" => $item["CODE"],
+				);
+			}
+		}
+
+		if(empty($arResult))
+		{
 			$arLocs = CAltasibGeoBase::SearchLocation($search, false, false, LANGUAGE_ID);
 			if(!empty($arLocs) && is_array($arLocs) && count($arLocs) == 1)
 				$arLocs = $arLocs[0];

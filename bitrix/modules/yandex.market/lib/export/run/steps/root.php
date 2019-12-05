@@ -40,6 +40,7 @@ class Root extends Base
 			];
 			$elementList = [ [] ]; // one empty array
 
+			$this->extendData($tagValuesList, $elementList, $context);
 			$this->writeData($tagValuesList, $elementList, $context);
 		}
 		else if ($action === 'refresh')

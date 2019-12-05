@@ -4,7 +4,7 @@
  * Developer: adumnov
  * Site: http://www.altasib.ru
  * E-mail: dev@altasib.ru
- * @copyright (c) 2006-2017 ALTASIB
+ * @copyright (c) 2006-2019 ALTASIB
  */
 
 $CookiePX = COption::GetOptionString("main", "cookie_name", "BITRIX_SM");
@@ -175,7 +175,7 @@ $MESS['ALTASIB_TITLE_LOAD_FILE']			= "Загрузка архива:";
 $MESS['ALTASIB_TITLE_UNPACK_FILE']			= "Распаковка архива:";
 $MESS['ALTASIB_TITLE_DB_UPDATE']			= "Обновление базы данных (<a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a>):";
 $MESS['ALTASIB_NOTICE_UPDATE_AVAILABLE']	= "Доступен обновленный архив данных с сайта <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a>.";
-$MESS['ALTASIB_NOTICE_UPDATE_NOT_AVAILABLE'] = "Доступных обновлений на сайте <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a> нет.";
+$MESS['ALTASIB_NOTICE_UPDATE_NOT_AVAILABLE'] = "Доступных обновлений на сайте <a href='http://ipgeobase.ru/' target='_blank' title='#MTITLE#'>ipgeobase.ru</a> нет.";
 $MESS['ALTASIB_NOTICE_DBUPDATE_SUCCESSFUL']	= "Обновление базы данных с сайта <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a> успешно завершено.";
 $MESS['ALTASIB_GEOBASE_GET_UPDATE']			= "Проверять наличие обновлений архивов БД местоположений на сайте <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a> автоматически:";
 $MESS["ALTASIB_NOTICE_UPDATE_MANUAL_MODE"]	= "Для проверки обновлений с сайта <a href='http://ipgeobase.ru/' target='_blank'>ipgeobase.ru</a> нажмите кнопку \"Проверить обновления\"";
@@ -185,7 +185,8 @@ $MESS["ALTASIB_GEOBASE_SOURCE"]				= "Источник определения местоположения:";
 $MESS["ALTASIB_GEOBASE_NOT_USING"]			= "Не использовать локальные БД";
 $MESS["ALTASIB_GEOBASE_LOCAL_DB"]			= "Локальная база ipgeobase.ru";
 $MESS["ALTASIB_GEOBASE_STATISTIC"]			= "Веб-аналитика 1С-Битрикс";
-$MESS["ALTASIB_GEOBASE_SOURCE_MM"]			= "Локальная база maxmind.com";
+$MESS["ALTASIB_GEOBASE_SOURCE_MM"]			= "Локальная база MaxMind Lite";
+$MESS["ALTASIB_GEOBASE_SOURCE_MM_GL2"]		= "Локальная база MaxMind GeoLite2";
 $MESS["ALTASIB_GEOBASE_IPGEOBASE_MM"]		= "Локальные базы ipgeobase.ru и maxmind.com";
 
 $MESS["ALTASIB_GEOBASE_UPDATE"]				= "Обновить";
@@ -193,6 +194,7 @@ $MESS["ALTASIB_GEOBASE_CHECK_UPDATE"]		= "Проверить обновления";
 
 $MESS["ALTASIB_GEOBASE_WIN_YOUR_CITY_ENABLE"]	= "Включить <b>автоматический показ</b> всплывающего окна \"Ваш город\":";
 $MESS["ALTASIB_GEOBASE_ONLY_SELECT_CITIES"]		= 'Использовать только города из <a title="Избранные города" onclick="tabControl.SelectTab(\'edit3\'); return false;">списка избранных городов</a>, без поля поиска:';
+$MESS["ALTASIB_GEOBASE_SHOW_NEAREST_SC"]		= 'Показывать вместо автоматически определенного города ближайший город из <a title="Избранные города" onclick="tabControl.SelectTab(\'edit3\'); return false;">списка избранных городов</a>:';
 
 
 $MESS['ALTASIB_TITLE_CITIES_LIST']	= "Список избранных городов (регионов)";
@@ -239,14 +241,16 @@ $MESS['ALTASIB_GEOBASE_JQUERY_2'] = "Подключать jQuery v.2";
 $MESS['ALTASIB_GEOBASE_FIELD_LOC_IND'] = "Идентификатор элемента поля ввода местоположения физического лица на странице оформления заказа:";
 $MESS['ALTASIB_GEOBASE_FIELD_LOC_LEG'] = "Идентификатор элемента поля ввода местоположения юридического лица на странице оформления заказа:";
 
-$MESS['ALTASIB_NOTICE_MM_UPDATE_AVAILABLE'] = "Доступен обновленный архив данных GeoLite с сайта <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a>.";
-$MESS['ALTASIB_NOTICE_MM_UPDATE_NOT_AVAILABLE'] = "Доступных обновлений на сайте <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> не найдено.";
-$MESS['ALTASIB_NOTICE_MM_DBUPDATE_SUCCESSFUL'] = "Обновление файла базы данных GeoLite с сайта <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> успешно завершено.";
-$MESS['ALTASIB_GEOBASE_MM_GET_UPDATE'] = "Проверять наличие обновлений GeoLite базы на сайте <a href='http://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> автоматически:";
-$MESS["ALTASIB_NOTICE_MM_UPDATE_MANUAL_MODE"] = "Для проверки обновлений с сайта <a href='http://dev.maxmind.com/' target='_blank'>maxmind.com</a> нажмите кнопку \"Проверить обновления\"";
+$MESS['ALTASIB_NOTICE_MM_UPDATE_AVAILABLE'] = "Доступен обновленный архив данных GeoLite2 с сайта <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a>.";
+$MESS['ALTASIB_NOTICE_MM_UPDATE_NOT_AVAILABLE'] = "Доступных обновлений #DBNAME# на сайте <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank' title='#MTITLE#'>maxmind.com</a> не найдено.";
+$MESS['ALTASIB_NOTICE_MM_DBUPDATE_SUCCESSFUL'] = "Обновление файла базы данных #DB# с сайта <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> успешно завершено.";
+$MESS['ALTASIB_GEOBASE_MM_GET_UPDATE'] = "Проверять наличие обновлений GeoLite базы на сайте <a href='https://dev.maxmind.com/geoip/legacy/geolite/' target='_blank'>maxmind.com</a> автоматически:";
+$MESS["ALTASIB_NOTICE_MM_UPDATE_MANUAL_MODE"] = "Для проверки обновлений с сайта <a href='https://dev.maxmind.com/' target='_blank'>maxmind.com</a> нажмите кнопку \"Проверить обновления\"";
+$MESS["ALTASIB_NOTICE_MM2_UPDATE_MANUAL_MODE"] = "Для проверки обновлений с сайта <a href='https://dev.maxmind.com/geoip/geoip2/geolite2/' target='_blank'>maxmind.com</a> нажмите кнопку \"Проверить обновления\"";
 
-$MESS['ALTASIB_TITLE_MM_DB_UPDATE'] = "Обновление базы данных (<a href='http://dev.maxmind.com/' target='_blank'>maxmind.com</a>):";
-$MESS["ALTASIB_CHECK_MM_UPDATES"] = "Проверка наличия обновлений на сайте <a href='http://dev.maxmind.com/' target='_blank'>maxmind.com</a>...";
+$MESS['ALTASIB_TITLE_MM_DB_UPDATE'] = "Обновление базы данных (<a href='https://dev.maxmind.com/' target='_blank'>maxmind.com</a>):";
+$MESS["ALTASIB_CHECK_MM_UPDATES"] = "Проверка наличия обновлений на сайте <a href='https://dev.maxmind.com/' target='_blank'>maxmind.com</a>...";
+$MESS["ALTASIB_CHECK_MM2_UPDATES"] = "Проверка наличия обновлений GeoLite2 на сайте <a href='https://dev.maxmind.com/geoip/geoip2/geolite2/' target='_blank'>maxmind.com</a>...";
 
 $MESS['ALTASIB_GEOBASE_DEMO_MODE'] = "Модуль работает в демонстрационном режиме. <a target='_blank' href='http://marketplace.1c-bitrix.ru/tobasket.php?ID=#MODULE#'>Купить версию без ограничений</a>";
 $MESS['ALTASIB_GEOBASE_DEMO_EXPIRED'] = "Демонстрационный период работы модуля закончился. <a target='_blank' href='http://marketplace.1c-bitrix.ru/tobasket.php?ID=#MODULE#'>Купить модуль</a>";
@@ -290,12 +294,13 @@ $MESS['ALTASIB_GEOBASE_RDR_MONTH']	= "1 месяц";
 $MESS['ALTASIB_GEOBASE_RDR_YEAR']	= "1 год";
 
 $MESS['ALTASIB_GEOBASE_NOT_SET'] = "<не установлено>";
+$MESS['ALTASIB_GEOBASE_NOT_DATA'] = "<нет данных>";
 $MESS['ALTASIB_GEOBASE_SPREAD_COOKIE'] = "Распространять куку выбранного города на все домены";
 $MESS['ALTASIB_GEOBASE_LOOCKUP'] = "Определение города и страны в модуле статистики";
 $MESS['ALTASIB_GEOBASE_LOOCKUP_USR'] = "Использовать установленные пользователем данные в источнике определения модуля <a href=\"\" target=\"_blank\">Статистики</a>";
 $MESS['ALTASIB_GEOBASE_SRV'] = 'Распечатка ключей глобального массива $_SERVER';
 $MESS['ALTASIB_GEOBASE_SRV_NOTE'] = "Проверка на передачу сервером данных об IP-адресе посетителя.<br/>";
-$MESS['ALTASIB_GEOBASE_SRV_DETECT'] = "Определен <u>#IP#</u> адрес.";
+$MESS['ALTASIB_GEOBASE_SRV_DETECT'] = "Определен <u>#IP#</u> IP-адрес.";
 $MESS['ALTASIB_GEOBASE_SRV_ND'] = "Глобальный IP адрес клиента <u>не определен</u>. Необходимо обратиться к хостеру.";
 $MESS['ALTASIB_GEOBASE_KEY'] = "Ключ";
 $MESS['ALTASIB_GEOBASE_VAL'] = "Значение";
@@ -334,3 +339,28 @@ $MESS['AGB_COLOR_OTHER'] = "Другой цвет, в формате #XXXXXX";
 $MESS['ALTASIB_GEOBASE_COLOR_SHM'] = "Настройки цвета";
 
 $MESS['ALTASIB_GEOBASE_COLOR_NOTE'] = "Для задания цвета вручную выберите <a href='#' onclick='#ON_CLICK#'>пустую</a> цветовую схему.";
+$MESS['ALTASIB_GEOBASE_DATA_STATISTIC'] = "Статистика баз данных";
+$MESS['ALTASIB_GEOBASE_STR_STATISTIC'] = "<table cellspacing = '15'>
+<tr><td><b>IPGeoBase</b></td><td><b>КЛАДР</b></td><td><b>MaxMind</b></td><td><b>Избранные</b></td></tr>
+<tr><td>Город: #IPGB_CITY#</td><td>Город: #KLADR_CITY#<br>Район: #KLADR_DISTR#<br>Регион: #KLADR_REGION#</td><td>Город: #MM_CITY#<br>Регион: #MM_REGION#<br>Страна: #MM_COUNTRY#</td><td>Город или регион: #SELECTED#<br></td></tr>
+</table>";
+
+$MESS['ALTASIB_GEOBASE_DATA_IPGB'] = "<i>IP адрес:</i> #IP#<br>Код страны: #C_CODE#<br>Регион: #R_NAME#<br>Округ: #CNT_NAME#<br>Город: #C_NAME#<br>ID города: #C_ID#<br>Ширина: #BR#<br>Долгота: #LONG#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_SERV_IPGB'] = "Код страны: #C_CODE#<br>Регион: #R_NAME#<br>Округ: #CNT_NAME#<br>Город: #C_NAME#<br>Ширина: #BR#<br>Долгота: #LONG#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_TOP'] = "IP адрес: #IP#<br>Страна: #CTR_NAME#<br>Регион: #R_NAME#<br>Город: #C_NAME#<br>Ширина: #BR#<br>Долгота: #LONG#<br>Временная зона: #TZ#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_STAT'] = "IP адрес: #IP#<br>Код страны: #CTR_CODE#<br>Страна: #CTR_NAME#<br>Регион: #R_NAME#<br>Город: #C_NAME#<br>";
+$MESS['ALTASIB_GEOBASE_BX_LOC'] = "<a href='#HREF_LOC#'>#LOC_NAME#</a>";
+$MESS['ALTASIB_GEOBASE_DATA_MM'] = "Код континента: #CNT_CODE#<br>Код страны: #CTR_CODE#<br>Страна: #CTR_NAME#<br>Код региона: #R_CODE#<br>Регион: #R_NAME#<br>Город: #C_NAME#<br>Почтовый индекс: #P_IND#<br>Ширина: #BR#<br>Долгота: #LONG#<br>";
+$MESS['ALTASIB_GEOBASE_DATA_MM_GL2'] = "Код континента: #CNT_CODE#<br>Континент: #CNT_NAME#<br>Код страны: #CTR_CODE#<br>Страна: #CTR_NAME#<br>ID региона: #R_ID#<br>Код региона: #R_CODE#<br>Регион: #R_NAME#<br>ID города: #C_ID#<br>Город: #C_NAME#<br>Почтовый индекс: #P_IND#<br>Ширина: #BR#<br>Долгота: #LONG#<br>Радиус точности: #RAD#<br>Временная зона: #TZ#<br>";
+
+$MESS['ALTASIB_GEOBASE_TBL_H1'] = "Локальная база<br>ipgeobase.ru";
+$MESS['ALTASIB_GEOBASE_TBL_H2'] = "Онлайн-сервис<br>ipgeobase.ru";
+$MESS['ALTASIB_GEOBASE_TBL_H3'] = "Онлайн-сервис<br>geoip.top";
+$MESS['ALTASIB_GEOBASE_TBL_H4'] = "Модуль статистики";
+$MESS['ALTASIB_GEOBASE_TBL_H5'] = "Местоположение Битрикс";
+$MESS['ALTASIB_GEOBASE_TBL_H6'] = "MaxMind Lite";
+$MESS['ALTASIB_GEOBASE_TBL_H7'] = "MaxMind GeoLite2";
+$MESS['ALTASIB_GEOBASE_DATA_TBL'] = "<table cellspacing = '15'>
+<tr><td><b>#HEAD_1#</b></td><td><b>#HEAD_2#</b></td><td><b>#HEAD_3#</b></td><td><b>#HEAD_4#</b></td><td><b>#HEAD_5#</b></td><td><b>#HEAD_6#</b></td><td><b>#HEAD_7#</b></td></tr>
+<tr><td>#BODY_1#</td><td>#BODY_2#</td><td>#BODY_3#</td><td>#BODY_4#</td><td>#BODY_5#</td><td>#BODY_6#</td><td>#BODY_7#</td></tr>
+</table>";

@@ -503,11 +503,13 @@ altasib_geobase.sc_load=function(){
 					list.animate({height:'hide'},'fast');
 				else{
 					var arOut='',oLength=0;
-					for(var prop='REGION' in data){
+					/*for(var prop='REGION' in data){
 						if(data.hasOwnProperty(prop))oLength++;
-					}
+					}*/
+					oLength = data.length;
 
 					for(var i=0;i<oLength;i++){
+						var codeReg='';
 						var sOpt=(typeof(data[i]['CITY'])=='undefined'||data[i]['CITY']==' '||data[i]['CITY']==null?'':data[i]['CITY']);
 						sOpt+=(typeof(data[i]['REGION'])=='undefined'||data[i]['REGION']==' '||data[i]['REGION']==null?'':(sOpt.length>0?', ':'')+data[i]['REGION']);
 						sOpt+=(typeof(data[i]['DISTRICT'])=='undefined'||data[i]['DISTRICT']==''||data[i]['DISTRICT']==' '||data[i]['DISTRICT']==null?'':(sOpt.length>0?', ':'')+data[i]['DISTRICT']);
@@ -517,11 +519,12 @@ altasib_geobase.sc_load=function(){
 						var sOptVal=data[i]['CITY'];
 						if(typeof sOptVal=='undefined'||altasib_geobase.sc_trim(sOptVal)==''||sOptVal=='null'){
 							sOptVal=data[i]['REGION'];
-							var codeReg=typeof(data[i]['C_CODE'])=='undefined'?data[i]['ID']:data[i]['C_CODE'];
+							codeReg=typeof(data[i]['C_CODE'])=='undefined'?data[i]['ID']:data[i]['C_CODE'];
 						}
-						arOut+= '<div id="altasib_geobase_inp_'+code+'"'+'value="'+sOptVal+'" onclick="altasib_geobase.sc_click(\''+(typeof codeReg=='undefined'?code:'')+'\',\''
+						var bNotRegn=(typeof codeReg=='undefined'||codeReg==''||codeReg==null);
+						arOut+= '<div id="altasib_geobase_inp_'+code+'"'+'value="'+sOptVal+'" onclick="altasib_geobase.sc_click(\''+(bNotRegn?code:'')+'\',\''
 						+(typeof countryID=='undefined'?'': countryID)+'\',\''
-						+(typeof codeReg=='undefined'?'':codeReg)+'\');">'+sOpt+'</div>\n';
+						+(bNotRegn?'':codeReg)+'\');">'+sOpt+'</div>\n';
 					}
 					list.html(arOut);
 					if(typeof $.fn.altasib_geobase_light!='undefined')

@@ -252,15 +252,15 @@ $hasActiveAddTag = false;
 								<td class="b-param-table__cell" align="right" width="40%">&nbsp;</td>
 								<td class="b-param-table__cell" colspan="3">
 									<span class="js-params--show-hidden-tags">
-										<a href="javascript:void(0)"><?= Loc::getMessage('YANDEX_MARKET_T_ADMIN_FIELD_PARAM_ADD_ATTRIBUTE', [
+										<span class="b-link" tabindex="0"><?= Loc::getMessage('YANDEX_MARKET_T_ADMIN_FIELD_PARAM_ADD_ATTRIBUTE', [
 											'#TAG_NAME#' => $tagName
-										]); ?></a>
+										]); ?></span>
 										<span class="js-params--hidden-tags">
 											<?
 											foreach ($addAttributeList as $attributeId => $isActive)
 											{
 												?>
-												<a class="<?= $isActive ? '' : 'is--hidden'; ?> js-param-node-collection__item-add" href="#" data-type="<?= $tagId . '.' . $attributeId; ?>"><?= $attributeId; ?></a>
+												<span class="<?= $isActive ? '' : 'is--hidden'; ?> js-param-node-collection__item-add" tabindex="0" data-type="<?= $tagId . '.' . $attributeId; ?>"><?= $attributeId; ?></span>
 												<?
 											}
 											?>
@@ -307,13 +307,13 @@ $hasActiveAddTag = false;
 				<td class="b-param-table__cell" width="40%">&nbsp;</td>
 				<td class="b-param-table__cell">
 					<span class="js-params--show-hidden-tags">
-						<a class="adm-btn" href="javascript:void(0)"><?= $langStatic['ADD_TAG']; ?></a>
+						<span class="adm-btn" tabindex="0"><?= $langStatic['ADD_TAG']; ?></span>
 						<span class="js-params--hidden-tags">
 							<?
 							foreach ($addTagList as $tagId => $isActive)
 							{
 								?>
-								<a class="<?= $isActive ? '' : 'is--hidden'; ?> js-param-tag-collection__item-add" href="#" data-type="<?= $tagId; ?>"><?= htmlspecialcharsbx('<' . $tagId . '>'); ?></a>
+								<span class="<?= $isActive ? '' : 'is--hidden'; ?> js-param-tag-collection__item-add" tabindex="0" data-type="<?= $tagId; ?>"><?= htmlspecialcharsbx('<' . $tagId . '>'); ?></span>
 								<?
 							}
 							?>

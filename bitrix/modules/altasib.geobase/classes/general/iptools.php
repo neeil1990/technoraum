@@ -48,4 +48,40 @@ Class CAltasibGeoBaseIPTools extends CAltasibGeoBaseIP
 		}
 		return $arData;
 	}
+
+	function GetRowsCount($sTable = "")
+	{
+		global $DB;
+		$arRes = array();
+		$arTables = array(
+			"altasib_geobase_cities",
+			"altasib_geobase_kladr_cities",
+			"altasib_geobase_kladr_districts",
+			"altasib_geobase_kladr_region",
+			"altasib_geobase_mm_city",
+			"altasib_geobase_mm_country",
+			"altasib_geobase_mm_region",
+			"altasib_geobase_selected",
+		);
+		if(!empty($sTable) && in_array($sTable, $arTables) && $DB->TableExists($sTable)){
+			$sRequest = 'SELECT COUNT(*) FROM '.$sTable;
+			$data = $DB->Query($sRequest);
+			$arData = $data->Fetch();
+			$arRes[$sTable] = $arData["COUNT(*)"];
+		}
+		else {
+			foreach($arTables as $table){
+				if($DB->TableExists($table)){
+					$sReq = 'SELECT COUNT(*) FROM '.$table;
+					$data = $DB->Query($sReq);
+					$arData = $data->Fetch();
+					$arRes[$table] = $arData["COUNT(*)"];
+				}
+				else{
+					$arRes[$table] = 0;
+				}
+			}
+		}
+		return $arRes;
+	}
 }

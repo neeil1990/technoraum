@@ -9,7 +9,8 @@ IncludeModuleLangFile(__FILE__);
 $mid = "altasib.geobase";
 $incMod = CModule::IncludeModuleEx($mid);
 
-$popupWin = new CJSPopup(GetMessage("ALTASIB_GEOBASE_FORM_TITLE"), array("SUFFIX"=>($_GET['subdialog'] == 'Y'? 'subdialog':'')));
+//$popupWin = new CJSPopup(GetMessage("ALTASIB_GEOBASE_FORM_TITLE"), array("SUFFIX"=>($_GET['subdialog'] == 'Y'? 'subdialog':'')));
+$popupWin = new CAltasibGeoBaseJSPopup(GetMessage("ALTASIB_GEOBASE_FORM_TITLE"), array("SUFFIX"=>($_GET['subdialog'] == 'Y'? 'subdialog':'')));
 
 if(intval($_POST['ID']) > 0)
 {
@@ -100,6 +101,18 @@ else:
 
 	if(intval($_POST['ID']) > 0)
 	{
+		if (is_uploaded_file($_FILES["file"]["tmp_name"]))
+		{
+			$arFileArray = array(
+				"name" => $_FILES["file"]["name"],
+				"size" => $_FILES["file"]["size"],
+				"tmp_name" => $_FILES["file"]["tmp_name"],
+				"type" => $_FILES["file"]["type"],
+				"MODULE_ID" => "altasib.geobase"
+			);
+
+			// $FileID = CFile::SaveFile($arFileArray, "highloadblock");
+		}
 		CAltasibGeoBaseSelected::SetValues($_POST['ID']);
 
 		if(intval($_POST['FIELD_SORT']) > 0 && $_POST['FIELD_SORT'] != $arCity["SORT"])

@@ -4,6 +4,7 @@
 	var Reference = BX.namespace('YandexMarket.Field.Reference');
 	var Param = BX.namespace('YandexMarket.Field.Param');
 	var Source = BX.namespace('YandexMarket.Source');
+	var utils = BX.namespace('YandexMarket.Utils');
 
 	var constructor = Param.Node = Reference.Base.extend({
 
@@ -226,7 +227,7 @@
 				for (i = 0; i < fieldEnumList.length; i++) {
 					fieldEnum = fieldEnumList[i];
 
-					content += '<option value="' + fieldEnum['ID'] + '">' + fieldEnum['VALUE'] + '</option>';
+					content += '<option value="' + fieldEnum['ID'] + '">' + utils.escape(fieldEnum['VALUE']) + '</option>';
 				}
 			} else if (type['TEMPLATE']) {
 				needType = 'template';

@@ -25,9 +25,6 @@ class Manager
 	const ENTITY_TYPE_PROMO = 'promo';
 	const ENTITY_TYPE_GIFT = 'gift';
 
-	protected static $registeredAgentMethods = [];
-	protected static $registeredChanges = [];
-
 	/**
 	 * @return String[]
 	 */
@@ -117,63 +114,21 @@ class Manager
 		return Market\Config::getLang('EXPORT_RUN_STEP_' . strtoupper($stepName));
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public static function isChangeRegistered($setupId, $entityType, $entityId)
 	{
-		$changeKey = $setupId . ':' . $entityType . ':' . $entityId;
-
-		return isset(static::$registeredChanges[$changeKey]);
+		return false;
 	}
 
 	public static function registerChange($setupId, $entityType, $entityId)
 	{
-		$changeKey = $setupId . ':' . $entityType . ':' . $entityId;
-
-		if (!isset(static::$registeredChanges[$changeKey]))
-		{
-			static::$registeredChanges[$changeKey] = true;
-
-			$queryExists = Storage\ChangesTable::getList([
-				'filter' => [
-					'=SETUP_ID' => $setupId,
-					'=ENTITY_TYPE' => $entityType,
-					'=ENTITY_ID' => $entityId
-				]
-			]);
-
-			if (!$queryExists->fetch())
-			{
-				Storage\ChangesTable::add([
-					'SETUP_ID' => $setupId,
-					'ENTITY_TYPE' => $entityType,
-					'ENTITY_ID' => $entityId,
-					'TIMESTAMP_X' => new Main\Type\DateTime()
-				]);
-			}
-
-			static::registerAgent('change');
-		}
+		Changes::register($setupId, $entityType, $entityId);
 	}
 
 	public static function releaseChanges($setupId, Main\Type\DateTime $dateTime)
 	{
-		Storage\ChangesTable::deleteBatch([
-			'filter' => [
-				'=SETUP_ID' => $setupId,
-				'<=TIMESTAMP_X' => $dateTime
-			]
-		]);
-	}
-
-	protected static function registerAgent($method)
-	{
-		if (!isset(static::$registeredAgentMethods[$method]))
-		{
-			static::$registeredAgentMethods[$method] = true;
-
-			Agent::register([
-				'method' => $method,
-				'sort' => 200 // more priority
-			]);
-		}
+		Changes::release($setupId, $dateTime);
 	}
 }

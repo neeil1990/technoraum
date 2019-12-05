@@ -21,6 +21,11 @@ class VendorModel extends Xml\Format\Reference\Base
 		return 'vendor.model';
 	}
 
+	public function getContext()
+	{
+		return [];
+	}
+
 	public function isSupportDeliveryOptions()
 	{
 		return true;

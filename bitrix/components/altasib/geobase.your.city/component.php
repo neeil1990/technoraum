@@ -22,6 +22,34 @@ if($arParams["CHECK_DATA"] == "Y")
 }
 
 $arResult = CAltasibGeoBase::GetDataKladr();
+
+// ------- begin nearest block --------
+if(COption::GetOptionString($mid, "show_nearest_select_city", "N") == "Y"){
+	$arNData = CAltasibGeoBaseSelected::GetNearestCityFromSelected("all", false);
+
+	if(!empty($arNData["R_ID"]) && !empty($arNData["C_NAME"])){
+
+		$arRegion = array(
+			"ID" => $arNData["R_ID"],
+			"FULL_NAME" => $arNData["R_FNAME"],
+			"NAME" => $arNData["R_NAME"],
+			"SOCR" => $arNData["R_SOCR"],
+			"CODE" => $arNData["R_ID"],
+		);
+		$arNFormat = CAltasibGeoBase::GetFormatKladrData($arRegion, $arNData["C_NAME"]);
+
+		if(!empty($arNFormat)){
+			$arReal = $arResult;
+			$arResult = $arNFormat;
+			$arResult["NEAREST_CITY_ENABLE"] = "Y";
+			$arResult["NEAREST_CITY"] = $arNData;
+			$arResult["REAL_CITY"] = $arReal;
+		}
+	}
+}
+// ------- end nearest block ----------
+
+
 $arResult["auto"] = CAltasibGeoBase::GetAddres();
 
 $arResult["REGION_DISABLE"] = COption::GetOptionString($mid, 'region_disable', 'N');

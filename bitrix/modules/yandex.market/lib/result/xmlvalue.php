@@ -4,7 +4,8 @@ namespace Yandex\Market\Result;
 
 class XmlValue extends Base
 {
-	protected $type = null;
+	protected $type;
+	protected $distinct;
 	protected $tagData = [];
 	protected $multipleTags = [];
 
@@ -26,6 +27,26 @@ class XmlValue extends Base
 	public function getType()
 	{
 		return $this->type;
+	}
+
+	/**
+	 * Установить ключ группировки уникальности тега
+	 *
+	 * @param $value
+	 */
+	public function setDistinct($value)
+	{
+		$this->distinct = $value;
+	}
+
+	/**
+	 * Получить ключ группировки уникальности тега
+	 *
+	 * @return mixed
+	 */
+	public function getDistinct()
+	{
+		return $this->distinct;
 	}
 
 	/**

@@ -2,6 +2,9 @@
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 CModule::IncludeModule("altasib.geobase");
 include_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/admin_notify.php");
+
+global $DB;
+
 $response = array();
 if(!function_exists('gzopen'))
 	$response["ERROR"] = 'GZIP module is not installed!';
@@ -28,8 +31,9 @@ $_REQUEST['timeout'] = intval($_REQUEST['timeout']);
 
 define('TIMEOUT', ($_REQUEST['timeout'] > 120 ? 120 : $_REQUEST['timeout']));
 
-$strRequestedUrl = 'http://'.LOAD_HOST.LOAD_PATH.LOAD_FILE;
-$strFilename = $_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geobase/".basename($strRequestedUrl);
+$strRequestedUrl = 'https://'.LOAD_HOST.LOAD_PATH.LOAD_FILE;
+$sUploadDir = $_SERVER["DOCUMENT_ROOT"] . "/upload/altasib/geobase/";
+$strFilename = $sUploadDir . basename($strRequestedUrl);
 
 $this_script_name = basename(__FILE__);
 
@@ -59,6 +63,8 @@ if ($strAction == "UPDATE"){
 		$response["UPDATE"]	= "Y";
 	} else {
 		$response["UPDATE"]	= "N";
+		if(file_exists($strFilename))
+			$response["MTIME"]	= date($DB->DateFormatToPHP(CSite::GetDateFormat("FULL")), filemtime($strFilename));
 	}
 }
 elseif ($strAction == "LOAD"){
@@ -94,8 +100,8 @@ elseif ($strAction == "UNPACK"){
 
 	$_arErrors = array();
 	// Unpack the archive file GeoLiteCity.dat
-	if ($f1 = @gzopen($_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geobase/".$_REQUEST["filename"], "rb")){
-		if ($f2 = @fopen($_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geobase/GeoLiteCity.dat", "w+")){
+	if ($f1 = @gzopen($sUploadDir . $_REQUEST["filename"], "rb")){
+		if ($f2 = @fopen($sUploadDir . "GeoLiteCity.dat", "w+")){
 			do {
 				$data = gzread($f1, 50000);
 				fwrite($f2, $data);
@@ -117,8 +123,8 @@ elseif ($strAction == "UNPACK"){
 		$response["FILENAME"] = urlencode(basename('GeoLiteCity.dat'));
 		$response["DROP_T"] = "Y";
 
-		@unlink($_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geobase/".$_REQUEST["filename"].'.log');
-		@unlink($_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geobase/".$_REQUEST["filename"].'.tmp');
+		@unlink($sUploadDir . $_REQUEST["filename"].'.log');
+		@unlink($sUploadDir . $_REQUEST["filename"].'.tmp');
 
 		SetCurrentStatus(LoaderGetMessage("LOADER_UNPACK_DELETE"));
 
@@ -126,7 +132,7 @@ elseif ($strAction == "UNPACK"){
 		SetCurrentStatus(LoaderGetMessage("LOADER_UNPACK_ERRORS"));
 		$arErrors = $_arErrors;
 		if (count($arErrors)>0){
-			if ($ft = fopen($_SERVER["DOCUMENT_ROOT"]."/upload/altasib/geobase/".$this_script_name.".log", "wb")){
+			if ($ft = fopen($sUploadDir . $this_script_name.".log", "wb")){
 				foreach ($arErrors as $value){
 					$str = "[".$value[0]."] ".$value[1]."\n";
 					fwrite($ft, $str);
