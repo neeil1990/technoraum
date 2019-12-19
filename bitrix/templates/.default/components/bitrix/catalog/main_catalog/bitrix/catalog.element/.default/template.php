@@ -134,10 +134,12 @@ while ($arItems = $dbBasketItems->Fetch())
 		?>
 	</div>
 	<div class="card_page_specs">
+        
 		<div class="the_price">
 			<? if($arResult["PROPERTIES"]["OLD_PRICE"]["VALUE"]):?>
 				<p class="old_price"><?=$arResult["PROPERTIES"]["OLD_PRICE_VAL"]["VALUE"];?> &#8381;</p>
 			<? endif; ?>
+
 			<p class="price"
 			   sale-procent="<?=$arResult["PRICES"]["price"]["DISCOUNT_DIFF_PERCENT"]?>"
 			   profit="<?=$arResult["PRICES"]["price"]["PRINT_DISCOUNT_DIFF"]?>"
@@ -150,30 +152,27 @@ while ($arItems = $dbBasketItems->Fetch())
                         <?=$arResult["PRICES"]["price"]["PRINT_VALUE"]?>
 					<?endif;?>
 				</span>
-				<? if($arResult["PRODUCT"]["QUANTITY"]):?>
-					<span style="float:right;position:relative;top:20px" class="in_store">На складе</span>
-				<?else:?>
-					<span class="in_store" style="background:none;float:right;position:relative;top:20px"><font color='red'>X</font> Отстуствует на складе</span>
-				<? endif; ?>
 			</p>
 		</div>
 
-        <?if(checkPrice($arResult['IBLOCK_ID'], $arResult['ID'])):?>
-            <a class="fancy button request-a-price" data-name="<?=$arResult['NAME']?>" href="#request-a-price">Запросить цену</a>
-        <?else:
-            $url = $_SERVER["REQUEST_URI"];
-            $url = explode("/" , $url);
-            for($i=0;$i<=count($url)-3;$i++)
-                $new_url .= $url[$i]."/";
-            $url = $new_url;
-            $url .= "?action=BUY&id=".$arResult["ID"];
-            ?>
-            <input type="hidden" name="to-cart-action" value="<?=$url?>" />
-            ?>
-            <a class="button add_to_cart_button" href="<?=$url?>">Добавить в корзину</a>
-            <a class="fancy button one_click_button" href="#click_one_buy">Купить в один клик</a>
-        <?endif;?>
-        
+        <div class="button_wrap">
+            <?if(checkPrice($arResult['IBLOCK_ID'], $arResult['ID'])):?>
+                <a class="fancy button request-a-price" data-name="<?=$arResult['NAME']?>" href="#request-a-price">Запросить цену</a>
+            <?else:
+                $url = $_SERVER["REQUEST_URI"];
+                $url = explode("/" , $url);
+                for($i=0;$i<=count($url)-3;$i++)
+                    $new_url .= $url[$i]."/";
+                $url = $new_url;
+                $url .= "?action=BUY&id=".$arResult["ID"];
+                ?>
+                <input type="hidden" name="to-cart-action" value="<?=$url?>" />
+
+                <a class="button add_to_cart_button" href="<?=$url?>">Добавить в корзину</a>
+                <a class="fancy button one_click_button" href="#click_one_buy">Купить в один клик</a>
+            <?endif;?>
+        </div>
+
 		<script type="text/javascript">
 			arrProducts[0] = {
 				id : '<?=$arResult['DIRECT_CREDIT']['id']?>',
