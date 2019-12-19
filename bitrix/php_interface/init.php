@@ -454,3 +454,11 @@ if(CModule::IncludeModule("altasib.geobase")) {
     }else
         $_SESSION['IPOLSDEK_city'] = $_SESSION['ALTASIB_GEOBASE']['CITY_NAME'];
 }
+
+function checkPrice($ib, $id){
+    $db_props = CIBlockElement::GetProperty($ib, $id, array("sort" => "asc"), Array("CODE" => "PRICE_HIDDEN"));
+    if($ar_props = $db_props->Fetch())
+         return ($ar_props['VALUE_ENUM'] == "Y");
+
+    return false;
+}

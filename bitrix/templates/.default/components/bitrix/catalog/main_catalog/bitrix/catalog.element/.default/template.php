@@ -144,10 +144,10 @@ while ($arItems = $dbBasketItems->Fetch())
 			   old_price="<?=$arResult["PRICES"]["price"]["PRINT_VALUE"];?>"
 				>
 				<span>
-					<?if($arResult["PRICES"]["price"]["VALUE"]):?>
-						<?=$arResult["PRICES"]["price"]["PRINT_VALUE"]?>
+					<?if(checkPrice($arResult['IBLOCK_ID'], $arResult['ID'])):?>
+                        По запросу
 					<?else:?>
-						По запросу
+                        <?=$arResult["PRICES"]["price"]["PRINT_VALUE"]?>
 					<?endif;?>
 				</span>
 				<? if($arResult["PRODUCT"]["QUANTITY"]):?>
@@ -182,10 +182,10 @@ while ($arItems = $dbBasketItems->Fetch())
 					if($h == 0)
 					{
 						?>
-						<?if($arResult["PRICES"]["price"]["VALUE"]):?>
-							<a class="button add_to_cart_button" href="<?=$url?>">Добавить в корзину</a>
+						<?if(checkPrice($arResult['IBLOCK_ID'], $arResult['ID'])):?>
+                            <a class="fancy button request-a-price" data-name="<?=$arResult['NAME']?>" href="#request-a-price">Запросить цену</a>
 						<?else:?>
-							<a class="fancy button request-a-price" data-name="<?=$arResult['NAME']?>" href="#request-a-price">Запросить цену</a>
+                            <a class="button add_to_cart_button" href="<?=$url?>">Добавить в корзину</a>
 						<?endif;?>
 						<?
 					}

@@ -120,22 +120,23 @@ if(count($arResult["ITEMS"]) > 0):
 							<?=$item["PROPERTIES"]["OLD_PRICE_VAL"]["VALUE"];?> &#8381;
 						<? endif; ?>
 						</p>
-						<p class="price"
+                        <p class="price"
 						   sale-procent="<?=$item["PRICES"]["price"]["DISCOUNT_DIFF_PERCENT"]?>"
 						   profit="<?=$item["PRICES"]["price"]["PRINT_DISCOUNT_DIFF"]?>"
 						   old_price="<?=$item["PRICES"]["price"]["PRINT_VALUE"];?>"
 							>
-							<?if($item["PRICES"]["price"]["VALUE"]):?>
-								<?=$item["PRICES"]["price"]["PRINT_VALUE"]?>
-							<?else:?>
-								<span style="font-size: 16px;">По запросу</span>
+
+                            <?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
+                                <span style="font-size: 16px;">По запросу</span>
+                            <?else:?>
+                                <?=$item["PRICES"]["price"]["PRINT_VALUE"]?>
 							<?endif;?>
 						</p>
 					</div>
-					<?if($item["PRICES"]["price"]["VALUE"]):?>
-						<a class="button to_cart_button" data-href="<?=$item["BUY_URL"]?>">В корзине</a>
+					<?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
+                        <a class="fancy request-a-price" data-name="<?=$item['NAME']?>" href="#request-a-price">Запросить</a>
 					<?else:?>
-						<a class="fancy request-a-price" data-name="<?=$item['NAME']?>" href="#request-a-price">Запросить</a>
+                        <a class="button to_cart_button" data-href="<?=$item["BUY_URL"]?>">В корзине</a>
 					<?endif;?>
 				</div>
 			</div>

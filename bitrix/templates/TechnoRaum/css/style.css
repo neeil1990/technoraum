@@ -320,7 +320,7 @@ a.ref {display:block;text-decoration:none;position:absolute;top:0;left:0;width:1
 .glav_cat_div .text p {display:block;font-size: 14px;  text-align: left;  color: #111111;}
 .glav_cat_div .text p a {color:#111111;text-decoration:none;}
 .glav_cat_div .text p.title {/*text-transform:uppercase;*/min-height:62px;font-size:20px;color:#111111;line-height:26px;}
-.glav_cat_div .the_price {display:inline-block;vertical-align:bottom;min-height:66px;padding:0px 0 0px 0;width:117px;}
+.glav_cat_div .the_price {display:inline-block;vertical-align:bottom;min-height:38px;padding:0px 0 0px 0;width:117px;}
 .glav_cat_div .text .the_price p {display:block;}
 .glav_cat_div .text .the_price p.price {font-size: 24px;line-height:42px;  font-weight: bold;color:#111111;position:relative;}
 .glav_cat_div .text .the_price p.old_price {font-size: 14px;min-height:22px;line-height:22px; text-decoration:line-through;  color: #a1a1a0;}

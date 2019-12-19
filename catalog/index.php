@@ -79,7 +79,7 @@ $APPLICATION->SetTitle("Каталог товаров");
 			47 => "POTREBLYAEMAYA_MOSHCHNOST",
 			48 => "COMPLETE_PYLESOSA",
 			49 => "WEIGTH",
-			50 => "",
+			50 => "PRICE_HIDDEN",
 		),
 		"DETAIL_SET_CANONICAL_URL" => "Y",
 		"DETAIL_SET_VIEWED_IN_COMPONENT" => "N",
