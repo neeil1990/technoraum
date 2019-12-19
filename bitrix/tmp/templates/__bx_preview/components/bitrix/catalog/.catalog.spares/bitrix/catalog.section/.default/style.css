@@ -1,0 +1,124 @@
+
+#zoom_dt{
+    width: 100%;
+    border: 1px solid #f2f2f2;
+}
+
+.option-image{
+    padding-left: 20px;
+    margin-top: 20px;
+}
+
+.option-image .o-title{
+    color: #025791;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.option-image .o-body,
+.option-image .o-body a,
+.option-image .o-body a:hover
+{
+    font-weight: 100;
+    font-size: 12px;
+    color: #455560;
+    text-decoration: none;
+}
+
+.table.section-element{
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.table.section-element>thead>tr>th,
+.table.table-stock>thead>tr>th
+{
+    vertical-align: middle;
+    font-size: 12px;
+    text-align: center;
+}
+
+.table.section-element>tbody>tr>td,
+.table.table-stock>tbody>tr>td
+{
+    color: #455560;
+    font-weight: 200;
+    font-size: 11px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table.section-element>tbody>tr>td:nth-child(2){
+    white-space: nowrap;
+}
+
+.table.section-element>tbody>tr>td input {
+    text-align: center;
+}
+
+.table.section-element>tbody>tr>td.spares-cart{
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.table.section-element>tbody>tr>td.spares-cart:hover{
+    background: #feee35;
+}
+
+.table.section-element .request-stock{
+    cursor: pointer;
+}
+
+#in-stock-request{
+    background: white;
+    height: 100%;
+}
+#in-stock-request .form-stock{
+    text-align: center;
+    margin-top: 50px;
+}
+#in-stock-request .form-stock .mail-stock{
+    margin-bottom: 15px;
+}
+#in-stock-request .form-stock .mail-stock input{
+    height: 40px;
+    max-width: 100%;
+    border: 2px solid #eee;
+    box-sizing: border-box;
+    padding: 0 10px;
+    text-align: center;
+}
+#in-stock-request .form-stock .btn-stock {
+    margin-bottom: 10px;
+}
+#in-stock-request .form-stock .btn-stock a{
+    border-color: #feee35;
+    font-size: 14px;
+    color: #111;
+    padding: 10px 15px;
+    background: #feee35;
+    display: inline-block;
+}
+#in-stock-request .form-stock .btn-stock a:hover{
+    text-decoration: none;
+}
+
+#in-stock-request .stock-msg-send{
+    text-align: center;
+    padding: 25px 10px;
+}
+#in-stock-request .stock-msg-send h1{
+    font-size: 25px;
+    margin-top: 10px;
+}
+
+.fancybox-close-stock{
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: white;
+    padding: 0px 5px;
+    border-radius: 20px;
+    color: black;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}

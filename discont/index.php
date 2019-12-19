@@ -1,8 +1,8 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetPageProperty("description", "Дисконтная программа на Karcher в Краснодаре - «TechnoRaum»");
+$APPLICATION->SetPageProperty("description", "Дисконтная программа на Керхер (Karcher) в интернет-магазине ТехноРаум");
 $APPLICATION->SetPageProperty("keywords", "karcher купить акции, karcher скидки, karcher со скидкой, акция karcher, акция karcher краснодар, керхер акции, керхер купить по акции, керхер распродажа, керхер со скидкой, керхер со скидкой купить, купить karcher со скидкой, скидка karcher, скидки на керхер");
-$APPLICATION->SetPageProperty("title", "Купить Керхер со скидкой в Краснодаре - «TechnoRaum»");
+$APPLICATION->SetPageProperty("title", "Купить Керхер со скидкой в интернет-магазине ТехноРаум");
 $APPLICATION->SetTitle("Дисконтная система");
 ?><div class="discont_page_wrap clearfix">
 	<div class="discont_page_left_column">
@@ -16,7 +16,7 @@ $APPLICATION->SetTitle("Дисконтная система");
 		<div class="discont_card">
 			<div class="discont_card_inner">
 				<span class="card_code">003466</span>
-				<p class="title">TechnoRaum</p>
+				<p class="title">ТехноРаум</p>
 				<p class="grey">Моечная и уборочная техника из Германии </p>
 				<p class="subtitle">Магазины</p>
 				<? $APPLICATION->IncludeFile(SITE_TEMPLATE_PATH."/include/discont_shops.php",Array(),Array("MODE"=>"html")); ?>
@@ -29,5 +29,4 @@ $APPLICATION->SetTitle("Дисконтная система");
 		</div>
 		<? $APPLICATION->IncludeFile(SITE_TEMPLATE_PATH."/include/discont_card_text.php",Array(),Array("MODE"=>"html")); ?>
 	</div>							
-</div>
-<?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
+</div><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

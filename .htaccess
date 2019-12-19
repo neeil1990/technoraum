@@ -193,9 +193,6 @@ Redirect 301 /catalog/penogeneratory/ https://technoraum.ru/catalog/prinadlezhno
 Redirect 301 /catalog/poloter/ https://technoraum.ru/catalog/bytovaya-tekhnika/poloter/ 
 Redirect 301 /catalog/poverkhnostnye-nasosy/ https://technoraum.ru/catalog/bytovaya-tekhnika/nasosy/poverkhnostnye-nasosy/ 
 Redirect 301 /catalog/prinadlezhnosti-i-aksessuary/aksessuary-k-avd/komplekty-peskostruynye/komplekt-dlya-peskostruynoy-chistki/ https://technoraum.ru/catalog/prinadlezhnosti-i-aksessuary/aksessuary-k-avd/komplekty-peskostruynye/ 
-Redirect 301 /catalog/professionalnaya-tekhnika/penogeneratory/ https://technoraum.ru/catalog/prinadlezhnosti-i-aksessuary/aksessuary-dlya-professionalnykh-avd/pennye-nasadki1/
-Redirect 301 /catalog/professionalnaya-tekhnika/polomoechnye-mashiny/polomoechnye-mashiny-s-ruchnym-upravleniem1/ https://technoraum.ru/catalog/professionalnaya-tekhnika/polomoechnye-mashiny/polomoechnye-mashiny-s-ruchnym-upravleniem1/ 
-Redirect 301 /catalog/professionalnaya-tekhnika/polomoechnye-mashiny/polomoechnye-mashiny-s-sidenem-dlya-voditelya1/ https://technoraum.ru/catalog/professionalnaya-tekhnika/polomoechnye-mashiny/polomoechnye-mashiny-s-sidenem-dlya-voditelya1/ 
 Redirect 301 /catalog/khimiya/avtokhimiya-i-avtokosmetika/sredstva-spetsialnogo-naznacheniya/ochistiteli-dvigatelya/ https://technoraum.ru/catalog/khimiya/avtokhimiya-i-avtokosmetika/ochistiteli-dvigatelya1/ 
 Redirect 301 /catalog/khimiya/avtokhimiya-i-avtokosmetika/sredstva-spetsialnogo-naznacheniya/ https://technoraum.ru/catalog/khimiya/sredstva-dlya-klininga/ 
 Redirect 301 /catalog/polomoechnye-mashiny/  https://technoraum.ru/catalog/professionalnaya-tekhnika/polomoechnye-mashiny/ 

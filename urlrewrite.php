@@ -8,7 +8,7 @@ $arUrlRewrite=array (
     'PATH' => '/desktop_app/router.php',
     'SORT' => 100,
   ),
-  149 => 
+  152 => 
   array (
     'CONDITION' => '#^ /catalog/(.+?)/\\??(.*)#',
     'RULE' => 'SECTION_CODE_PATH=$1&$2',

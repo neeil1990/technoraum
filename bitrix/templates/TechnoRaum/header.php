@@ -31,6 +31,12 @@ if($url[1] != "personal" && $url[2] != "order" && $url[3] != "make")
         <meta name="google-site-verification" content="ccjrPE4dXLJ5OSnSmsPlY3D2BFpidw66j04twxL5M5M" />
         <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900&amp;subset=cyrillic" rel="stylesheet">
 		<?$APPLICATION->ShowHead();?>
+		
+		<?
+			if (!$USER->IsAuthorized()) {
+				CJSCore::Init(array('ajax', 'json'));
+			}
+		?>
 
         <meta property="og:title" content="<?$APPLICATION->ShowTitle()?>"/>
         <meta property="og:description" content="<?$APPLICATION->ShowProperty('description');?>"/>
@@ -61,6 +67,7 @@ if($url[1] != "personal" && $url[2] != "order" && $url[3] != "make")
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKQX2R2"
                       height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+
 
     <div id="panel"><?$APPLICATION->ShowPanel();?></div>
 	<div class="container" id="top">		

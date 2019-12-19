@@ -1,0 +1,1 @@
+<?define("arturgolubev_gmerchant_TEMPORARY_CACHE", "J2QMWHphAQRgUiw0VGBUL1F7");?>

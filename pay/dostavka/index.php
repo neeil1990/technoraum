@@ -1,8 +1,8 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetPageProperty("description", "Доставка Karcher в Краснодар и по всей России - «TechnoRaum»");
+$APPLICATION->SetPageProperty("description", "Доставка товаров по всей России от интернет-магазина ТехноРаум");
 $APPLICATION->SetPageProperty("keywords", "Доставка Керхер, Karcher в Краснодаре");
-$APPLICATION->SetPageProperty("title", "Доставка Karcher в Краснодар и по всей России от интернет-магазина «TechnoRaum»");
+$APPLICATION->SetPageProperty("title", "Доставка от магазина ТехноРаум");
 $APPLICATION->SetTitle("Доставка");
 ?><br>
 <h2><img width="300" alt="dostavka-min.jpg" src="/upload/medialibrary/295/2954e69a2b714fc58c4533e1c845dc4f.jpg" height="103" title="Доставка техники Керхер." align="left">Доставляем технику Керхер в:</h2>

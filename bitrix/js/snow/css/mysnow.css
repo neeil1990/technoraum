@@ -1,0 +1,27 @@
+/*-----SnowEffect[Start]----*/
+.snow .drop { display: block; z-index:0; position:fixed; background-repeat: no-repeat; min-width:2px; min-height:2px;
+border-radius: 180px;
+-moz-border-radius: 180px;
+-webkit-border-radius: 180px;
+background:#fff;
+background: -moz-linear-gradient(top, #fff, #eee);
+background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#eee));
+background: -webkit-linear-gradient(top, #fff, #eee);
+background: -ms-linear-gradient(top, #fff, #eee);
+background: -o-linear-gradient(top, #fff, #eee);
+box-shadow:0 0 5px #fff;
+-moz-box-shadow:0 0 5px #fff;
+-webkit-box-shadow:0 0 5px #fff; }
+/*-----SnowEffect[End]----*/
+.snow .drop { background-color:none; box-shadow:none; }
+.snow .drop.drop0 { background:url(snow1.png) no-repeat; }
+.snow .drop.drop1 { background:url(snow2.png) no-repeat; }
+.snow .drop.drop2 { background:url(snow3.png) no-repeat; }
+#snowflakesCanvas {
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background: url(http://demo.shortithemes.com/mistletoe/images/gar_01.png) repeat-x;
+}

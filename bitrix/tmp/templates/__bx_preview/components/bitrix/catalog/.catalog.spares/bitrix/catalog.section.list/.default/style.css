@@ -1,0 +1,17 @@
+
+.item-sections{
+    display: flex;
+    align-items: center;
+    background: #feee35;
+    height: 60px;
+    padding: 10px;
+    margin-bottom: 100px;
+}
+.item-sections .sections-img{}
+.item-sections .section-title{
+    margin: auto 5px;
+    color: #000;
+}
+.item-sections .section-title:hover{
+    text-decoration: none;
+}

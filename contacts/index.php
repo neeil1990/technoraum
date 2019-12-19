@@ -8,9 +8,9 @@ $APPLICATION->SetTitle("Контакты");
 </p>
 <p class="tel">
  <b>Горячая линия:&nbsp;</b><br>
- <b>продажа </b>8 800 777 57 01<br>
- <b>ремонт </b>8 800 777 57 81<br>
- <b>e-mail:</b> <a href="mailto:info@technoraum.ru">info@technoraum.ru</a>
+ <b>Продажа </b>8 800 777 57 01<br>
+ <b>Ремонт </b>8 800 777 57 81<br>
+ <b>E-mail:</b> <a href="mailto:info@technoraum.ru">info@technoraum.ru</a>
 </p>
  <?$APPLICATION->IncludeComponent(
 	"bitrix:news.list",

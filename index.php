@@ -1,6 +1,6 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetPageProperty("description", "В интернет-магазине TechnoRaum вы можете заказать технику Karcher по доступным ценам. Подробнее по телефону 8 (800) 777 57 01");
+$APPLICATION->SetPageProperty("description", "В интернет-магазине ТехноРаум Вы можете заказать технику Karcher по доступным ценам и с доставкой по РФ");
 $APPLICATION->SetPageProperty("keywords", "Karcher, Кёрхер, керхер, керхер официальный сайт в краснодаре, купить керхер в краснодаре, магазин керхер, магазин керхер краснодар, фирменный магазин karcher, товары керхер, керхер, купить karcher в интернет магазине, керхер интернет магазин, товары керхер цены");
 $APPLICATION->SetPageProperty("title", "Керхер (Karcher) в Краснодаре | Официальный интернет-магазин ТехноРаум");
 $APPLICATION->SetTitle("Купить технику Karcher в Краснодаре на официальном сайте: низкие цены на все товары");

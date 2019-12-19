@@ -1,1 +1,0 @@
-DROP TABLE if exists b_catalog_vsfr_export;

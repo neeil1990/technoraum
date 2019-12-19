@@ -784,6 +784,31 @@ Class CAltasibGeoBase
 						}
 					}
 				}
+			} else {
+				// from system distributions of cookies
+				$arSpr = $APPLICATION->GetSpreadCookieUrls();
+				if(!empty($arSpr)){
+					if(!empty($arSpr[0])){
+						$arDomain = self::GetDomains();
+
+						if(count($arDomain)>0){
+							$arUrl = parse_url($arSpr[0]);
+							$params = $arUrl["query"];
+							$protocol = (CMain::IsHTTPS()) ? "https://" : "http://";
+							$arCurUrl = parse_url($protocol.$_SERVER["HTTP_HOST"]."/".$_SERVER["REQUEST_URI"]);
+
+							foreach($arDomain as $domain){
+								if(strlen(trim($domain))>0){
+									$url = $protocol.$domain."/bitrix/tools/altasib.geobase/spread.php?".$params;
+									$arrUrl = parse_url($url);
+
+									if($arrUrl["host"] != $arCurUrl["host"])
+										$res[] = $url;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -1726,7 +1751,7 @@ Class CAltasibGeoBase
 				$strData = $APPLICATION->get_cookie("ALTASIB_GEOBASE_CODE");
 			}
 
-			if(($ip == $last_ip) && $strData)
+			if(($ip == $last_ip || empty($ip)) && $strData)
 			{
 				$arData = CAltasibGeoBase::deCodeJSON($strData);
 			}

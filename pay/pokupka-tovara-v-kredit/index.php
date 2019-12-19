@@ -1,7 +1,7 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetPageProperty("title", "Купить Karcher (Керхер) в Кредит в Краснодаре от интернет-магазина «TechnoRaum»");
-$APPLICATION->SetPageProperty("description", "Купить Karcher (Керхер) в Кредит в Краснодаре - «TechnoRaum»");
+$APPLICATION->SetPageProperty("title", "Купить Karcher (Керхер) в кредит от интернет-магазина ТехноРаум");
+$APPLICATION->SetPageProperty("description", "Купить Karcher (Керхер) в кредит от интернет-магазина ТехноРаум. Отправляем заявки сразу в более чем 10 банков. Решение в течение 5 минут.");
 $APPLICATION->SetPageProperty("keywords", "Karcher в кредит");
 $APPLICATION->SetTitle("Покупка товара «В кредит»");
 ?><h2>Купите в кредит все, что хотите быстро, просто и удобно.</h2>
