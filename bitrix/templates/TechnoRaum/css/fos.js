@@ -1,9 +1,11 @@
 $(document).ready(function(){
 
     $(".request-a-price").click(function(){
-        var name = $(this).attr("data-name");
-        $(".rform").attr("data-name",name);
+        var price;
+        price = ($(this).closest('.card_page_specs').find('.price').attr("old_price")) ? $(this).closest('.card_page_specs').find('.price').attr("old_price") : $(this).closest('.text').find('.price').attr("old_price");
+        $(".rform").attr("data-name",$(this).attr("data-name") + ': ' + price);
     });
+
     $(".rform").submit(function(e){
         e.preventDefault();
         var name = $(this).attr("data-name");

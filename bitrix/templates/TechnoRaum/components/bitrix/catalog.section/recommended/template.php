@@ -62,7 +62,7 @@ $this->setFrameMode(true);
                         </p>
                         <div class="the_price">
                             <?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
-                                <p class="price" style="font-size: 14px;">По запросу</p>
+                                <p class="price" old_price="<?=$item["PRICES"]["price"]["PRINT_DISCOUNT_VALUE"]?>" style="font-size: 14px;">По запросу</p>
                             <?else:?>
                                 <p class="price"><?=$item["PRICES"]["price"]["PRINT_DISCOUNT_VALUE"]?></p>
                             <?endif;?>

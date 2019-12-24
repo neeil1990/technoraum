@@ -70,18 +70,15 @@ elseif($_POST["form_id"] == 5)
 }
 elseif($_POST["form_id"] == 8)
 {
-    $page = iconv("UTF-8","CP1251",trim(strip_tags($_POST["name_page"])));
-    $name = iconv("UTF-8","CP1251",trim(strip_tags($_POST["name"])));
-    $phone = iconv("UTF-8","CP1251",trim(strip_tags($_POST["tel"])));
-    $email = iconv("UTF-8","CP1251",trim(strip_tags($_POST["email"])));
-    $msg = iconv("UTF-8","CP1251",trim(strip_tags($_POST["msg"])));
+    $errorMessage = "";
+    $data = \Bitrix\Main\Text\Encoding::convertEncoding($_POST, 'UTF-8',LANG_CHARSET, $errorMessage);
 
     $arEventFields = array(
-        "PAGE" => $page,
-        "NAME" => $name,
-        "PHONE" => $phone,
-        "EMAIL" => $email,
-        "MSG" => $msg
+        "PAGE" => str_replace('?', 'P', $data['name_page']),
+        "NAME" => $data['name'],
+        "PHONE" => $data['tel'],
+        "EMAIL" => $data['email'],
+        "MSG" => $data['msg']
     );
 
     $event = "REQUEST_PRICE";
