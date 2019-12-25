@@ -68,12 +68,11 @@ $this->setFrameMode(true);
                             <?endif;?>
                         </div>
 
+
+                        <a class="button to_cart_button" data-href="<?=$item["BUY_URL"]?>">В корзине</a>
                         <?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
                             <a class="fancy request-a-price" data-name="<?=$item['NAME']?>" href="#request-a-price">Запросить</a>
-                        <?else:?>
-                            <a class="button to_cart_button" data-href="<?=$item["BUY_URL"]?>">В корзине</a>
                         <?endif;?>
-
                     </div>
                 </div>
             </li>

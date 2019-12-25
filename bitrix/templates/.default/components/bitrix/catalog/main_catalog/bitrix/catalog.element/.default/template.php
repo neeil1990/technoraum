@@ -156,20 +156,21 @@ while ($arItems = $dbBasketItems->Fetch())
 		</div>
 
         <div class="button_wrap">
+            <?
+            $url = $_SERVER["REQUEST_URI"];
+            $url = explode("/" , $url);
+            for($i=0;$i<=count($url)-3;$i++)
+                $new_url .= $url[$i]."/";
+            $url = $new_url;
+            $url .= "?action=BUY&id=".$arResult["ID"];
+            ?>
+            <input type="hidden" name="to-cart-action" value="<?=$url?>" />
+
+            <a class="button add_to_cart_button" href="<?=$url?>">Добавить в корзину</a>
+            <a class="fancy button one_click_button" href="#click_one_buy">Купить в один клик</a>
+
             <?if(checkPrice($arResult['IBLOCK_ID'], $arResult['ID'])):?>
                 <a class="fancy button request-a-price" data-name="<?=$arResult['NAME']?>" href="#request-a-price">Запросить цену</a>
-            <?else:
-                $url = $_SERVER["REQUEST_URI"];
-                $url = explode("/" , $url);
-                for($i=0;$i<=count($url)-3;$i++)
-                    $new_url .= $url[$i]."/";
-                $url = $new_url;
-                $url .= "?action=BUY&id=".$arResult["ID"];
-                ?>
-                <input type="hidden" name="to-cart-action" value="<?=$url?>" />
-
-                <a class="button add_to_cart_button" href="<?=$url?>">Добавить в корзину</a>
-                <a class="fancy button one_click_button" href="#click_one_buy">Купить в один клик</a>
             <?endif;?>
         </div>
 

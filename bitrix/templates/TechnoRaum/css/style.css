@@ -321,17 +321,20 @@ a.ref {display:block;text-decoration:none;position:absolute;top:0;left:0;width:1
 .glav_cat_div .text p a {color:#111111;text-decoration:none;}
 .glav_cat_div .text p.title {/*text-transform:uppercase;*/min-height:62px;font-size:20px;color:#111111;line-height:26px;}
 .glav_cat_div .the_price {display:inline-block;vertical-align:bottom;min-height:38px;padding:0px 0 0px 0;width:117px;}
+.the_content_right_column .glav_cat_div .the_price {width:140px;}
 .glav_cat_div .text .the_price p {display:block;}
 .glav_cat_div .text .the_price p.price {font-size: 24px;line-height:42px;  font-weight: bold;color:#111111;position:relative;}
 .glav_cat_div .text .the_price p.old_price {font-size: 14px;min-height:22px;line-height:22px; text-decoration:line-through;  color: #a1a1a0;}
 
-.glav_cat_div .text a.button {-moz-transition:all 0s;-webkit-transition:all 0s;transition:all 0s;display:inline-block;vertical-align:bottom;width: 68px;background:url(../img/cart1.png) no-repeat center center;  height: 38px;line-height:38px;margin:0 0 3px 48px;font-size: 0px;text-indent:20px;border-width:2px;border-color:#feee35;color: #111111;  border-radius: 0px;  border: solid 2px #feee35;cursor: pointer;}
+.glav_cat_div .text a.button {-moz-transition:all 0s;-webkit-transition:all 0s;transition:all 0s;display:inline-block;vertical-align:bottom;width: 75px;background:url(../img/cart1.png) no-repeat center center;  height: 38px;line-height:38px;margin:0 0 3px 48px;font-size: 0px;text-indent:20px;border-width:2px;border-color:#feee35;color: #111111;  border-radius: 0px;  border: solid 2px #feee35;cursor: pointer;}
 .glav_cat_div .text a.button:hover {background:#feee35 url(../img/cart1.png) no-repeat center center;}
 .glav_cat_div .text a.button.active {margin-left:0;font-size: 12px;width:116px;background-image:url(../img/in_cart_check.png);background-color:#feee35;background-position:13px center;}
 
 .glav_cat_div .text a.request-a-price{
     display: inline-block;
     color: black;
+    width: 100%;
+    text-align: center;
     font-size: 12px;
     line-height: 10px;
     padding: 15px 10px;
@@ -702,10 +705,26 @@ a.button.filter_clear_button:hover {border-color:transparent;text-decoration:non
 .card_page_specs .the_price p.old_price {font-size: 16px;min-height:30px;line-height:22px; padding-bottom:0;text-decoration:line-through;  color: #a1a1a0;}
 
 .card_page_specs .button_wrap {clear:both;width:100%;max-width:100%;overflow:hidden;padding-bottom:20px;}
-.card_page_specs .button_wrap a.button {font-size:16px;color:#111;font-weight:bold;margin-bottom:15px;}
-.card_page_specs a.button.add_to_cart_button {float:left;width:266px;height:56px;line-height:56px;border-color:#feee35;background:#feee35 url(../img/cart1.png) no-repeat 25px center;text-indent:15px;}
+.card_page_specs .button_wrap a.button {font-size:16px;color:#111;font-weight:bold;margin-bottom:10px;}
+.card_page_specs a.button.add_to_cart_button {
+    display: inline-block;
+    width: 266px;
+    height: 54px;
+    line-height: 50px;
+    border-color: #feee35;
+    background: #feee35 url(../img/cart1.png) no-repeat 25px center;
+    text-indent: 15px;
+    margin-right: 10px;
+}
 .card_page_specs a.button.add_to_cart_button:hover {background-color:#eede25;border-color:#eede25;}
-.card_page_specs a.button.one_click_button {padding-left:0 !important;float:right;border-color:#feee35;background:none;width:238px;line-height:50px;}
+.card_page_specs a.button.one_click_button {
+    display: inline-block;
+    padding-left: 0 !important;
+    border-color: #feee35;
+    background: none;
+    width: 238px;
+    line-height: 50px;
+}
 .card_page_specs a.button.one_click_button:hover {background-color:#eede25;border-color:#eede25;}
 .in_card_add{background: #feee35 url(../img/check.png) no-repeat !important;background-size: 25px 25px !important;background-position: 15px center !important;}
 
@@ -1632,7 +1651,8 @@ form[name='bform'] input[type='submit']{font-weight: bold;border-color: #feee35;
 }
 
 .i_creditbtn_first {
-    width: 220px;
+    width: 100%;
+    max-width: 255px;
     height: 38px;
     font-family: "Open Sans";
     padding-top: 1px;
@@ -1649,7 +1669,7 @@ form[name='bform'] input[type='submit']{font-weight: bold;border-color: #feee35;
     font-size: 16px;
     float: left;
     text-align: center!important;
-    width: 70px;
+    width: 100px;
     line-height: 1.3;
     padding-top: 1px;
     padding-bottom: 0;
