@@ -128,4 +128,12 @@ $MESS ['IPOLSDEK_NDS_VAT0']  = "0%";
 $MESS ['IPOLSDEK_NDS_VAT10'] = "10%";
 $MESS ['IPOLSDEK_NDS_VAT18'] = "18%";
 $MESS ['IPOLSDEK_NDS_VAT20'] = "20%";
+
+// Лог
+$MESS ['IPOLSDEK_LOGGING_calculation']  = "Расчет СДЭКа";
+$MESS ['IPOLSDEK_LOGGING_compability']  = "Доступность доставки профиля";
+$MESS ['IPOLSDEK_LOGGING_calculate']    = "Расчет профиля";
+$MESS ['IPOLSDEK_LOGGING_shipments']    = "Детализация расчета профиля";
+$MESS ['IPOLSDEK_LOGGING_orderSend']    = "Отправка заказа";
+$MESS ['IPOLSDEK_LOGGING_statusCheck']  = "Проверка статуса";
 ?>

@@ -12,6 +12,7 @@
 class CalculatePriceDeliverySdek {
 	private $version = "1.0";//������ ������
     private $jsonUrl = 'http://api.cdek.ru/calculator/calculate_price_by_json_request.php';
+    private $customUrl = false;
 
 	private $authLogin;
 	private $authPassword;
@@ -139,7 +140,7 @@ class CalculatePriceDeliverySdek {
         $data_string = http_build_query($bodyData);
 
 		$ch = curl_init();
-		curl_setopt($ch,CURLOPT_URL, $this->jsonUrl);
+		curl_setopt($ch,CURLOPT_URL, ($this->customUrl) ? $this->customUrl : $this->jsonUrl);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch,CURLOPT_HTTPHEADER,array(
 		    'Content-Type: application/x-www-form-urlencoded',
@@ -155,7 +156,9 @@ class CalculatePriceDeliverySdek {
 		$result = curl_exec($ch); 
 		$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
-
+		
+		\Ipolh\SDEK\Bitrix\Admin\Logger::calculation(array('Request' => $data,'Response' => json_decode($result, true)));
+		
 		if($code == 200)
 			return json_decode($result, true);
 		elseif($code == 0)
@@ -222,6 +225,17 @@ class CalculatePriceDeliverySdek {
 		$val = floatval($val);
 		$this->timeOut = ($val <= 0) ? 6 : $val;
 	}
+
+    /**
+     * @param bool $customUrl
+     * @return $this
+     */
+    public function setCustomUrl($customUrl)
+    {
+        $this->customUrl = $customUrl;
+
+        return $this;
+    }
 }
 
 ?>

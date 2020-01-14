@@ -122,7 +122,7 @@
 			});
 		},
 		// удаление
-		killReq(oid,mode){ // отзыв и удаление
+		killReq: function(oid,mode){ // отзыв и удаление
 			if(confirm('<?=GetMessage("IPOLSDEK_JSC_SOD_IFKILL")?>'))
 				IPOLSDEK_setups.ajax({
 					data: {isdek_action:'killReqOD',oid:oid,mode:mode},
@@ -138,7 +138,7 @@
 				});
 		},
 
-		delReq(oid,mode){ // просто удаление
+		delReq: function(oid,mode){ // просто удаление
 			if(confirm('<?=GetMessage("IPOLSDEK_JSC_SOD_IFDELETE")?>'))
 				IPOLSDEK_setups.ajax({
 					data: {isdek_action:'delReqOD',oid:oid,mode:mode},
@@ -149,7 +149,7 @@
 				});
 		},
 
-		forceKill(oid,mode){ // делай что угодно, только удались
+		forceKill: function(oid,mode){ // делай что угодно, только удались
 			if(confirm('<?=GetMessage("IPOLSDEK_JSC_SOD_IFKILL")?>'))
 				IPOLSDEK_setups.ajax({
 					data: {isdek_action:'killReqOD',oid:oid,mode:mode},
@@ -194,7 +194,7 @@
 
 		// адекватные действиЯ
 		follow: function(wat){
-			window.open("http://www.edostavka.ru/track.html?order_id="+wat,"_blank");
+			window.open("http://www.cdek.ru/track.html?order_id="+wat,"_blank");
 		},
 
 		print: function(oId,mode){
@@ -425,7 +425,7 @@
 			</div>
 		
 			<input type='button' style='margin-top:20px' value='<?=GetMessage('IPOLSDEK_OTHR_killReq_BUTTON')?>' onclick='IPOLSDEK_setups.table.ultraKill()'>&nbsp;
-			<input type='button' style='margin-top:20px' value='<?=GetMessage('IPOLSDEK_OTHR_getOutLst_BUTTON_OT')?>' onclick='IPOLSDEK_syncOutb()'/>
+			<input type='button' style='margin-top:20px' value='<?=GetMessage('IPOLSDEK_OTHR_getOutLst_BUTTON_OT')?>' onclick='IPOLSDEK_setups.base.syncOrdrs()'/>
 		</div>
 		<div id='IPOLSDEK_notFound'><?=GetMessage('IPOLSDEK_OTHR_NO_REQ_FILTER')?></div>
 	</td></tr>

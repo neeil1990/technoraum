@@ -5,6 +5,7 @@ IncludeModuleLangFile(__FILE__);
 /*
 	IPOLSDEK_CACHE_TIME - время кэша в секундах
 	IPOLSDEK_NOCACHE    - если задан - не использовать кэш
+    IPOLSDEK_DOWNCOMPLECTS - выгружать комплекты отдельными товарами
 
 	onBeforeDimensionsCount - габариты товаров [документировано]
 	onCompabilityBefore - годнота профилей [документировано]
@@ -26,6 +27,12 @@ class CDeliverySDEK extends sdekHelper{
 	static $orderWeight  = false;
 	static $orderPrice   = false;
 
+    /**
+     * @var bool|string
+     * Сохраняет город Битрикса в Compability и Calculate, чтобы учитывать необходимость узнавать город СДЭКа из БД
+     * Учитывая, что sdekCity может быть установлен извне, проверяется на false в калькуляторе
+     */
+    static $bitrixCity   = false;
 	static $sdekCity     = false;
 	static $sdekCityCntr = false;
 	static $sdekSender   = false;
@@ -194,6 +201,7 @@ class CDeliverySDEK extends sdekHelper{
 		$_SESSION['IPOLSDEK_CHOSEN'] = array();
 
 		// defining cityTo
+        self::$bitrixCity  = $arOrder['LOCATION_TO'];
 		$arCity = self::getCity($arOrder['LOCATION_TO'],true);
 
 		if($arCity){
@@ -303,12 +311,16 @@ class CDeliverySDEK extends sdekHelper{
 				$arKeys = $newKeys;
 			}
 			if(!$ifPrevent) return array();
-		
-		}
+		} else {
+            self::$sdekCity     = false;
+            self::$sdekCityCntr = false;
+        }
 
 		// Подключение FrontEnd (для многостраничного компонента)
 		if($_POST['CurrentStep'] > 1 && $_POST['CurrentStep'] < 4 && in_array('pickup',$arKeys))
 			self::pickupLoader();
+		
+		\Ipolh\SDEK\Bitrix\Admin\Logger::compability($arKeys);
 
 		return $arKeys;
 	}
@@ -323,13 +335,17 @@ class CDeliverySDEK extends sdekHelper{
                 "TEXT"   => GetMessage('IPOLSDEK_DELIV_ERR_NOCNT'),
             );
 
-		if(!self::$sdekCity){
+        // bitrixCity checks only if given - because of possible city-sets from other places
+		if(!self::$sdekCity || (self::$bitrixCity && self::$bitrixCity  != $arOrder['LOCATION_TO'])){
 			$arCity = self::getCity($arOrder['LOCATION_TO'],true);
-			
+
 			if($arCity){
 				self::$sdekCity = $arCity['SDEK_ID'];
 				self::$sdekCityCntr = ($arCity['COUNTRY']) ? $arCity['COUNTRY'] : 'rus';
-			}
+			} else {
+                self::$sdekCity     = false;
+                self::$sdekCityCntr = false;
+            }
 		}
 		
 		if(self::$sdekCity){
@@ -461,6 +477,10 @@ class CDeliverySDEK extends sdekHelper{
 				date('d.m.Y',time()+($curProfile['TERMS']['MAX'])*86400)
 			);
 		}
+		
+		\Ipolh\SDEK\Bitrix\Admin\Logger::calculate(array('Profile' => $profile, 'Result'=> $arReturn));
+		\Ipolh\SDEK\Bitrix\Admin\Logger::shipments(array('Profile' => $profile, 'Shipments'=> sdekShipmentCollection::$shipments));
+		
 		return $arReturn;
 	}
 
@@ -563,6 +583,10 @@ class CDeliverySDEK extends sdekHelper{
 			$calc->setAuth(self::$auth['account'],self::$auth['password']);
 			$calc->setSenderCityId(self::$sdekSender);
 			$calc->setReceiverCityId(self::$sdekCity);
+			// кастомный урл калькуляции
+			if(defined('IPOLSDEK_CALCULATE_URL')){
+			    $calc->setCustomUrl(constant('IPOLSDEK_CALCULATE_URL'));
+            }
 			// $calc->setDateExecute(date()); 2012-08-20 //устанавливаем дату планируемой отправки
 			//устанавливаем тариф по-умолчанию
 			if(is_numeric($tarif))
@@ -608,7 +632,6 @@ class CDeliverySDEK extends sdekHelper{
 				if(!is_array($res))
 					$arReturn['error'] = GetMessage('IPOLSDEK_DELIV_SDEKISDEAD');
 				else{
-					self::$lastCnt = $res['result']['price'];
 					$arReturn = array(
 						'success'  		  => true,
 						'price'    		  => $res['result']['price'],
@@ -1391,7 +1414,7 @@ class CDeliverySDEK extends sdekHelper{
 	}
 
 	static function cntDelivsConverted($arOrder){
-		$basket = Bitrix\Sale\Basket::create(SITE_ID);
+		$basket = Bitrix\Sale\Basket::create(SITE_ID,null, 'RUB');
 		if(array_key_exists('GOODS',$arOrder) && is_array($arOrder['GOODS']) && count($arOrder['GOODS']))
 			foreach($arOrder['GOODS'] as $key => $arGood){
 				$basketItem = Bitrix\Sale\BasketItem::create($basket,self::$MODULE_ID,$key+1);

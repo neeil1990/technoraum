@@ -8,7 +8,7 @@
 	$MESS ['IPOLSDEK_JSC_SOD_OTHERTITLE'] = "Отправленные заявки";
 	$MESS ['IPOLSDEK_JSC_SOD_ACCOUNT'] = "Аккаунт заказа";
 	$MESS ['IPOLSDEK_JSC_SOD_PriceInLK'] = "Стоимость в личном кабинете: ";
-	$MESS ['IPOLSDEK_JSC_SOD_PriceONLYInLK'] = "Стоимость по личному кабинету";
+	$MESS ['IPOLSDEK_JSC_SOD_PriceONLYInLK'] = "Показана стоимость по личному кабинету без наценок сайта";
 	$MESS ['IPOLSDEK_JSC_SOD_noTarifs'] = "Подходящих тарифов не обнаружено.";
 	$MESS ['IPOLSDEK_JSC_SOD_noAccounts'] = "Активные аккаунты не обнаружены.";
 	$MESS ['IPOLSDEK_JSC_SOD_badPhone'] = "телефон. Номер должен быть написан в международном формате код страны (для России это +7) и сам номер (10 и более цифр). Номер не должен содержать никаких букв и символов, кроме признаков добавочного номера ':' (двоеточие), '#' (решетка).";

@@ -3,8 +3,8 @@
 IncludeModuleLangFile(__FILE__);
 
 /*
-	onGoodsToRequest
-	requestSended
+	onGoodsToRequest - изменение товаров в заказе
+	requestSended - отправка заявки
 */
 
 class sdekdriver extends sdekHelper{
@@ -23,7 +23,8 @@ class sdekdriver extends sdekHelper{
 
 	// сборка упаковки в заказ
 	protected static function getPacks($oId,$mode,$orderParams){
-		$arPacks = array();
+		$arPacks   = array();
+		$minEnsure = ((array_key_exists('minVats',$orderParams) && $orderParams['minVats'] == 'Y') || (COption::GetOptionString(self::$MODULE_ID,'noVats','N') == 'Y'));
 
 		if(array_key_exists('packs',$orderParams) && $orderParams['packs'])
 			foreach($orderParams['packs'] as $id => $content){
@@ -33,7 +34,7 @@ class sdekdriver extends sdekHelper{
 					'LENGTH' => $gabs[0],
 					'WIDTH'  => $gabs[1],
 					'HEIGHT' => $gabs[2],
-					'GOODS'  => self::getGoods($oId,$mode,$content['weight'],$content['goods'])
+					'GOODS'  => self::getGoods($oId,$mode,$content['weight'],$content['goods'],$minEnsure)
 				);
 			}
 		else
@@ -42,7 +43,7 @@ class sdekdriver extends sdekHelper{
 				'LENGTH' => $orderParams["GABS"]['D_L'],
 				'WIDTH'  => $orderParams["GABS"]['D_W'],
 				'HEIGHT' => $orderParams["GABS"]['D_H'],
-				'GOODS'  => self::getGoods($oId,$mode,$orderParams["GABS"]['W'])
+				'GOODS'  => self::getGoods($oId,$mode,$orderParams["GABS"]['W'],false,$minEnsure)
 			);
 		return $arPacks; // вес - граммы, стороны - см
 	}
@@ -95,7 +96,7 @@ class sdekdriver extends sdekHelper{
 	}
 
 	//сборка товаров в заказ
-	protected static function getGoods($oId,$mode,$givenWeight,$given=false){
+	protected static function getGoods($oId,$mode,$givenWeight,$given=false,$minEnsure=false){
 		$givenWeight *= 1000;
 		if($mode == 'order' || !self::canShipment())
 			$arGoods = self::getGoodsArray($oId);
@@ -113,7 +114,7 @@ class sdekdriver extends sdekHelper{
 				$weight = ($good['WEIGHT']) ? $good['WEIGHT'] * 1000 : 1000;
 				$arTG[$key] = array(
 					'price'    => $good['PRICE'],
-					'cstPrice' => (COption::GetOptionString(self::$MODULE_ID,'noVats','N') == 'Y') ? 1 : $good['PRICE'],
+					'cstPrice' => ($minEnsure) ? 1 : $good['PRICE'],
 					'weight'   => $weight,
 					'quantity' => $cnt,
 					'name'     => $good['NAME'],
@@ -267,8 +268,9 @@ class sdekdriver extends sdekHelper{
 		foreach($packs as $number => $packContent){
 			foreach($packContent['GOODS'] as $index => $arGood){
 				if($cntrCurrency){
-					$packs[$number]['GOODS'][$index]["price"] = floatval(sdekExport::formatCurrency(array('TO'=>$cntrCurrency['site'],'SUM'=>$arGood["price"],'orderId'=>$oId)));
-					$packs[$number]['GOODS'][$index]["price"] = floatval(sdekExport::formatCurrency(array('TO'=>$cntrCurrency['site'],'SUM'=>$arGood["cstPrice"],'orderId'=>$oId)));
+					$packs[$number]['GOODS'][$index]["price"]    = floatval(sdekExport::formatCurrency(array('TO'=>$cntrCurrency['site'],'SUM'=>$arGood["price"],'orderId'=>$oId)));
+					$arGood["price"]                             = floatval(sdekExport::formatCurrency(array('TO'=>$cntrCurrency['site'],'SUM'=>$arGood["price"],'orderId'=>$oId)));
+					$packs[$number]['GOODS'][$index]["cstPrice"] = floatval(sdekExport::formatCurrency(array('TO'=>$cntrCurrency['site'],'SUM'=>$arGood["cstPrice"],'orderId'=>$oId)));
 				}
 				$toPay = ($bezNal || $orderParams['toPay'] == 0) ? 0 : $arGood["price"];
 				$cnt = (int) $arGood["quantity"];
@@ -459,10 +461,14 @@ class sdekdriver extends sdekHelper{
 		if(!cmodule::includemodule('sale')){self::errorLog(GetMessage("IPOLSDEK_ERRLOG_NOSALEOML"));return false;}//без модуля sale делать нечего
 		$mesId=self::getMessId();
 		$orderXML = self::genOrderXML($oId,$mesId,$mode);
+ // self::toLog($orderXML,'$orderXML',true);
+ // return;
 		if(!$orderXML) return false;
 		$sended = '';
 		$result = self::sendToSDEK($orderXML,'new_orders');
-// self::toLog(array($orderXML,$result),'requste',true);
+		
+		\Ipolh\SDEK\Bitrix\Admin\Logger::orderSend(array('Request' => $orderXML, 'Response'=> $result['result']));
+
 		$return = false;
 		if($result['code'] == 200){
 			$xml=simplexml_load_string($result['result']);
@@ -672,7 +678,7 @@ class sdekdriver extends sdekHelper{
 	}
 
 	static function getExtraOptions(){ // доп. настройки для заказов
-		$arAddService = array(3,16,17,30,36,37,48);
+		$arAddService = array(3,7,16,17,30,36,37,48);
 		$src = COption::getOptionString(self::$MODULE_ID,'addingService',false);
 		$svdOpts = unserialize(COption::getOptionString(self::$MODULE_ID,'addingService','a:0:{}'));
 		$arReturn = array();
@@ -712,7 +718,10 @@ class sdekdriver extends sdekHelper{
 				));
 			unset($_SESSION['IPOLSDEK_CHOSEN']);
 		}
-		if(COption::GetOptionString(self::$MODULE_ID,'autoloads','N') == 'Y'){
+		if(
+		    COption::GetOptionString(self::$MODULE_ID,'autoloads','N') == 'Y' &&
+            COption::GetOptionString(self::$MODULE_ID,'autoloadsMode','O') === 'O'
+        ){
 			if($respond = self::autoLoad($oId,$arFields,'O')){
 				$op = CSaleOrderProps::GetList(array(),array("PERSON_TYPE_ID" =>$arFields['PERSON_TYPE_ID'],"CODE"=>"IPOLSDEK_AUTOSEND"))->Fetch();
 				if($op)

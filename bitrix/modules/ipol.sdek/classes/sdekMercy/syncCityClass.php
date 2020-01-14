@@ -238,7 +238,7 @@ class cityExport{
 		$city = self::simpleCity($city);
 		
 		$arChange = array();
-		for($i=1;$i<17;$i++){
+		for($i=1;$i<19;$i++){
 			$arChange []= GetMessage('IPOLSDEK_SIMPLECITY_'.$i);
 		}
 		

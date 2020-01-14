@@ -26,6 +26,29 @@ foreach(array("debug_widget","startLogging","debug_fileMode","debug_calculation"
 	sdekOption::placeHint($code);
 ?>
 
+<script>
+    IPOLSDEK_setups.debug = {
+        restorePVZ : function () {
+            if(confirm('<?=GetMessage('IPOLSDEK_LBL_RESTOREPVZ')?>')){
+                $('#SDEK_pvzRestore').attr('disabled','disabled');
+                IPOLSDEK_setups.ajax({
+                    data : {
+                        isdek_action : 'restorePVZ'
+                    },
+                    dataType : 'JSON',
+                    success  :function (data) {
+                        if(data.SUCCESS){
+                            alert('<?=GetMessage('IPOLSDEK_LBL_RESTORED')?>');
+                        } else {
+                            alert('<?=GetMessage('IPOLSDEK_LBL_UNRESTORED')?> '+data.ERROR);
+                        }
+                    }
+                });
+            }
+        }
+    };
+</script>
+
 
 <tr class="heading"><td colspan="2" valign="top" align="center"><?=GetMessage("IPOLSDEK_HDR_logging")?></td></tr>
 <tr><td style="color:#555;" colspan="2">
@@ -101,3 +124,11 @@ foreach($arEvents as $code => $name){
         }
     }
 ?>
+
+<tr class="heading"><td colspan="2" valign="top" align="center"><?=GetMessage("IPOLSDEK_HDR_pvzRestore")?></td></tr>
+<tr><td style="color:#555;" colspan="2">
+    <?sdekOption::placeFAQ('PVZRESTORE')?>
+</td></tr>
+<tr><td style="color:#555;" colspan="2"><br></td></tr>
+<tr><td colspan="2"><input type="button" id="SDEK_pvzRestore" onclick="IPOLSDEK_setups.debug.restorePVZ()" value="<?=GetMessage('IPOLSDEK_LBL_RESTOREPVZBTN')?>"/></td></tr>
+

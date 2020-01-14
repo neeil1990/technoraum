@@ -50,6 +50,12 @@
 	}
 </style>
 
+<?
+if(sdekHelper::getModuleVersion()){
+	Ipolh\SDEK\Bitrix\Tools::placeWarningLabel('<a href="/bitrix/admin/partner_modules.php?lang=ru">'.GetMessage('IPOLSDEK_LABEL_checkVersion').'</a>',GetMessage('IPOLSDEK_LABEL_moduleVersion').sdekHelper::getModuleVersion());
+}
+?>
+
 <tr class="heading"><td colspan="2" valign="top" align="center"><?=GetMessage('IPOLSDEK_FAQ_HDR_SETUP')?></td></tr>
 <tr><td style="color:#555;" colspan="2">
 	<?sdekOption::placeFAQ('WTF')?>
@@ -85,6 +91,7 @@
 	<?sdekOption::placeFAQ('CITYSUNC')?>
 	<?sdekOption::placeFAQ('CNTDOST')?>
 	<?sdekOption::placeFAQ('CALLCOURIER')?>
+	<?sdekOption::placeFAQ('TESTACCOUNT')?>
 	<?sdekOption::placeFAQ('ERRORS')?>
 	<?sdekOption::placeFAQ('PROBLEMS')?>
 	<?sdekOption::placeFAQ('OTHER')?>

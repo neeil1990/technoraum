@@ -417,23 +417,33 @@
 				'files'  => array()
 			);
 
-			foreach($arAccPrints as $accId => $data){
-				$headers = self::getXMLHeaders($accId);
-				$request = '<?xml version="1.0" encoding="UTF-8" ?>
-	<'.$container.' Date="'.$headers['date'].'" Account="'.$headers['account'].'" Secure="'.$headers['secure'].'"  OrderCount="'.$data['cnt'].'" CopyCount="'.$copies.'" '.$format.'>'.$data['XML']."</".$container.">";
+			foreach($arAccPrints as $accId => $data) {
+                $headers = self::getXMLHeaders($accId);
+                $request = '<?xml version="1.0" encoding="UTF-8" ?>
+	<' . $container . ' Date="' . $headers['date'] . '" Account="' . $headers['account'] . '" Secure="' . $headers['secure'] . '"  OrderCount="' . $data['cnt'] . '" CopyCount="' . $copies . '" ' . $format . '>' . $data['XML'] . "</" . $container . ">";
 
-				$result = self::sendToSDEK($request,$method);
+                $result = self::sendToSDEK($request, $method);
 
-				if(strpos($result['result'],'<')===0){
-					$answer = simplexml_load_string($result['result']);
-					$errAnswer = '';
-					foreach($answer->$container as $print)
-						$errAnswer .= $print['Msg'].". ";
-					foreach($answer->Order as $print)
-						$errAnswer .= $print['Msg'].". ";
+                if (strpos($result['result'], '<') === 0) {
+                    $answer = simplexml_load_string($result['result']);
+                    $errAnswer = '';
+                    foreach ($answer->$container as $print)
+                        $errAnswer .= $print['Msg'] . ". ";
+                    foreach ($answer->Order as $print)
+                        $errAnswer .= $print['Msg'] . ". ";
 
-					$arReturn['error'] .= $errAnswer;
-				}else{
+                    $arReturn['error'] .= $errAnswer;
+                } elseif (strpos($result['result'], '{') === 0){
+                    $answer = json_decode($result['result'],true);
+                    $errAnswer = '';
+                    if(!empty($answer) && array_key_exists('alerts',$answer) && is_array($answer['alerts'])){
+                        foreach ($answer['alerts'] as $arError){
+                            $errAnswer .= $arError['msg'].". ";
+                        }
+                    }
+
+                    $arReturn['error'] .= $errAnswer;
+                } else {
 					if(!file_exists($_SERVER['DOCUMENT_ROOT']."/upload/".self::$MODULE_ID))
 						mkdir($_SERVER['DOCUMENT_ROOT']."/upload/".self::$MODULE_ID);
 					$fileName = mktime()."_".$accId;
@@ -861,7 +871,7 @@
 				$arReturn = array('result' => $us['result']);
 				switch($us['result']){
 					case 'error'   : $arReturn['text'] = GetMessage("IPOLSDEK_SYNCTY_ERR_HAPPENING")." ".$us['error']; break;
-					case 'end'     : $arReturn['text'] = (array_key_exists('full',$params) && $params['full']) ? GetMessage('IPOLSDEK_UPDT_DONE').date("d.m.Y H:i:s",filemtime($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".self::$MODULE_ID."/list.php")) : GetMessage('IPOLSDEK_SYNCTY_LBL_SCOD'); break;
+					case 'end'     : $arReturn['text'] = (array_key_exists('full',$params) && $params['full']) ? GetMessage('IPOLSDEK_UPDT_DONE').date("d.m.Y H:i:s",filemtime($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".self::$MODULE_ID."/list.json")) : GetMessage('IPOLSDEK_SYNCTY_LBL_SCOD'); break;
 					case 'country' : $arReturn['text'] = GetMessage('IPOLSDEK_SYNCTY_CNTRCTDONE').GetMessage('IPOLSDEK_SYNCTY_'.$us['country']); break;
 					default        : $arReturn['text'] = GetMessage('IPOLSDEK_SYNCTY_LBL_PROCESS')." ".$us['done']."/".$us['total']; break;
 				}
@@ -976,7 +986,8 @@
 	';
 
 					$result = self::sendToSDEK($XML,'status_report_h');
-
+					\Ipolh\SDEK\Bitrix\Admin\Logger::statusCheck(array('Request' => $XML, 'Response'=> $result['result']));
+					
 					if($result['code'] != 200)
 						self::errorLog(GetMessage("IPOLSDEK_GOS_UNBLSND").GetMessage("IPOLSDEK_ERRORLOG_BADRESPOND").$result['code']);
 					else{
@@ -1030,6 +1041,7 @@
 			';
 
 			$result = self::sendToSDEK($XML,'status_report_h');
+			\Ipolh\SDEK\Bitrix\Admin\Logger::statusCheck(array('Request' => $XML, 'Response'=> $result['result']));
 
 			if($result['code'] != 200)
 				self::errorLog(GetMessage("IPOLSDEK_GOS_UNBLSND").GetMessage("IPOLSDEK_ERRORLOG_BADRESPOND").$result['code']);
@@ -1089,7 +1101,8 @@
 							"SOURCE"   => $arOrder['SOURCE']
 						)))
 							self::errorLog(GetMessage('IPOLSDEK_GOS_HASERROR').GetMessage('IPOLSDEK_GOS_CANTUPDATEREQ').$arOrder['ORDER_ID'].". ".GetMessage('IPOLSDEK_GOS_STATUS').$curState.".");
-						else{
+						elseif($curState !== $arOrder['STATUS']){
+							// update statuses in Bitrix only if got new status
 							$newStat = COption::GetOptionString(self::$MODULE_ID,(($arOrder['SOURCE'] == 1)?"stShipment":"status").$curState,false);
 							if($newStat && strlen($newStat) < 3){
 								if($arOrder['SOURCE'] == 1){ // отправление
@@ -1105,6 +1118,10 @@
 									}
 								}
 							}
+
+                            foreach(GetModuleEvents(self::$MODULE_ID, "onNewStatus", true) as $arEvent)
+                                ExecuteModuleEventEx($arEvent,Array($arOrder['ORDER_ID'],$curState,$arOrder['SOURCE']));
+							
 							// оплаченность
 							if(
 								$orderMess['State'] == 4 && 
@@ -1140,70 +1157,15 @@
 		static function updateList(){ // обновление списка пунктов самовывоза
 			self::checkAS();
 			self::ordersNum();
-			$errors = false;
-			$request = self::sendToSDEK(false,'pvzlist','type=ALL');
-			$arList = array();
-			if($request['code'] == 200){
-				$xml=simplexml_load_string($request['result']);
-				foreach($xml as $key => $val){
-					$cityCode = (string)$val['CityCode'];
-					// if(!sqlSdekCity::getBySId($cityCode))
-						// continue;
-					$type = (string)$val['Type'];
-					$city = (string)$val["City"];
-					if(strpos($city,'(') !== false)
-						$city = trim(substr($city,0,strpos($city,'(')));
-					if(strpos($city,',') !== false)
-						$city = trim(substr($city,0,strpos($city,',')));
-					$code = (string)$val["Code"];
-					$arList[$type][$city][$code]=array(
-						'Name'     => (string)$val['Name'],
-						'WorkTime' => (string)$val['WorkTime'],
-						'Address'  => (string)$val['Address'],
-						'Phone'    => (string)$val['Phone'],
-						'Note'     => str_replace(array("\n","\r"),'',nl2br((string)$val['Note'])),
-						'cX'       => (string)$val['coordX'],
-						'cY'       => (string)$val['coordY'],
-						'Dressing' => (string)$val['IsDressingRoom'],
-						'Cash'	   => (string)$val['HaveCashless'], 
-						'Station'  => (string)$val['NearestStation'],
-						'Site'	   => (string)$val['Site'],
-						'Metro'	   => (string)$val['MetroStation']
-					);
-					if($val->WeightLimit){
-						$arList[$type][$city][$code]['WeightLim'] = array(
-							'MIN' => (float)$val->WeightLimit['WeightMin'],
-							'MAX' => (float)$val->WeightLimit['WeightMax']
-						);
-					}
-					if($val->OfficeImage)
-						$arList[$type][$city][$code]['Picture'] = (string)$val->OfficeImage['url'];
-					if($val->OfficeHowGo)
-						$arList[$type][$city][$code]['Path']    = (string)$val->OfficeHowGo['url'];
-				}
-			}
-			else{
-				$strInfo = GetMessage('IPOLSDEK_FILE_UNBLUPDT').$request['code'].".";
-				$errors = true;
-			}
-			if(count($arList)){
-				if(!file_put_contents($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".self::$MODULE_ID."/list.php",json_encode($arList))){
-					$strInfo = GetMessage('IPOLSDEK_SUNCPVZ_NOWRITE');
-					$errors = true;
-				}
-			} else {
-				$strInfo = GetMessage('IPOLSDEK_SUNCPVZ_NODATA');
-				$errors = true;
-			}
-			if($strInfo && COption::GetOptionString(self::$MODULE_ID,'logged',false)){
-				$file=fopen($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".self::$MODULE_ID."/hint.txt","a");
-				fwrite($file,"<br><br><strong>".date('d.m.Y H:i:s')."</strong><br>".$strInfo);
-				fclose($file);
-			}
+			$syncResult = \Ipolh\SDEK\Bitrix\Controller\pvzController::updateList();
 
-			if(!COption::GetOptionString(self::$MODULE_ID,'logged',false) && $request['code']!=200)
-				return array('code' => $request['code']);
-			return !$errors;
+			if(!$syncResult['SUCCESS'] && COption::GetOptionString(self::$MODULE_ID,'logged',false)){
+                $file=fopen($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".self::$MODULE_ID."/hint.txt","a");
+                fwrite($file,"<br><br><strong>".date('d.m.Y H:i:s')."</strong><br>".$syncResult['ERROR']);
+                fclose($file);
+            }
+
+            return $syncResult['SUCCESS'];
 		}
 
 		static function cityUpdater($params=false){
@@ -1382,6 +1344,12 @@
 			}
 		}
 
+		public static function restorePVZ()
+        {
+            $result = \Ipolh\SDEK\Bitrix\Controller\pvzController::updateList('backup');
+            echo json_encode($result);
+        }
+
 		
 		/*()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
 														Импорт городов
@@ -1559,10 +1527,10 @@
 			return sqlSdekOrders::CheckRecord($orderId,$mode);
 		}
 
-		private static function nativeReq($where,$what=false){
+		public static function nativeReq($where,$what=false){
 			if(!$where) return false;
 			$ch = curl_init();
-			curl_setopt($ch,CURLOPT_URL,'http://ipolh.com/webService/sdek/'.$where);
+			curl_setopt($ch,CURLOPT_URL,'https://ipolh.com/webService/sdek/'.$where);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			if($what){
 				curl_setopt($ch, CURLOPT_POST, TRUE);

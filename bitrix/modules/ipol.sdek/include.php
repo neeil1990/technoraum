@@ -6,6 +6,7 @@ IncludeModuleLangFile(__FILE__);
 // IPOLSDEK_LOG - ����� ����
 
 /*
+ * IPOLSDEK_BASIC_URL - API для базового запроса
 	onPVZListReady
 */
 
@@ -121,10 +122,14 @@ class sdekHelper{
         if(!$where) return false;
         $where .= '.php' . (($get) ? "?".$get : '');
         $ch = curl_init();
-        if($where == 'new_orders.php' && COption::GetOptionString(self::$MODULE_ID,'crazyHosters','N') != 'Y' && COption::GetOptionString(self::$MODULE_ID,'blockSwitch','N') != 'Y')
+        $specialUrl = defined('IPOLSDEK_BASIC_URL') ? constant('IPOLSDEK_BASIC_URL') : false;
+        if($where == 'new_orders.php' && COption::GetOptionString(self::$MODULE_ID,'crazyHosters','N') != 'Y' && COption::GetOptionString(self::$MODULE_ID,'blockSwitch','N') != 'Y' && !$specialUrl)
             curl_setopt($ch,CURLOPT_URL,'http://proxy.apiship.ru/cdek/new_orders.php');
-        else
-            curl_setopt($ch,CURLOPT_URL,'https://integration.cdek.ru/'.$where);
+        elseif($specialUrl) {
+            curl_setopt($ch, CURLOPT_URL, $specialUrl . $where);
+        } else {
+            curl_setopt($ch, CURLOPT_URL, 'https://integration.cdek.ru/' . $where);
+        }
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         if($XML){
@@ -530,12 +535,15 @@ class sdekHelper{
     }
 
     static function getListFile($noEnc=false){// ������� ������ �� LIST - ����� � ��� �������, � ������� ���... ������... ����...
-        if(!file_exists($_SERVER['DOCUMENT_ROOT']."/bitrix/js/".self::$MODULE_ID."/list.php")) return array();
-        $arList = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT']."/bitrix/js/".self::$MODULE_ID."/list.php"),true);
+        $controller = new \Ipolh\SDEK\Bitrix\Controller\pvzController();
+        $arList = $controller->getListFile();
+
         if(!$noEnc)
             $arList = self::zaDEjsonit($arList);
+
         foreach(GetModuleEvents(self::$MODULE_ID,"onPVZListReady",true) as $arEvent)
             ExecuteModuleEventEx($arEvent,Array(&$arList));
+
         return $arList;
     }
 
@@ -566,6 +574,17 @@ class sdekHelper{
     protected static function getSaleVersion(){
         include($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/sale/install/version.php');
         return $arModuleVersion['VERSION'];
+    }
+	
+	public static function getModuleVersion()
+    {
+		$moduleObject = CModule::CreateModuleObject(self::$MODULE_ID);
+
+		if(is_object($moduleObject)){
+			return $moduleObject->MODULE_VERSION;
+		}
+
+        return false; 
     }
 
     static function getCountryOptions(){
@@ -686,7 +705,9 @@ CModule::AddAutoloadClasses(
         'sdekCityGetter'			 => '/classes/sdekMercy/getCityClass.php',
         'sdekShipment'				 => '/classes/lib/sdekShipment.php',
         'sdekShipmentCollection'	 => '/classes/lib/sdekShipmentCollection.php',
-		'\\Ipolh\\SDEK\\subscribeHandler'  => '/classes/general/subscribeHandler.php'
+		'\\Ipolh\\SDEK\\subscribeHandler'  => '/classes/general/subscribeHandler.php',
+		'\\Ipolh\\SDEK\\pvzWidjetHandler'  => '/classes/general/pvzWidjetHandler.php',
+		'\\Ipolh\\SDEK\\abstractGeneral'  => '/classes/general/abstractGeneral.php'
     )
 );
 

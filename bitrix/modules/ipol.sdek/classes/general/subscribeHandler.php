@@ -3,10 +3,13 @@ namespace Ipolh\SDEK;
 
 IncludeModuleLangFile(__FILE__);
 
-class subscribeHandler
+class subscribeHandler /*extends abstractGeneral*/
 {
+
+    protected static $MODULE_LBL = IPOLH_SDEK_LBL;
+    protected static $MODULE_ID  = IPOLH_SDEK;
+
     public static $link = true;
-    private static $MODULE_ID  = IPOLH_SDEK;
 
     public static function getAjaxAction($action,$subaction){
         if(method_exists('sdekHelper',$action))
@@ -76,15 +79,36 @@ class subscribeHandler
     }
 		// loading widjet data
     public static function OnEndBufferContent(&$content){
-        \CDeliverySDEK::onBufferContent($content);
+		if(
+		    class_exists('Ipolh\SDEK\pvzWidjetHandler') &&
+            \COption::GetOptionString(self::$MODULE_ID,'useOldWidjetConnect','N') !== 'Y'
+        ){
+			\Ipolh\SDEK\pvzWidjetHandler::onBufferContent($content);
+		}else{
+			\CDeliverySDEK::onBufferContent($content);
+		}
     }
 		// prepare data for component
     public static function prepareWidjetData($arResult,$arUserResult){
-        \CDeliverySDEK::pickupLoader($arResult,$arUserResult);
+        if(
+            class_exists('Ipolh\SDEK\pvzWidjetHandler') &&
+            \COption::GetOptionString(self::$MODULE_ID,'useOldWidjetConnect','N') !== 'Y'
+        ){
+			\Ipolh\SDEK\pvzWidjetHandler::pickupLoader($arResult,$arUserResult);
+		}else{
+			\CDeliverySDEK::pickupLoader($arResult,$arUserResult);
+		}
     }
 		// including component
     public static function loadComponent(){
-        \CDeliverySDEK::loadComponent();
+        if(
+            class_exists('Ipolh\SDEK\pvzWidjetHandler') &&
+            \COption::GetOptionString(self::$MODULE_ID,'useOldWidjetConnect','N') !== 'Y'
+        ){
+			\Ipolh\SDEK\pvzWidjetHandler::loadComponent();
+		}else{
+			\CDeliverySDEK::loadComponent();
+		}
     }
 		// adding properties to order & autoloads
     public static function onOrderCreate($oId,$arFields){

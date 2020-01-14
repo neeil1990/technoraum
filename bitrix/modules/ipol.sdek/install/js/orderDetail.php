@@ -2,7 +2,8 @@
 $SDEK_ID = false;
 $message = array();
 
-if(self::$requestVals){ // получаем параметры заявки из БД, если они есть
+// getting form parametrs from BD
+if(self::$requestVals){
     $ordrVals = self::$requestVals;
     $status=$ordrVals['STATUS'];
 
@@ -16,7 +17,8 @@ if(self::$requestVals){ // получаем параметры заявки из БД, если они есть
         }
     $SDEK_ID = $ordrVals['SDEK_ID'];
     $MESS_ID = $ordrVals['MESS_ID'];
-    $ordrVals=unserialize($ordrVals['PARAMS']); // массив значений заявки, если не задан - заполняется по умолчанию из параметров, указанных в опциях и покупателем
+    // array of form data, of not given - formed from default parametrs from options and order
+    $ordrVals=unserialize($ordrVals['PARAMS']);
     self::$isLoaded = true;
 
     if(self::$workMode == 'order')
@@ -56,20 +58,20 @@ if(self::$isLoaded)
 else
     self::$isEditable = true;
 
-$orignCityId = false; // город-исходник из заказа, для которого рассчитывается доставка - только он есть в таблице соответствий
-
-// Проверка города [если отправляется в ошибочный]
+// Checking city, if sended in error one
 $errCities = sdekHelper::getErrCities();
 $multiCity = false;
 $multiCityS = false;
-if(array_key_exists('many',$errCities) && array_key_exists(self::$orderDescr['properties'][COption::GetOptionString(self::$MODULE_ID,'location','LOCATION')],$errCities['many'])){
+$bitrixCityId = self::$orderDescr['properties'][COption::GetOptionString(self::$MODULE_ID,'location','LOCATION')];
+if(array_key_exists('many',$errCities) && array_key_exists($bitrixCityId,$errCities['many'])){
     $multiCity = '&nbsp;&nbsp;<a href="#" class="PropWarning" onclick="return IPOLSDEK_oExport.popup(\'pop-multiCity\',this);"></a>	
 	<div id="pop-multiCity" class="b-popup" style="display: none; ">
 	<div class="pop-text">'.GetMessage("IPOLSDEK_SOD_MANYCITY").'<div class="close" onclick="$(this).closest(\'.b-popup\').hide();"></div>
 </div>';
+
     $multiCityS = "<select id='IPOLSDEK_ms' onchange='IPOLSDEK_onMSChange(\$(this))'>
-	<option value='".$orignCityId."' ".(($ordrVals['location'] == $orignCityId)?"selected":"").">".$errCities['many'][$ordrVals['location']]['takenLbl']."</option>";
-    foreach($errCities['many'][$ordrVals['location']]['sdekCity'] as $sdekId => $arAnalog)
+	<option value='".$orderCity['SDEK_ID']."' ".(($ordrVals['location'] == $orderCity['SDEK_ID'])?"selected":"").">".$errCities['many'][$bitrixCityId]['takenLbl']."</option>";
+    foreach($errCities['many'][$bitrixCityId]['sdekCity'] as $sdekId => $arAnalog)
         $multiCityS .= "<option value='".$sdekId."' ".(($ordrVals['location'] == $sdekId)?"selected":"").">".$arAnalog['region'].", ".$arAnalog['name']."</option>";
     $multiCityS .= "</select>";
 }
@@ -128,7 +130,7 @@ $badPay = (self::$orderDescr['info']['PAYED'] != 'Y');
 $strOfPSV='';
 $arBPVZ = "{";
 if(array_key_exists($cityName,$arList['PVZ'])){
-	uasort($arList['PVZ'][$cityName],'sdekExport::sortPVZ');
+    uasort($arList['PVZ'][$cityName],'sdekExport::sortPVZ');
     foreach($arList['PVZ'][$cityName] as $code => $punkts){
         if(!array_key_exists($code,$arModdedList[$cityName]))
             $arBPVZ .= $code.":true,";
@@ -141,12 +143,12 @@ $arBPVZ .= "}";
 //Доп. опции
 $exOpts = sdekdriver::getExtraOptions();
 foreach($exOpts as $code => $vals)
-	if($ordrVals['AS'][$code] == 'Y')
-		$exOpts[$code]['DEF'] = 'Y';
-	elseif(self::$isLoaded)
-		$exOpts[$code]['DEF'] = 'N';
-	
-		
+    if($ordrVals['AS'][$code] == 'Y')
+        $exOpts[$code]['DEF'] = 'Y';
+    elseif(self::$isLoaded)
+        $exOpts[$code]['DEF'] = 'N';
+
+
 
 // Вызов курьера
 $allowCourier = (COption::GetOptionString(self::$MODULE_ID,'allowSenders','N') == 'Y');
@@ -174,7 +176,7 @@ if($svdCouriers && count($svdCouriers))
         $IPOLSDEK_svdC .= "},";
     }
 
-// Разбиение на города-отправители
+// Splitting for cender-cities
 $senderWH = 0;
 if(COption::GetOptionString(self::$MODULE_ID,'warhouses','N')==='Y'){
     if(self::isConverted() && $workMode == 'order'){
@@ -192,7 +194,7 @@ if(COption::GetOptionString(self::$MODULE_ID,'warhouses','N')==='Y'){
         }else
             $senderWH = json_decode($ordrVals['service'],true);
 }
-// страны и валюты
+// countries and currencies
 
 $arCity  = sqlSdekCity::getBySId($ordrVals['location']);
 $country = ($arCity['COUNTRY']) ? $arCity['COUNTRY'] : 'rus';
@@ -239,6 +241,18 @@ CJSCore::Init(array("jquery"));
             background: url('/bitrix/images/<?=self::$MODULE_ID?>/trouble.png') no-repeat transparent !important;
             background-size: contain !important;
         }
+        .WarningLK{
+            background: url('/bitrix/images/<?=self::$MODULE_ID?>/lkcount.png') no-repeat transparent;
+            background-size: contain;
+            display: inline-block;
+            height: 12px;
+            position: relative;
+            width: 12px;
+        }
+        .WarningLK:hover{
+            background: url('/bitrix/images/<?=self::$MODULE_ID?>/lkcount.png') no-repeat transparent !important;
+            background-size: contain !important;
+        }
         .PropHint {
             background: url('/bitrix/images/<?=self::$MODULE_ID?>/hint.gif') no-repeat transparent;
             display: inline-block;
@@ -276,19 +290,19 @@ CJSCore::Init(array("jquery"));
         #IPOLSDEK_wndOrder{
             width: 100%;
         }
-		#IPOLSDEK_badDeliveryTerm{
-			display:none;
-		}
-		#IPOLSDEK_killDeliveryTerm{
-			width: 15px;
-			height: 15px;
-			display: none;
-			background: url("/bitrix/images/<?=self::$MODULE_ID?>/delPack.png") !important;
-			right: -24px;
-			position: relative;
-			top: 4px;
-			cursor:pointer;
-		}
+        #IPOLSDEK_badDeliveryTerm{
+            display:none;
+        }
+        #IPOLSDEK_killDeliveryTerm{
+            width: 15px;
+            height: 15px;
+            display: none;
+            background: url("/bitrix/images/<?=self::$MODULE_ID?>/delPack.png") !important;
+            right: -24px;
+            position: relative;
+            top: 4px;
+            cursor:pointer;
+        }
         #IPOLSDEK_allTarifs{
             border-collapse: collapse;
             width: 100%;
@@ -322,10 +336,10 @@ CJSCore::Init(array("jquery"));
             border: 1px solid #dce7ed;
             padding: 5px;
         }
-		.errorText{
-			color:red;
-			font-size:11px;
-		}
+        .errorText{
+            color:red;
+            font-size:11px;
+        }
     </style>
     <script>
         <?=sdekdriver::getModuleExt('mask_input')?>
@@ -340,9 +354,9 @@ CJSCore::Init(array("jquery"));
             delivPrice   : <?=$ordrVals['deliveryP']?>,
             curDelivery  : <?=(self::$orderDescr['info']['DELIVERY_SDEK']) ? '"'.self::$orderDescr['info']['DELIVERY_ID'].'"' : "false"?>,
             country      : "<?=$country?>",
-			person	     : '<?=(self::$orderDescr['info']['PERSON_TYPE_ID']) ? self::$orderDescr['info']['PERSON_TYPE_ID'] : '1'?>',
-			paysystem    : <?=(self::$orderDescr['info']['PAY_SYSTEM_ID']) ? "'".self::$orderDescr['info']['PAY_SYSTEM_ID']."'" : 'false'?>,
-			deliveryDate : false,
+            person	     : '<?=(self::$orderDescr['info']['PERSON_TYPE_ID']) ? self::$orderDescr['info']['PERSON_TYPE_ID'] : '1'?>',
+            paysystem    : <?=(self::$orderDescr['info']['PAY_SYSTEM_ID']) ? "'".self::$orderDescr['info']['PAY_SYSTEM_ID']."'" : 'false'?>,
+            deliveryDate : false,
 
             ajax: function(params){
                 var ajaxParams = {
@@ -350,20 +364,13 @@ CJSCore::Init(array("jquery"));
                     url   : "/bitrix/js/<?=self::$MODULE_ID?>/ajax.php",
                     error : function(a,b,c){console.log('export '+b,c);}
                 };
-                if(typeof(params.data) != 'undefined')
+                if(typeof(params.data) !== 'undefined')
                     ajaxParams.data = params.data;
-                if(typeof(params.dataType) != 'undefined')
+                if(typeof(params.dataType) !== 'undefined')
                     ajaxParams.dataType = params.dataType;
-                if(typeof(params.success) != 'undefined')
+                if(typeof(params.success) !== 'undefined')
                     ajaxParams.success = params.success;
                 $.ajax(ajaxParams);
-            },
-
-            isEmpty: function(obj){
-                if(typeof(obj) == 'object')
-                    for(var i in obj)
-                        return false;
-                return true;
             },
 
             load: function(){
@@ -377,7 +384,7 @@ CJSCore::Init(array("jquery"));
                 }
             },
 
-            // окно
+            // window
             wnd: false,
             showWindow: function(){
                 var savButStat='';
@@ -402,13 +409,13 @@ CJSCore::Init(array("jquery"));
                         height: '500',
                         width: '505',
                         buttons: [
-                            '<input type=\"button\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_SAVESEND')?>\"  '+savButStat+'onclick=\"IPOLSDEK_oExport.send(\'saveAndSend\')\"/>', // сохранить и отправить
-                            '<input id=\"IPOLSDEK_allTarifsBtn\" type=\"button\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_ALLTARIFS')?>\"  '+savButStat+'onclick=\"IPOLSDEK_oExport.allTarifs.show()\"/>', // все тарифы
+                            '<input type=\"button\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_SAVESEND')?>\"  '+savButStat+'onclick=\"IPOLSDEK_oExport.send(\'saveAndSend\')\"/>',
+                            '<input id=\"IPOLSDEK_allTarifsBtn\" type=\"button\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_ALLTARIFS')?>\"  '+savButStat+'onclick=\"IPOLSDEK_oExport.allTarifs.show()\"/>', // all tarifs
                             '<input type=\"button\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_DELETE')?>\" '+delButStat+' onclick=\"IPOLSDEK_oExport.delete()\"/>', // удалить
-                            '<input type=\"button\" id=\"IPOLSDEK_PRINT\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_PRNTSH')?>\" '+prntButStat+' onclick="IPOLSDEK_oExport.print(\''+IPOLSDEK_oExport.orderId+'\'); return false;"/>', // печать штрихкода
-                            '<input type=\"button\" id=\"IPOLSDEK_SHTRIH\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_SHTRIH')?>\" '+prntButStat+' onclick="IPOLSDEK_oExport.shtrih(\''+IPOLSDEK_oExport.orderId+'\'); return false;"/>', // печать штрихкода
+                            '<input type=\"button\" id=\"IPOLSDEK_PRINT\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_PRNTSH')?>\" '+prntButStat+' onclick="IPOLSDEK_oExport.print(\''+IPOLSDEK_oExport.orderId+'\'); return false;"/>', // printing invoice
+                            '<input type=\"button\" id=\"IPOLSDEK_SHTRIH\" value=\"<?=GetMessage('IPOLSDEK_JSC_SOD_SHTRIH')?>\" '+prntButStat+' onclick="IPOLSDEK_oExport.shtrih(\''+IPOLSDEK_oExport.orderId+'\'); return false;"/>', // printing shtrih
                             '<input type=\"button\" value=\"<?=GetMessage('IPOLSDEK_JS_SOD_PACKS')?>\"  onclick="IPOLSDEK_packs.wnd.open(); return false;"/>', // места
-                            <?if($SDEK_ID){?>'<a href="http://www.edostavka.ru/track.html?order_id=<?=$SDEK_ID?>" target="_blank"><?=GetMessage('IPOLSDEK_JSC_SOD_FOLLOW')?></a>'<?}?> // отслеживание
+                            <?if($SDEK_ID){?>'<a href="http://www.cdek.ru/track.html?order_id=<?=$SDEK_ID?>" target="_blank"><?=GetMessage('IPOLSDEK_JSC_SOD_FOLLOW')?></a>'<?}?> // follow
                         ]
                     });
                     $('#IPOLSDEK_courierTimeBeg').mask("29:59");
@@ -430,8 +437,8 @@ CJSCore::Init(array("jquery"));
                 <?}?>
             },
 
-            // события
-            //изменилась услуга: проверяем, не самовывоз ли, скрываем/показываем соответствующие поля доставки
+            // events
+                // changing tarif: check weither pvz or couries, shows corresponding form fields
             onCodeChange: function(wat,ifDef){
                 if(wat.val() == 138 || wat.val() == 139) $('#IPOLSDEK_tarifWarning').css('display','table-row');
                 else $('#IPOLSDEK_tarifWarning').css('display','');
@@ -452,73 +459,74 @@ CJSCore::Init(array("jquery"));
                         IPOLSDEK_oExport.courier.handle();
                 }else{
                     $('#IPOLSDEK_courierHeader').css('display','none');
-                    if(IPOLSDEK_oExport.courier.request && typeof(ifDef) == 'undefined')
+                    if(IPOLSDEK_oExport.courier.request && typeof(ifDef) === 'undefined')
                         IPOLSDEK_oExport.courier.handle();
                 }
                 <?}else{?>
                 $('#IPOLSDEK_courierHeader').css('display','none');
                 <?}?>
 
-                if(typeof(ifDef) == 'undefined')
+                if(typeof(ifDef) === 'undefined')
                     IPOLSDEK_oExport.onRecheck();
                 else
                     IPOLSDEK_oExport.onRecheck(true);
                 IPOLSDEK_oExport.onPVZChange();
             },
-            // Изменился город назначения (если в списке ошибочных)
+                // changing destination city (if in error list)
             onMSChange: function(wat){
                 $('#IPOLSDEK_location').val(wat.val());
                 IPOLSDEK_oExport.onRecheck();
             },
-            // Изменился ПВЗ - надо проверить его доступность
+                // changing PVZ - checking available
             onPVZChange: function(wat){
-                if(typeof(wat) == 'undefined')
+                if(typeof(wat) === 'undefined')
                     wat = $('#IPOLSDEK_PVZ');
-                if(typeof(IPOLSDEK_oExport.badPVZ[wat.val()]) != 'undefined')
+                if(typeof(IPOLSDEK_oExport.badPVZ[wat.val()]) !== 'undefined')
                     $('#IPOLSDEK_oExport.badPVZ').css('display','inline');
                 else
                     $('#IPOLSDEK_oExport.badPVZ').css('display','none');
             },
-			// Изменение даты доставки
-			onDeliveryDateChange: function(){
-				$('#IPOLSDEK_badDeliveryTerm').css('display','');
-				var deliveryDate    = $('#IPOLSDEK_deliveryDate').val();
-				var deliveryDateR   = IPOLSDEK_oExport.deliveryDate.toString();;
-				if(deliveryDate){
-					$('#IPOLSDEK_killDeliveryTerm').css('display','inline-block');
-				}else{
-					$('#IPOLSDEK_killDeliveryTerm').css('display','none');
-				}		
-				if(deliveryDate && deliveryDateR){
-					$('#IPOLSDEK_deliveryTerm').html(deliveryDateR);
-					var deliveryDateROb = new Date();
-					deliveryDate = deliveryDate.split('.');
-					var deliveryDateOb  = new Date(deliveryDate[2],deliveryDate[1]-1,deliveryDate[0]);
+                // changing data delivery
+            onDeliveryDateChange: function(){
+                $('#IPOLSDEK_badDeliveryTerm').css('display','');
+                var deliveryDate    = $('#IPOLSDEK_deliveryDate').val();
+                var deliveryDateR   = IPOLSDEK_oExport.deliveryDate.toString();;
+                if(deliveryDate){
+                    $('#IPOLSDEK_killDeliveryTerm').css('display','inline-block');
+                }else{
+                    $('#IPOLSDEK_killDeliveryTerm').css('display','none');
+                }
+                if(deliveryDate && deliveryDateR){
+                    $('#IPOLSDEK_deliveryTerm').html(deliveryDateR);
+                    var deliveryDateROb = new Date();
+                    deliveryDate = deliveryDate.split('.');
+                    var deliveryDateOb  = new Date(deliveryDate[2],deliveryDate[1]-1,deliveryDate[0]);
 
-					if(deliveryDateR.indexOf('-') !== -1){
-						deliveryDateR   = deliveryDateR.substr(0,deliveryDateR.indexOf('-'));
-					}
-					deliveryDateROb.setHours(0);
-					deliveryDateROb.setDate(deliveryDateROb.getDate()+Number(deliveryDateR));
+                    if(deliveryDateR.indexOf('-') !== -1){
+                        deliveryDateR   = deliveryDateR.substr(0,deliveryDateR.indexOf('-'));
+                    }
+                    deliveryDateROb.setHours(0);
+                    deliveryDateROb.setDate(deliveryDateROb.getDate()+Number(deliveryDateR));
 
-					if(Number(deliveryDateOb - deliveryDateROb) < -43200000){
-						$('#IPOLSDEK_badDeliveryTerm').css('display','table-row');
-					}
-				}
-			},
-			resetDate: function(){
-				$("#IPOLSDEK_deliveryDate").val("");
-				IPOLSDEK_oExport.onDeliveryDateChange();
-			},
-            // Изменился город-отправитель: пересчитываем все.
+                    if(Number(deliveryDateOb - deliveryDateROb) < -43200000){
+                        $('#IPOLSDEK_badDeliveryTerm').css('display','table-row');
+                    }
+                }
+            },
+                // data
+            resetDate: function(){
+                $("#IPOLSDEK_deliveryDate").val("");
+                IPOLSDEK_oExport.onDeliveryDateChange();
+            },
+                // Changing cender-ciry: recheck all
             onDepartureChange: function(){
                 IPOLSDEK_oExport.onRecheck();
             },
-            // Изменение условий - проверка стоимости / сроков
+                // changing terms: recalculate
             onRecheck: function(isNoAlert){
                 var reqParams = IPOLSDEK_oExport.getInputsRecheck();
 
-                if(typeof(reqParams) != 'object' || typeof(reqParams.cityTo) == 'undefined'){
+                if(typeof(reqParams) !== 'object' || typeof(reqParams.cityTo) === 'undefined'){
                     alert(reqParams);
                     return false;
                 }
@@ -527,16 +535,16 @@ CJSCore::Init(array("jquery"));
                     data     : reqParams,
                     dataType : 'json',
                     success  : function(data){
-                        if(typeof data.success != 'undefined'){
+                        if(typeof data.success !== 'undefined'){
                             var text = '';
                             if(data.success){
                                 var dayLbl = data.termMin + "-" + data.termMax;
                                 if(data.termMin == data.termMax) dayLbl = data.termMax;
-								IPOLSDEK_oExport.deliveryDate = dayLbl;
+                                IPOLSDEK_oExport.deliveryDate = dayLbl;
                                 text = "<?=GetMessage("IPOLSDEK_JSC_SOD_NEWCONDITIONS_1")?>"  + dayLbl + " <?=GetMessage("IPOLSDEK_JS_SOD_HD_DAY")?>";
-                                if(typeof(data.price) != 'undefined')
+                                if(typeof(data.price) !== 'undefined')
                                     text+="<?=GetMessage("IPOLSDEK_JSC_SOD_NEWCONDITIONS_2")?>" + data.price;
-                                if(typeof(data.sourcePrice) != 'undefined')
+                                if(typeof(data.sourcePrice) !== 'undefined')
                                     text+="\n\n<?=GetMessage("IPOLSDEK_JSC_SOD_PriceInLK")?>"+data.sourcePrice;
                                 $('#IPOLSDEK_newPrDel').html(data.price);
                             } else {
@@ -548,14 +556,14 @@ CJSCore::Init(array("jquery"));
                                 text += data[i]+" ("+i+") \n";
                             $('#IPOLSDEK_newPrDel').html('<?=GetMessage("IPOLSDEK_JS_SOD_noDost")?>');
                         }
-                        if(typeof(isNoAlert) == 'undefined')
+                        if(typeof(isNoAlert) === 'undefined')
                             alert(text);
-						IPOLSDEK_oExport.onDeliveryDateChange();
+                        IPOLSDEK_oExport.onDeliveryDateChange();
                     }
                 });
             },
 
-            // Данные для отправки / проверки
+            // Data for sending
             getInputsRecheck: function(params){
                 // var city = $('#IPOLSDEK_location').val();
                 var city = $('#IPOLSDEK_cityTo').val();
@@ -580,7 +588,7 @@ CJSCore::Init(array("jquery"));
                 if(packs)
                     packs = JSON.parse(packs);
 
-                if(typeof(params) == 'undefined')
+                if(typeof(params) === 'undefined')
                     params = {};
 
                 var cityFrom = (params.cityFrom) ? params.cityFrom : false;
@@ -602,9 +610,9 @@ CJSCore::Init(array("jquery"));
                     GABS      : (params.GABS) ? params.GABS : GABS,
                     packs     : (params.packs) ? params.packs : packs,
                     account   : account,
-					price	  : IPOLSDEK_oExport.goodsPrice,
-					person    : IPOLSDEK_oExport.person,
-					paysystem : IPOLSDEK_oExport.paysystem
+                    price	  : IPOLSDEK_oExport.goodsPrice,
+                    person    : IPOLSDEK_oExport.person,
+                    paysystem : IPOLSDEK_oExport.paysystem
                 };
             },
 
@@ -616,21 +624,24 @@ CJSCore::Init(array("jquery"));
 
                 if($('#IPOLSDEK_isBeznal').attr('checked'))
                     dO['isBeznal']='Y';
+                if($('#IPOLSDEK_minVats').attr('checked'))
+                    dO['minVats']='Y';
 
                 var reqFields = {
                     'service'   	 : {need: true},
                     'realSeller'	 : {need: false},
                     'departure'		 : {need: true,check: ($('#IPOLSDEK_departure').length && !isCourierCall)},
                     'location'  	 : {need: true},
-					'deliveryDate'   : {need: false},
+                    'deliveryDate'   : {need: false},
                     'name'     		 : {need: true},
                     'email'     	 : {need: true},
                     'phone'     	 : {need: true,format: IPOLSDEK_oExport.checkPhone,failFormat: "<?=GetMessage('IPOLSDEK_JSC_SOD_badPhone')?>"},
                     'comment'    	 : {need: false},
+                    'reccompany'     : {need: false},
                     'NDSGoods'    	 : {need: false},
                     'NDSDelivery'    : {need: false},
-                    'toPay'			 : {need: true, check: (typeof(dO['isBeznal']) == 'undefined' || dO['isBeznal'] != 'Y')},
-                    'deliveryP'		 : {need: true, check: (typeof(dO['isBeznal']) == 'undefined' && dO['isBeznal'] != 'Y')},
+                    'toPay'			 : {need: true, check: (typeof(dO['isBeznal']) === 'undefined' || dO['isBeznal'] != 'Y')},
+                    'deliveryP'		 : {need: true, check: (typeof(dO['isBeznal']) === 'undefined' && dO['isBeznal'] != 'Y')},
                     'street'      	 : {need: true,check: (profile == 'courier')},
                     'house'      	 : {need: true,check: (profile == 'courier')},
                     'flat'       	 : {need: true,check: (profile == 'courier')},
@@ -649,17 +660,17 @@ CJSCore::Init(array("jquery"));
                 };
 
                 for(var i in reqFields){
-                    if(typeof(reqFields[i].need) == 'undefined') continue;
-                    if(typeof(reqFields[i].check) != 'undefined' && !reqFields[i].check) continue;
+                    if(typeof(reqFields[i].need) === 'undefined') continue;
+                    if(typeof(reqFields[i].check) !== 'undefined' && !reqFields[i].check) continue;
                     dO[i]=$('#IPOLSDEK_'+i).val();
                     if(!dO[i] && reqFields[i].need){
                         return $('#IPOLSDEK_'+i).closest('tr').children('td').html();
-					}
-					if(typeof(reqFields[i].format) != 'undefined'){
-						if(!reqFields[i].format(dO[i])){
-							return (typeof(reqFields[i].failFormat)!= 'undefined') ? reqFields[i].failFormat : $('#IPOLSDEK_'+i).closest('tr').children('td').html();
-						}
-					}
+                    }
+                    if(typeof(reqFields[i].format) !== 'undefined'){
+                        if(!reqFields[i].format(dO[i])){
+                            return (typeof(reqFields[i].failFormat)!== 'undefined') ? reqFields[i].failFormat : $('#IPOLSDEK_'+i).closest('tr').children('td').html();
+                        }
+                    }
                 }
 
                 dO['AS'] = {};
@@ -685,11 +696,11 @@ CJSCore::Init(array("jquery"));
                 return dO;
             },
 
-            // кнопки
-            // Сохранение и отправка
+            // buttons
+                // save and send
             send: function(){
                 var dataObject=IPOLSDEK_oExport.getInputs();
-                if(typeof dataObject != 'object'){if(dataObject)alert('<?=GetMessage('IPOLSDEK_JSC_SOD_ZAPOLNI')?> "'+dataObject+'"');return;}
+                if(typeof dataObject !== 'object'){if(dataObject)alert('<?=GetMessage('IPOLSDEK_JSC_SOD_ZAPOLNI')?> "'+dataObject+'"');return;}
                 dataObject['isdek_action'] = 'saveAndSend';
                 dataObject['orderId']  = IPOLSDEK_oExport.orderId;
                 dataObject['mode']     = IPOLSDEK_oExport.mode;
@@ -703,7 +714,7 @@ CJSCore::Init(array("jquery"));
                     }
                 });
             },
-            // Удаление
+                // delete
             delete: function(){
                 var oId = (IPOLSDEK_oExport.mode == 'shipment') ? IPOLSDEK_oExport.shipment : IPOLSDEK_oExport.orderId;
                 if(IPOLSDEK_oExport.status == 'NEW' || IPOLSDEK_oExport.status == 'ERROR' || IPOLSDEK_oExport.status == 'DELETE'){
@@ -732,7 +743,7 @@ CJSCore::Init(array("jquery"));
                     }
                 }
             },
-            // печать
+                // invoice
             print: function(){
                 $('#IPOLSDEK_PRINT').attr('disabled','true');
                 $('#IPOLSDEK_PRINT').val('<?=GetMessage("IPOLSDEK_JSC_SOD_LOADING")?>');
@@ -740,7 +751,7 @@ CJSCore::Init(array("jquery"));
                     data : {
                         isdek_action : 'printOrderInvoice',
                         oId  : (IPOLSDEK_oExport.mode == 'shipment') ? IPOLSDEK_oExport.shipment : IPOLSDEK_oExport.orderId,
-						mode : IPOLSDEK_oExport.mode
+                        mode : IPOLSDEK_oExport.mode
                     },
                     dataType : 'json',
                     success : function(data){
@@ -756,15 +767,15 @@ CJSCore::Init(array("jquery"));
                     }
                 });
             },
-			
-			shtrih: function(){
-				$('#IPOLSDEK_SHTRIH').attr('disabled','true');
+                // barcode
+            shtrih: function(){
+                $('#IPOLSDEK_SHTRIH').attr('disabled','true');
                 $('#IPOLSDEK_SHTRIH').val('<?=GetMessage("IPOLSDEK_JSC_SOD_LOADING")?>');
                 IPOLSDEK_oExport.ajax({
                     data : {
                         isdek_action : 'printOrderShtrih',
                         oId : (IPOLSDEK_oExport.mode == 'shipment') ? IPOLSDEK_oExport.shipment : IPOLSDEK_oExport.orderId,
-						mode : IPOLSDEK_oExport.mode
+                        mode : IPOLSDEK_oExport.mode
                     },
                     dataType : 'json',
                     success : function(data){
@@ -779,10 +790,10 @@ CJSCore::Init(array("jquery"));
                             alert(data.error);
                     }
                 });
-			},
+            },
 
-            // служебные
-            // тариф: ПВЗ, Почтомат или курьер
+            // service
+                // tarif: pvz, courier or inpost (old)
             defineTarifs: function(val){
                 val = parseInt(val);
 
@@ -792,14 +803,14 @@ CJSCore::Init(array("jquery"));
                     return 'pickup';
                 return 'courier';
             },
-            // тариф: до двери или склада
+                // tarif: todoor or to sklad
             isToDoor: function(val){
                 var dT = [<?=sdekHelper::getDoorTarifs(true)?>];
                 for(var i = 0; i < dT.length; i++)
                     if(dT[i] == val) return true;
                 return false;
             },
-            // проверка на оплачен / не оплачен при безнале
+                // checking payed / beznal
             checkPay: function(){
                 if($('#IPOLSDEK_isBeznal').attr('checked')){
                     <?if($badPay){?>$('#IPOLSDEK_notPayed').css('display','inline');<?}?>
@@ -819,12 +830,12 @@ CJSCore::Init(array("jquery"));
                     $('#IPOLSDEK_deliveryP').val(IPOLSDEK_oExport.delivPrice);
                 }
             },
-            // управление сервисными свойствами
+                // service props
             serverShow: function(){
                 $(".IPOLSDEK_detOrder").css("display","");
                 IPOLSDEK_oExport.gabs.label();
             },
-            // всплывающие подсказки
+                // popup hints
             popup: function (code, info){
                 var offset = $(info).position().top;
                 var obj;
@@ -844,15 +855,22 @@ CJSCore::Init(array("jquery"));
                 var val = parseFloat(wat.val().replace(',','.'));
                 wat.val((isNaN(val)) ? 0 : val);
             },
-			
-			checkPhone: function(val){
-				// var check = /^(\+7(\d{10}))/;
-				var check = /^(\+(\d{11}))/;
-				return check.test(val);
-			},
 
-            // Дополнительные окна и функционал
-            // Все тарифы
+            checkPhone: function(val){
+                // var check = /^(\+7(\d{10}))/;
+                var check = /^(\+(\d{11}))/;
+                return check.test(val);
+            },
+
+            isEmpty: function(obj){
+                if(typeof(obj) === 'object')
+                    for(var i in obj)
+                        return false;
+                return true;
+            },
+
+            // additional windows and functional
+                // all tarifs
             allTarifs: {
                 wnd: false,
 
@@ -862,10 +880,10 @@ CJSCore::Init(array("jquery"));
                 tarifDescr  : false,
 
                 curMode : false,
-				stopF   : false,
+                stopF   : false,
 
                 show: function(){
-					IPOLSDEK_oExport.allTarifs.stopF = false;
+                    IPOLSDEK_oExport.allTarifs.stopF = false;
                     var wndContent = "<table id='IPOLSDEK_allTarifs'></table><div id='IPOLSDEK_allTarAjax' style='text-align:center;border:none;padding-top: 10px;'><img src='/bitrix/images/<?=self::$MODULE_ID?>/ajax.gif'></div><input type='button' id='IPOLSDEK_tarifStopper' value='<?=GetMessage('IPOLSDEK_LBL_STOP')?>' onclick='IPOLSDEK_oExport.allTarifs.stop()'>";
 
                     $('#IPOLSDEK_allTarifsBtn').attr('disabled','disabled');
@@ -922,22 +940,22 @@ CJSCore::Init(array("jquery"));
                                 IPOLSDEK_oExport.allTarifs.closer();
                                 IPOLSDEK_oExport.allTarifs.carnage(true);
                             }
-                        },
+                        }
                     });
                 },
 
                 carnage: function(isStart){
                     if(
-						(
-							typeof(isStart) == 'undefined' && 
-							!IPOLSDEK_oExport.allTarifs.curMode
-						) || IPOLSDEK_oExport.allTarifs.stopF
-					){
-						IPOLSDEK_oExport.allTarifs.curMode = false;
-						$('#IPOLSDEK_allTarAjax').css('display','none');
-						IPOLSDEK_oExport.allTarifs.closer(true);
-						return;
-					}
+                        (
+                            typeof(isStart) === 'undefined' &&
+                            !IPOLSDEK_oExport.allTarifs.curMode
+                        ) || IPOLSDEK_oExport.allTarifs.stopF
+                    ){
+                        IPOLSDEK_oExport.allTarifs.curMode = false;
+                        $('#IPOLSDEK_allTarAjax').css('display','none');
+                        IPOLSDEK_oExport.allTarifs.closer(true);
+                        return;
+                    }
 
                     if(!IPOLSDEK_oExport.allTarifs.curMode){
                         IPOLSDEK_oExport.allTarifs.curMode = IPOLSDEK_oExport.allTarifs.getFirstTafirType();
@@ -965,33 +983,33 @@ CJSCore::Init(array("jquery"));
                                 data: reqParams,
                                 dataType: 'json',
                                 success: function(data){
-									var arBlocks = {ready: false,price:'',term:'',choosable:''};
-									if(data.tarif){
-										arBlocks.ready = true; 
-										arBlocks.name  = IPOLSDEK_oExport.allTarifs.tarifDescr[data.tarif]; 
-										if(data.success){
-											arBlocks.price = '';
-											if(typeof(data.price) != 'undefined'){
-												arBlocks.price = data.price;
-												if(typeof(data.sourcePrice) != 'undefined')
-													arBlocks.price += '<a href="#" class="PropWarning" onclick="return false;" title="<?=GetMessage('IPOLSDEK_JSC_SOD_PriceInLK')?> '+data.sourcePrice+'">';
-											}else{
-												if(typeof(data.sourcePrice) != 'undefined'){
-													arBlocks.price = data.sourcePrice+' <a href="#" class="PropWarning" onclick="return false;" title="<?=GetMessage('IPOLSDEK_JSC_SOD_PriceONLYInLK')?>">';
-												}
-											}
-											arBlocks.term = ((data['termMin'] == data['termMax'])?data['termMin']:data['termMin']+" - "+data['termMax'])+" <?=GetMessage('IPOLSDEK_JS_SOD_HD_DAY')?>";
-											arBlocks.choosable = "<input type='button' value='<?=GetMessage('IPOLSDEK_FRNT_CHOOSE')?>' onclick='IPOLSDEK_oExport.allTarifs.select(\""+data.tarif+"\");'>";
-										} else{
-											if(data.error){
-												arBlocks.price = "<span class='errorText'>"+data.error+"</span>";
-											}
-										}
-									}
-									
-									if(arBlocks.ready){
-										 $('#IPOLSDEK_allTarifs').append("<tr id='IPOLSDEK_tarifsTable_"+data.tarif+"' class='adm-list-table-row'><td class='adm-list-table-cell'>"+arBlocks.name+"</td><td class='adm-list-table-cell' style='text-align:center;'>"+arBlocks.price+"</td><td class='adm-list-table-cell' style='text-align:center;'>"+arBlocks.term+"</td><td class='adm-list-table-cell'>"+arBlocks.choosable+"</td></tr>");
-									}
+                                    var arBlocks = {ready: false,price:'',term:'',choosable:''};
+                                    if(data.tarif){
+                                        arBlocks.ready = true;
+                                        arBlocks.name  = IPOLSDEK_oExport.allTarifs.tarifDescr[data.tarif];
+                                        if(data.success){
+                                            arBlocks.price = '';
+                                            if(typeof(data.price) !== 'undefined'){
+                                                arBlocks.price = data.price;
+                                                if(typeof(data.sourcePrice) !== 'undefined')
+                                                    arBlocks.price += '<a href="#" class="PropWarning" onclick="return false;" title="<?=GetMessage('IPOLSDEK_JSC_SOD_PriceInLK')?> '+data.sourcePrice+'">';
+                                            }else{
+                                                if(typeof(data.sourcePrice) !== 'undefined'){
+                                                    arBlocks.price = data.sourcePrice+' <a href="#" class="WarningLK" onclick="return false;" title="<?=GetMessage('IPOLSDEK_JSC_SOD_PriceONLYInLK')?>">';
+                                                }
+                                            }
+                                            arBlocks.term = ((data['termMin'] == data['termMax'])?data['termMin']:data['termMin']+" - "+data['termMax'])+" <?=GetMessage('IPOLSDEK_JS_SOD_HD_DAY')?>";
+                                            arBlocks.choosable = "<input type='button' value='<?=GetMessage('IPOLSDEK_FRNT_CHOOSE')?>' onclick='IPOLSDEK_oExport.allTarifs.select(\""+data.tarif+"\");'>";
+                                        } else{
+                                            if(data.error){
+                                                arBlocks.price = "<span class='errorText'>"+data.error+"</span>";
+                                            }
+                                        }
+                                    }
+
+                                    if(arBlocks.ready){
+                                        $('#IPOLSDEK_allTarifs').append("<tr id='IPOLSDEK_tarifsTable_"+data.tarif+"' class='adm-list-table-row'><td class='adm-list-table-cell'>"+arBlocks.name+"</td><td class='adm-list-table-cell' style='text-align:center;'>"+arBlocks.price+"</td><td class='adm-list-table-cell' style='text-align:center;'>"+arBlocks.term+"</td><td class='adm-list-table-cell'>"+arBlocks.choosable+"</td></tr>");
+                                    }
                                     IPOLSDEK_oExport.allTarifs.carnage();
                                 }
                             });
@@ -1000,11 +1018,11 @@ CJSCore::Init(array("jquery"));
                     }
 
                 },
-				
-				stop: function(){
-					IPOLSDEK_oExport.allTarifs.stopF = true;
-					$('#IPOLSDEK_tarifStopper').css('display','none');
-				},
+
+                stop: function(){
+                    IPOLSDEK_oExport.allTarifs.stopF = true;
+                    $('#IPOLSDEK_tarifStopper').css('display','none');
+                },
 
                 getFirstTafirType: function(){
                     for(var i in IPOLSDEK_oExport.allTarifs.availTarifs)
@@ -1022,270 +1040,270 @@ CJSCore::Init(array("jquery"));
 
                 closer: function(doShow){
                     var handler = $('#IPOLSDEK_allTarifs').closest('.bx-core-adm-dialog').find('.bx-core-adm-icon-close');
-                    if(typeof(doShow) == 'undefined')
+                    if(typeof(doShow) === 'undefined')
                         handler.css('visibility','hidden');
                     else
                         handler.css('visibility','visible');
                 },
 
-
                 lang: {
-        <?foreach(sdekExport::getAllProfiles() as $profile){?>
-        <?=$profile?> : '<?=GetMessage("IPOLSDEK_DELIV_".strtoupper($profile)."_TITLE")?>',
-        <?}?>
-        }
-        },
-        // оформление курьера
-        courier: {
-            request: <?if(!$allowCourier) echo 'true';
-            elseif($ordrVals['courierDate']) echo 'false';
-            else echo 'true';
-                ?>, // проверка в php! Обратное, так как при загрузке работает
-
-            handle: function(){
-                if(IPOLSDEK_oExport.courier.request){
-                    $("[onclick='IPOLSDEK_oExport.courier.handle()']").html('<?=GetMessage('IPOLSDEK_JS_SOD_HD_SHOWCOURIER')?>');
-                    $('.IPOLSDEK_courierInfo').css('display','none');
-                    IPOLSDEK_oExport.courier.request = false;
-                    $('#IPOLSDEK_departure').removeAttr('disabled');
-                }else{
-                    <?if(COption::GetOptionString(self::$MODULE_ID,'allowSenders','N') == 'N'){?> return; <?}?>
-                    if($('#IPOLSDEK_courierHeader').css('display')!='none'){
-                        $("[onclick='IPOLSDEK_oExport.courier.handle()']").html('<?=GetMessage('IPOLSDEK_JS_SOD_HD_NOSHOWCOURIER')?>');
-                        $('.IPOLSDEK_courierInfo').css('display','');
-                        IPOLSDEK_oExport.courier.request = true;
-                        $('#IPOLSDEK_departure').attr('disabled','disabled');
-                    }
+                    <?foreach(sdekExport::getAllProfiles() as $profile){?>
+                    '<?=$profile?>' : '<?=GetMessage("IPOLSDEK_DELIV_".strtoupper($profile)."_TITLE")?>',
+                    <?}?>
                 }
             },
+            // courier datas
+            courier: {
+                request: <?if(!$allowCourier) echo 'true';
+                elseif($ordrVals['courierDate']) echo 'false';
+                else echo 'true';
+                    ?>, // проверка в php! Обратное, так как при загрузке работает
 
-            changeCity: function(mode,val){
-                if(mode == 1){
-                    $('#IPOLSDEK_cSSelector').parent().css('display','block');
-                    $('#IPOLSDEK_cSLabel').parent().css('display','none');
-                    $('#IPOLSDEK_cSSelector').val('');
-                }else{
-                    $('#IPOLSDEK_cSLabel').parent().css('display','block');
-                    $('#IPOLSDEK_cSSelector').parent().css('display','none');
-                    $('#IPOLSDEK_cSLabel').html(val.item.label);
-                    $('#IPOLSDEK_courierCity').val(val.item.value);
+                handle: function(){
+                    if(IPOLSDEK_oExport.courier.request){
+                        $("[onclick='IPOLSDEK_oExport.courier.handle()']").html('<?=GetMessage('IPOLSDEK_JS_SOD_HD_SHOWCOURIER')?>');
+                        $('.IPOLSDEK_courierInfo').css('display','none');
+                        IPOLSDEK_oExport.courier.request = false;
+                        $('#IPOLSDEK_departure').removeAttr('disabled');
+                    }else{
+                        <?if(COption::GetOptionString(self::$MODULE_ID,'allowSenders','N') == 'N'){?> return; <?}?>
+                        if($('#IPOLSDEK_courierHeader').css('display')!='none'){
+                            $("[onclick='IPOLSDEK_oExport.courier.handle()']").html('<?=GetMessage('IPOLSDEK_JS_SOD_HD_NOSHOWCOURIER')?>');
+                            $('.IPOLSDEK_courierInfo').css('display','');
+                            IPOLSDEK_oExport.courier.request = true;
+                            $('#IPOLSDEK_departure').attr('disabled','disabled');
+                        }
+                    }
+                },
+
+                changeCity: function(mode,val){
+                    if(mode == 1){
+                        $('#IPOLSDEK_cSSelector').parent().css('display','block');
+                        $('#IPOLSDEK_cSLabel').parent().css('display','none');
+                        $('#IPOLSDEK_cSSelector').val('');
+                    }else{
+                        $('#IPOLSDEK_cSLabel').parent().css('display','block');
+                        $('#IPOLSDEK_cSSelector').parent().css('display','none');
+                        $('#IPOLSDEK_cSLabel').html(val.item.label);
+                        $('#IPOLSDEK_courierCity').val(val.item.value);
+                        IPOLSDEK_oExport.onRecheck();
+                    }
+                },
+
+                svdCrrs: {<?=$IPOLSDEK_svdC?>},
+
+                selectProfile: function(val){
+                    var Vals = '';
+                    if(val === '')
+                        Vals = {senderName:"",cityName:"",courierCity:'',courierStreet:'',courierHouse:'',courierFlat:'',courierPhone:'',courierName:''};
+                    else
+                        Vals = IPOLSDEK_oExport.courier.svdCrrs[val];
+                    for(var i in Vals)
+                        $('#IPOLSDEK_'+i).val(Vals[i]);
+                    $('#IPOLSDEK_cSLabel').html(Vals.cityName);
+                    IPOLSDEK_oExport.courier.onTimeChange();
                     IPOLSDEK_oExport.onRecheck();
-                }
-            },
+                },
 
-            svdCrrs: {<?=$IPOLSDEK_svdC?>},
+                onDateChange: function(){
+                    var curDate = new Date('<?=date('Y')?>','<?=(date('m')-1)?>','<?=date('d')?>');
+                    var selDate = $('#IPOLSDEK_courierDate').val().split('.');
+                    selDate = new Date(selDate[2],selDate[1]-1,selDate[0]);
 
-            selectProfile: function(val){
-                var Vals = '';
-                if(val === '')
-                    Vals = {senderName:"",cityName:"",courierCity:'',courierStreet:'',courierHouse:'',courierFlat:'',courierPhone:'',courierName:''};
-                else
-                    Vals = IPOLSDEK_oExport.courier.svdCrrs[val];
-                for(var i in Vals)
-                    $('#IPOLSDEK_'+i).val(Vals[i]);
-                $('#IPOLSDEK_cSLabel').html(Vals.cityName);
-                IPOLSDEK_oExport.courier.onTimeChange();
-                IPOLSDEK_oExport.onRecheck();
-            },
-
-            onDateChange: function(){
-                var curDate = new Date('<?=date('Y')?>','<?=(date('m')-1)?>','<?=date('d')?>');
-                var selDate = $('#IPOLSDEK_courierDate').val().split('.');
-                selDate = new Date(selDate[2],selDate[1]-1,selDate[0]);
-
-                if(selDate < curDate)
-                    $('#IPOLSDEK_courierDateError').css('display','table-cell');
-                else
-                    $('#IPOLSDEK_courierDateError').css('display','none');
-                if(selDate.valueOf() == curDate.valueOf() && !$('#IPOLSDEK_courierTimeBeg').val()){
-                    var cT = new Date();
-                    var aT = new Date(cT.getTime() + 900000); // +15 min
-                    if(aT.getHours() < 15){
-                        $('#IPOLSDEK_courierTimeBeg').val(aT.getHours()+":"+aT.getMinutes());
-                        aT = new Date(cT.getTime() + 11700000); // +3h 15m
-                        $('#IPOLSDEK_courierTimeEnd').val(aT.getHours()+":"+aT.getMinutes());
+                    if(selDate < curDate)
+                        $('#IPOLSDEK_courierDateError').css('display','table-cell');
+                    else
+                        $('#IPOLSDEK_courierDateError').css('display','none');
+                    if(selDate.valueOf() == curDate.valueOf() && !$('#IPOLSDEK_courierTimeBeg').val()){
+                        var cT = new Date();
+                        var aT = new Date(cT.getTime() + 900000); // +15 min
+                        if(aT.getHours() < 15){
+                            $('#IPOLSDEK_courierTimeBeg').val(aT.getHours()+":"+aT.getMinutes());
+                            aT = new Date(cT.getTime() + 11700000); // +3h 15m
+                            $('#IPOLSDEK_courierTimeEnd').val(aT.getHours()+":"+aT.getMinutes());
+                        }
                     }
-                }
 
-                IPOLSDEK_oExport.courier.onTimeChange();
-            },
+                    IPOLSDEK_oExport.courier.onTimeChange();
+                },
 
-            onTimeChange: function(){
-                var start = $('#IPOLSDEK_courierTimeBeg').val();
-                var end = $('#IPOLSDEK_courierTimeEnd').val();
-                if(start || end){
-                    var check = IPOLSDEK_oExport.courier.timeCheck(start,end,$('#IPOLSDEK_courierDate').val());
-                    if(check === true){
+                onTimeChange: function(){
+                    var start = $('#IPOLSDEK_courierTimeBeg').val();
+                    var end = $('#IPOLSDEK_courierTimeEnd').val();
+                    if(start || end){
+                        var check = IPOLSDEK_oExport.courier.timeCheck(start,end,$('#IPOLSDEK_courierDate').val());
+                        if(check === true){
+                            $('.IPOLSDEK_badInput').removeClass('IPOLSDEK_badInput');
+                            $('#IPOLSDEK_courierTimeOK').val(true);
+                            $('#IPOLSDEK_courierTimeError').html('');
+                        }else{
+                            if(check.error == 'start' || check.error == 'both')
+                                $('#IPOLSDEK_courierTimeBeg').addClass('IPOLSDEK_badInput');
+                            if(check.error == 'end' || check.error == 'both')
+                                $('#IPOLSDEK_courierTimeEnd').addClass('IPOLSDEK_badInput');
+                            $('#IPOLSDEK_courierTimeOK').val(false);
+                            $('#IPOLSDEK_courierTimeError').html(check.text);
+                        }
+                    }else{
                         $('.IPOLSDEK_badInput').removeClass('IPOLSDEK_badInput');
                         $('#IPOLSDEK_courierTimeOK').val(true);
                         $('#IPOLSDEK_courierTimeError').html('');
-                    }else{
-                        if(check.error == 'start' || check.error == 'both')
-                            $('#IPOLSDEK_courierTimeBeg').addClass('IPOLSDEK_badInput');
-                        if(check.error == 'end' || check.error == 'both')
-                            $('#IPOLSDEK_courierTimeEnd').addClass('IPOLSDEK_badInput');
-                        $('#IPOLSDEK_courierTimeOK').val(false);
-                        $('#IPOLSDEK_courierTimeError').html(check.text);
                     }
-                }else{
-                    $('.IPOLSDEK_badInput').removeClass('IPOLSDEK_badInput');
-                    $('#IPOLSDEK_courierTimeOK').val(true);
-                    $('#IPOLSDEK_courierTimeError').html('');
-                }
-            },
+                },
 
-            timeCheck: function(start,end,day){
-                if(!start)
-                    return {
-                        'error' : 'start',
-                        'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_fillStart')?>',
-                    }
-                if(!end)
-                    return {
-                        'error' : 'end',
-                        'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_fillEnd')?>',
-                    }
-                start = start.split(':');
-                start[0] = parseInt(start[0]);
-                start[1] = parseInt(start[1]);
-                if(start[0] < 9)
-                    return {
-                        'error' : 'start',
-                        'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_badStart')?>',
-                    }
-                end   = end.split(':');
-                end[0] = parseInt(end[0]);
-                end[1] = parseInt(end[1]);
-                if(end[0] > 18 || (end[0] == 18 && end[1]))
-                    return {
-                        'error' : 'end',
-                        'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_badEnd')?>',
-                    }
-                if((end[0] - start[0]) * 60 + end[1] - start[1] < 180)
-                    return {
-                        'error' : 'both',
-                        'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_badBoth')?>',
-                    }
-                if(typeof(day) != 'undefined' && day == '<?=date('d.m.Y')?>' && start[0] > 14)
-                    return {
-                        'error' : 'start',
-                        'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_bad15')?>',
-                    }
-                return true;
-            }
-        },
-        // Управление габаритами упаковки
-        gabs:{
-            //кнопка "Изменить"
-            change: function(){
-                var GABS = {
-                    D_L: $('#IPOLSDEK_GABS_D_L').val() * 10, // СДЭК-овские - в см
-                    D_W: $('#IPOLSDEK_GABS_D_W').val() * 10,
-                    D_H: $('#IPOLSDEK_GABS_D_H').val() * 10
-                };
-                var htmlCG  = "<input type='text' class='IPOLSDEK_gabInput' id='IPOLSDEK_GABS_D_L_new' value='"+GABS.D_L+"'> <?=GetMessage("IPOLSDEK_mm")?>&nbsp;x&nbsp;";
-                htmlCG += "<input type='text' class='IPOLSDEK_gabInput' id='IPOLSDEK_GABS_D_W_new' value='"+GABS.D_W+"'> <?=GetMessage("IPOLSDEK_mm")?>&nbsp;x&nbsp;";
-                htmlCG += "<input type='text' class='IPOLSDEK_gabInput' id='IPOLSDEK_GABS_D_H_new' value='"+GABS.D_H+"'> <?=GetMessage("IPOLSDEK_mm")?>,";
-                htmlCG += "<input type='text' style='width:20px' id='IPOLSDEK_GABS_W_new' value='"+$('#IPOLSDEK_GABS_W').val()+"'> <?=GetMessage("IPOLSDEK_kg")?>";
-                htmlCG += " <a href='javascript:void(0)' onclick='IPOLSDEK_oExport.gabs.accept()'>OK</a>";
-                $('#IPOLSDEK_natGabs').css('display','none');
-                $('#IPOLSDEK_gabsPlace').parents('tr').css('display','table-row');
-                $('#IPOLSDEK_gabsPlace').html(htmlCG);
-            },
-            // принятие изменений в кнопке "Изменить"
-            accept: function(){
-                var ar = ['D_L','D_W','D_H','W'];
-                var GABS = {'mode':'mm'};
-                for(var i in ar){
-                    IPOLSDEK_oExport.checkFloat($('#IPOLSDEK_GABS_'+ar[i]+'_new'));
-                    GABS[ar[i]] = $('#IPOLSDEK_GABS_'+ar[i]+'_new').val();
-                }
-
-                IPOLSDEK_oExport.gabs.write(GABS);
-
-                IPOLSDEK_oExport.onRecheck();
-            },
-            // установка изменений согласно GABS
-            write: function(GABS){
-                if(GABS.mode == 'mm'){
-                    var GABSmm = GABS;
-                    var GABScm = {
-                        'D_L'  : GABS.D_L / 10,
-                        'D_W'  : GABS.D_W / 10,
-                        'D_H'  : GABS.D_H / 10
-                    }
-                }else{
-                    var GABSmm =  {
-                        'D_L'  : GABS.D_L * 10,
-                        'D_W'  : GABS.D_W * 10,
-                        'D_H'  : GABS.D_H * 10
-                    };
-                    var GABScm = GABS;
-                }
-
-                var htmlCG  = GABSmm.D_L + " <?=GetMessage("IPOLSDEK_mm")?> x " + GABSmm.D_W + " <?=GetMessage("IPOLSDEK_mm")?> x " + GABSmm.D_H + " <?=GetMessage("IPOLSDEK_mm")?>, " + GABS.W + " <?=GetMessage("IPOLSDEK_kg")?> <a href='javascript:void(0)' onclick='IPOLSDEK_oExport.gabs.change()'> <?=GetMessage('IPOLSDEK_STT_CHNG')?></a>";
-                $('#IPOLSDEK_gabsPlace').html(htmlCG);
-                $('#IPOLSDEK_GABS_D_L').val(GABScm.D_L);
-                $('#IPOLSDEK_GABS_D_W').val(GABScm.D_W);
-                $('#IPOLSDEK_GABS_D_H').val(GABScm.D_H);
-                $('#IPOLSDEK_GABS_W').val(GABS.W);
-                $('#IPOLSDEK_gabsPlace').parents('tr').css('display','table-row');
-                $('#IPOLSDEK_VWeightPlace').html((GABScm.D_L*GABScm.D_W*GABScm.D_H) / 5000);
-                IPOLSDEK_oExport.gabs.changeStat = true;
-                IPOLSDEK_oExport.serverShow();
-            },
-            // окончание работы управления упаковками
-            onPackHandlerEnd: function(){
-                $('#IPOLSDEK_PLACES').val('');
-                if(IPOLSDEK_packs.saveObj.cnt == 1){
-                    var gabs = [1,1,1,1];
-                    for(var i in IPOLSDEK_packs.saveObj)
-                        if(!isNaN(parseInt(i))){
-                            gabs = IPOLSDEK_packs.saveObj[i].gabs.split(' x ');
-                            gabs.push(IPOLSDEK_packs.saveObj[i].weight);
-                            continue;
+                timeCheck: function(start,end,day){
+                    if(!start)
+                        return {
+                            'error' : 'start',
+                            'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_fillStart')?>',
                         }
-
-                    IPOLSDEK_oExport.gabs.write({
-                        'D_L'  : gabs[0],
-                        'D_W'  : gabs[1],
-                        'D_H'  : gabs[2],
-                        'W'    : gabs[3],
-                        'mode' : 'cm'
-                    });
-                }else{
-                    if(IPOLSDEK_packs.saveObj){
-                        delete IPOLSDEK_packs.saveObj.cnt;
-                        $('#IPOLSDEK_PLACES').val(JSON.stringify(IPOLSDEK_packs.saveObj));
-                    }
-                    IPOLSDEK_oExport.serverShow();
-                    IPOLSDEK_oExport.onRecheck();
+                    if(!end)
+                        return {
+                            'error' : 'end',
+                            'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_fillEnd')?>',
+                        }
+                    start = start.split(':');
+                    start[0] = parseInt(start[0]);
+                    start[1] = parseInt(start[1]);
+                    if(start[0] < 9)
+                        return {
+                            'error' : 'start',
+                            'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_badStart')?>',
+                        }
+                    end   = end.split(':');
+                    end[0] = parseInt(end[0]);
+                    end[1] = parseInt(end[1]);
+                    if(end[0] > 18 || (end[0] == 18 && end[1]))
+                        return {
+                            'error' : 'end',
+                            'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_badEnd')?>',
+                        }
+                    if((end[0] - start[0]) * 60 + end[1] - start[1] < 180)
+                        return {
+                            'error' : 'both',
+                            'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_badBoth')?>',
+                        }
+                    if(typeof(day) != 'undefined' && day == '<?=date('d.m.Y')?>' && start[0] > 14)
+                        return {
+                            'error' : 'start',
+                            'text'  : '<?=GetMessage('IPOLSDEK_JS_TIME_bad15')?>',
+                        }
+                    return true;
                 }
             },
-            // проверяет, что именно показывать при открытии и редактировании
-            changeStat: <?=(sdekHelper::isEqualArrs($naturalGabs,$ordrVals['GABS']) ? "false" : "true")?>,
-            label: function(){
-                // заданы упаковки
-                if($('#IPOLSDEK_PLACES').val()){
-                    $('#IPOLSDEK_gabsPlace').closest('tr').css('display','none');
+            // Handling packs params
+            gabs:{
+                // button "change"
+                change: function(){
+                    // in sm - CDEK params
+                    var GABS = {
+                        D_L: $('#IPOLSDEK_GABS_D_L').val() * 10,
+                        D_W: $('#IPOLSDEK_GABS_D_W').val() * 10,
+                        D_H: $('#IPOLSDEK_GABS_D_H').val() * 10
+                    };
+                    var htmlCG  = "<input type='text' class='IPOLSDEK_gabInput' id='IPOLSDEK_GABS_D_L_new' value='"+GABS.D_L+"'> <?=GetMessage("IPOLSDEK_mm")?>&nbsp;x&nbsp;";
+                    htmlCG += "<input type='text' class='IPOLSDEK_gabInput' id='IPOLSDEK_GABS_D_W_new' value='"+GABS.D_W+"'> <?=GetMessage("IPOLSDEK_mm")?>&nbsp;x&nbsp;";
+                    htmlCG += "<input type='text' class='IPOLSDEK_gabInput' id='IPOLSDEK_GABS_D_H_new' value='"+GABS.D_H+"'> <?=GetMessage("IPOLSDEK_mm")?>,";
+                    htmlCG += "<input type='text' style='width:20px' id='IPOLSDEK_GABS_W_new' value='"+$('#IPOLSDEK_GABS_W').val()+"'> <?=GetMessage("IPOLSDEK_kg")?>";
+                    htmlCG += " <a href='javascript:void(0)' onclick='IPOLSDEK_oExport.gabs.accept()'>OK</a>";
                     $('#IPOLSDEK_natGabs').css('display','none');
-                    $('#IPOLSDEK_PLACES').closest('tr').css('display','');
-                }else{
-                    if(IPOLSDEK_oExport.gabs.changeStat){
-                        $('#IPOLSDEK_gabsPlace').closest('tr').css('display','table-row');
-                        $('#IPOLSDEK_natGabs').css('display','none');
-                        $('#IPOLSDEK_PLACES').closest('tr').css('display','none');
+                    $('#IPOLSDEK_gabsPlace').parents('tr').css('display','table-row');
+                    $('#IPOLSDEK_gabsPlace').html(htmlCG);
+                },
+                // assepting changes via button "change"
+                accept: function(){
+                    var ar = ['D_L','D_W','D_H','W'];
+                    var GABS = {'mode':'mm'};
+                    for(var i in ar){
+                        IPOLSDEK_oExport.checkFloat($('#IPOLSDEK_GABS_'+ar[i]+'_new'));
+                        GABS[ar[i]] = $('#IPOLSDEK_GABS_'+ar[i]+'_new').val();
+                    }
+
+                    IPOLSDEK_oExport.gabs.write(GABS);
+
+                    IPOLSDEK_oExport.onRecheck();
+                },
+                // setting changes according to gabs
+                write: function(GABS){
+                    if(GABS.mode == 'mm'){
+                        var GABSmm = GABS;
+                        var GABScm = {
+                            'D_L'  : GABS.D_L / 10,
+                            'D_W'  : GABS.D_W / 10,
+                            'D_H'  : GABS.D_H / 10
+                        }
                     }else{
+                        var GABSmm =  {
+                            'D_L'  : GABS.D_L * 10,
+                            'D_W'  : GABS.D_W * 10,
+                            'D_H'  : GABS.D_H * 10
+                        };
+                        var GABScm = GABS;
+                    }
+
+                    var htmlCG  = GABSmm.D_L + " <?=GetMessage("IPOLSDEK_mm")?> x " + GABSmm.D_W + " <?=GetMessage("IPOLSDEK_mm")?> x " + GABSmm.D_H + " <?=GetMessage("IPOLSDEK_mm")?>, " + GABS.W + " <?=GetMessage("IPOLSDEK_kg")?> <a href='javascript:void(0)' onclick='IPOLSDEK_oExport.gabs.change()'> <?=GetMessage('IPOLSDEK_STT_CHNG')?></a>";
+                    $('#IPOLSDEK_gabsPlace').html(htmlCG);
+                    $('#IPOLSDEK_GABS_D_L').val(GABScm.D_L);
+                    $('#IPOLSDEK_GABS_D_W').val(GABScm.D_W);
+                    $('#IPOLSDEK_GABS_D_H').val(GABScm.D_H);
+                    $('#IPOLSDEK_GABS_W').val(GABS.W);
+                    $('#IPOLSDEK_gabsPlace').parents('tr').css('display','table-row');
+                    $('#IPOLSDEK_VWeightPlace').html((GABScm.D_L*GABScm.D_W*GABScm.D_H) / 5000);
+                    IPOLSDEK_oExport.gabs.changeStat = true;
+                    IPOLSDEK_oExport.serverShow();
+                },
+                // finishing work with gabs
+                onPackHandlerEnd: function(){
+                    $('#IPOLSDEK_PLACES').val('');
+                    if(IPOLSDEK_packs.saveObj.cnt == 1){
+                        var gabs = [1,1,1,1];
+                        for(var i in IPOLSDEK_packs.saveObj)
+                            if(!isNaN(parseInt(i))){
+                                gabs = IPOLSDEK_packs.saveObj[i].gabs.split(' x ');
+                                gabs.push(IPOLSDEK_packs.saveObj[i].weight);
+                                continue;
+                            }
+
+                        IPOLSDEK_oExport.gabs.write({
+                            'D_L'  : gabs[0],
+                            'D_W'  : gabs[1],
+                            'D_H'  : gabs[2],
+                            'W'    : gabs[3],
+                            'mode' : 'cm'
+                        });
+                    }else{
+                        if(IPOLSDEK_packs.saveObj){
+                            delete IPOLSDEK_packs.saveObj.cnt;
+                            $('#IPOLSDEK_PLACES').val(JSON.stringify(IPOLSDEK_packs.saveObj));
+                        }
+                        IPOLSDEK_oExport.serverShow();
+                        IPOLSDEK_oExport.onRecheck();
+                    }
+                },
+                // cheching, what to show when opening and editting
+                changeStat: <?=(sdekHelper::isEqualArrs($naturalGabs,$ordrVals['GABS']) ? "false" : "true")?>,
+                label: function(){
+                    // if given labels
+                    if($('#IPOLSDEK_PLACES').val()){
                         $('#IPOLSDEK_gabsPlace').closest('tr').css('display','none');
-                        $('#IPOLSDEK_natGabs').css('display','inline');
-                        $('#IPOLSDEK_PLACES').closest('tr').css('display','none');
+                        $('#IPOLSDEK_natGabs').css('display','none');
+                        $('#IPOLSDEK_PLACES').closest('tr').css('display','');
+                    }else{
+                        if(IPOLSDEK_oExport.gabs.changeStat){
+                            $('#IPOLSDEK_gabsPlace').closest('tr').css('display','table-row');
+                            $('#IPOLSDEK_natGabs').css('display','none');
+                            $('#IPOLSDEK_PLACES').closest('tr').css('display','none');
+                        }else{
+                            $('#IPOLSDEK_gabsPlace').closest('tr').css('display','none');
+                            $('#IPOLSDEK_natGabs').css('display','inline');
+                            $('#IPOLSDEK_PLACES').closest('tr').css('display','none');
+                        }
                     }
                 }
-            }
-        },
+            },
         <?if($senderWH){?>
-        // города-отправители
-        senderWH: {
+            // cender cities
+            senderWH: {
             wnd: false,
                 show: function(){
                 if(!IPOLSDEK_oExport.senderWH.wnd){
@@ -1306,9 +1324,9 @@ CJSCore::Init(array("jquery"));
             },
         },
         <?}?>
-        // аккаунты
-        account : {
-            wnd: false,
+            // accounts
+            account : {
+                wnd: false,
 
                 change : function(){
                 if(!IPOLSDEK_oExport.account.wnd){
@@ -1360,42 +1378,42 @@ CJSCore::Init(array("jquery"));
                 });
             },
 
-            submit : function(){
-                var value = $('[name="IPOLSDEK_changeAcc"]:checked').val();
-                if(typeof(value) !== 'undefined' && value){
-                    $('#IPOLSDEK_account').val(value);
-                    $('#IPOLSDEK_accountLbl').html($('[name="IPOLSDEK_changeAcc"]:checked').parent().parent().children('.IPOLSDEK_accName').html());
-                    IPOLSDEK_oExport.onRecheck();
-                }
-                IPOLSDEK_oExport.account.wnd.Close();
-            }
-        },
-        // валюты
-        currency:{
-            goal: '<?=$cntrCurrency?>',
-
-                getFormat: function(sum,from,to,where){
-                IPOLSDEK_oExport.ajax({
-                    data    : {isdek_action:'formatCurrency',SUM:sum,FROM:from,TO:to,WHERE:where,FORMAT:'Y',orderId:IPOLSDEK_oExport.orderId},
-                    dataType: 'JSON',
-                    success : function(data){
-                        $('#'+data.WHERE).html(data.VALUE);
+                submit : function(){
+                    var value = $('[name="IPOLSDEK_changeAcc"]:checked').val();
+                    if(typeof(value) !== 'undefined' && value){
+                        $('#IPOLSDEK_account').val(value);
+                        $('#IPOLSDEK_accountLbl').html($('[name="IPOLSDEK_changeAcc"]:checked').parent().parent().children('.IPOLSDEK_accName').html());
+                        IPOLSDEK_oExport.onRecheck();
                     }
-                });
+                    IPOLSDEK_oExport.account.wnd.Close();
+                }
             },
+            // currencies
+            currency:{
+                goal: '<?=$cntrCurrency?>',
 
-            init: function(){
-                $('#IPOLSDEK_toPay').on('change',IPOLSDEK_oExport.currency.onChange);
-                $('#IPOLSDEK_deliveryP').on('change',IPOLSDEK_oExport.currency.onChange);
-            },
+                    getFormat: function(sum,from,to,where){
+                    IPOLSDEK_oExport.ajax({
+                        data    : {isdek_action:'formatCurrency',SUM:sum,FROM:from,TO:to,WHERE:where,FORMAT:'Y',orderId:IPOLSDEK_oExport.orderId},
+                        dataType: 'JSON',
+                        success : function(data){
+                            $('#'+data.WHERE).html(data.VALUE);
+                        }
+                    });
+                },
 
-            onChange: function(e){
-                var val = $(e.currentTarget).val();
-                var id  = $(e.currentTarget).attr('id') + 'Format';
-                $('#'+id).html('');
-                IPOLSDEK_oExport.currency.getFormat(val,0,IPOLSDEK_oExport.currency.goal,id);
+                init: function(){
+                    $('#IPOLSDEK_toPay').on('change',IPOLSDEK_oExport.currency.onChange);
+                    $('#IPOLSDEK_deliveryP').on('change',IPOLSDEK_oExport.currency.onChange);
+                },
+
+                onChange: function(e){
+                    var val = $(e.currentTarget).val();
+                    var id  = $(e.currentTarget).attr('id') + 'Format';
+                    $('#'+id).html('');
+                    IPOLSDEK_oExport.currency.getFormat(val,0,IPOLSDEK_oExport.currency.goal,id);
+                }
             }
-        }
         };
 
         $(document).ready(IPOLSDEK_oExport.load);
@@ -1408,7 +1426,7 @@ CJSCore::Init(array("jquery"));
             <?if($MESS_ID){?><tr><td><?=GetMessage('IPOLSDEK_JS_SOD_MESS_ID')?></td><td><?=$MESS_ID?></td></tr><?}?>
             <?if($senderWH){?><tr><td colspan='2'><a href='javascript:void(0)' onclick='IPOLSDEK_oExport.senderWH.show()'><?=GetMessage('IPOLSDEK_JS_SOD_senderWH_TITLE')?></a></td></tr>
             <?}?>
-            <?//Заявка?>
+            <?// Form?>
             <tr class='heading'><td colspan='2'><?=GetMessage('IPOLSDEK_JS_SOD_HD_PARAMS')?></td></tr>
             <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_number')?></td><td><?=(self::$orderDescr['info']['ACCOUNT_NUMBER'])?self::$orderDescr['info']['ACCOUNT_NUMBER']:self::$orderId?></td></tr>
             <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_service')?></td><td>
@@ -1416,13 +1434,13 @@ CJSCore::Init(array("jquery"));
                     <?=$message['service']?>
                 </td></tr>
             <tr id='IPOLSDEK_tarifWarning'><td colspan='2'><span><?=GetMessage('IPOLSDEK_JS_SOD_WRONGTARIF')?></span></td></tr>
-            <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_realSeller')?> <a href='#' class='PropHint' onclick='return IPOLSDEK_oExport.popup("pop-realSeller",this);'></a></td><td><input type='text' id='IPOLSDEK_realSeller' value='<?=$ordrVals['realSeller']?>'></td></tr>
-            <?// Города-отправители?>
+            <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_realSeller')?> <a href='#' class='PropHint' onclick='return IPOLSDEK_oExport.popup("pop-realSeller",this);'></a></td><td><input type='text' id='IPOLSDEK_realSeller' value='<?=str_replace("'",'"',$ordrVals['realSeller'])?>'></td></tr>
+            <?// Sender cities?>
             <?if($citySenders || (self::$isLoaded && array_key_exists('departure',$ordrVals))){?>
                 <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_departure')?></td><td>
                         <?if(self::$isLoaded && array_key_exists('departure',$ordrVals) && !$citySenders[$ordrVals['departure']]){
-							$subCitySender = sqlSdekCity::getBySId($ordrVals['departure']);
-						?>
+                            $subCitySender = sqlSdekCity::getBySId($ordrVals['departure']);
+                            ?>
                             <span style='color:red'><?=$subCitySender['NAME']?> <?=GetMessage('IPOLSDEK_ERR_SENDERCITYNOTFOUND');?></span><br>
                         <?}
                         if($citySenders){?>
@@ -1434,12 +1452,12 @@ CJSCore::Init(array("jquery"));
                         <?}?>
                     </td></tr>
             <?}?>
-            <?//Ошибки?>
+            <?//Errors?>
             <?if(count($message['troubles'])){?>
                 <tr class='heading'><td colspan='2'><?=GetMessage('IPOLSDEK_JS_SOD_HD_ERRORS')?></td></tr>
                 <tr><td colspan='2'><?=$message['troubles']?></td></tr>
             <?}?>
-            <?//Отправитель?>
+            <?//Sender?>
             <tr id='IPOLSDEK_courierHeader'><td colspan='2' style='text-align:center;border-top: 1px dashed black'><a href='javascript:void(0)' onclick='IPOLSDEK_oExport.courier.handle()'></a>&nbsp;<a class='PropHint' onclick="return IPOLSDEK_oExport.popup('pop-sender',this);" href='javascript:void(0)'></a></td></tr>
             <?
             if($svdCouriers && count($svdCouriers)){?>
@@ -1449,7 +1467,7 @@ CJSCore::Init(array("jquery"));
                             <?}?>
                         </select>&nbsp;<a class='PropHint' onclick="return IPOLSDEK_oExport.popup('pop-courierSender',this);" href='javascript:void(0)'></a></td></tr>
             <?}?>
-            <?// Дата?>
+            <?// Date?>
             <tr class='IPOLSDEK_courierInfo'><td><?=GetMessage('IPOLSDEK_JS_SOD_courierDate')?></td><td>
                     <div class="adm-input-wrap adm-input-wrap-calendar">
                         <input class="adm-input adm-input-calendar" disabled id='IPOLSDEK_courierDate' disabled type="text" name="IPOLSDEK_courierDate" style='width:148px;' value="<?=$ordrVals['courierDate']?>">
@@ -1457,10 +1475,10 @@ CJSCore::Init(array("jquery"));
                     </div>
                 </td></tr>
             <tr class='IPOLSDEK_courierInfo'><td colspan='2' id='IPOLSDEK_courierDateError' style='font-size:small;color:red;display:none'><?=GetMessage('IPOLSDEK_JS_SOD_badDate')?></td></tr>
-            <?// Время?>
+            <?// Time?>
             <tr class='IPOLSDEK_courierInfo'><td><?=GetMessage('IPOLSDEK_JS_SOD_courierTime')?></td><td><input id='IPOLSDEK_courierTimeBeg' type='text' value='<?=$ordrVals['courierTimeBeg']?>' style='width:56px' onchange='IPOLSDEK_oExport.courier.onTimeChange()'> - <input id='IPOLSDEK_courierTimeEnd' type='text' value='<?=$ordrVals['courierTimeEnd']?>' style='width:56px' onchange='IPOLSDEK_oExport.courier.onTimeChange()'><input type='hidden' id='IPOLSDEK_courierTimeOK'></td></tr>
             <tr class='IPOLSDEK_courierInfo'><td colspan='2' id='IPOLSDEK_courierTimeError' style='font-size:small;color:red'></td></tr>
-            <?// Прочее курьер?>
+            <?// Courier?>
             <tr class='IPOLSDEK_courierInfo'><td><?=GetMessage('IPOLSDEK_JS_SOD_courierCity')?></td><td>
                     <div><span id='IPOLSDEK_cSLabel'><?=$ordrVals['courierCity']['NAME']." ({$ordrVals['courierCity']['REGION']})"?></span><br><a href='javascript:void(0)' onclick='IPOLSDEK_oExport.courier.changeCity(1)'><?=GetMessage("IPOLSDEK_STT_CHNG")?></a></div>
                     <div style='display:none'><input id='IPOLSDEK_cSSelector' type='text' value=''></div>
@@ -1472,7 +1490,7 @@ CJSCore::Init(array("jquery"));
             <tr class='IPOLSDEK_courierInfo'><td><?=GetMessage('IPOLSDEK_JS_SOD_courierPhone')?></td><td><input id='IPOLSDEK_courierPhone' type='text' value='<?=$ordrVals['courierPhone']?>'></td></tr>
             <tr class='IPOLSDEK_courierInfo'><td><?=GetMessage('IPOLSDEK_JS_SOD_courierName')?></td><td><input id='IPOLSDEK_courierName' type='text' value='<?=str_replace("'",'"',$ordrVals['courierName'])?>'></td></tr>
             <tr class='IPOLSDEK_courierInfo'><td><?=GetMessage('IPOLSDEK_JS_SOD_courierComment')?></td><td><input id='IPOLSDEK_courierComment' type='text' value='<?=str_replace("'",'"',$ordrVals['courierComment'])?>'></td></tr>
-            <?//Адрес?>
+            <?//Address?>
             <tr class='heading'><td colspan='2'><?=GetMessage('IPOLSDEK_JS_SOD_HD_ADDRESS')?></td></tr>
             <tr>
                 <td>
@@ -1503,38 +1521,39 @@ CJSCore::Init(array("jquery"));
                 </td>
             </tr>
             <tr class='IPOLSDEK_SV'><td colspan='2'><span id='IPOLSDEK_badPVZ' style='display:none'><?=GetMessage('IPOLSDEK_JS_SOD_BADPVZ')?></span></td></tr>
-            <?//Получатель?>
+            <?// Reciver?>
             <tr class='heading'><td colspan='2'><?=GetMessage('IPOLSDEK_JS_SOD_HD_RESIEVER')?></td></tr>
-			<?if(COption::GetOptionString(self::$MODULE_ID,'addData','N') == 'Y'){?>
-				<tr>
-					<td><?=GetMessage('IPOLSDEK_JS_SOD_deliveryDate')?></td>
-					<td>
-						<div class="adm-input-wrap adm-input-wrap-calendar">
-							<input class="adm-input adm-input-calendar" disabled id='IPOLSDEK_deliveryDate' disabled type="text" name="IPOLSDEK_deliveryDate" style='width:148px;' value="<?=$ordrVals['deliveryDate']?>">
-							<span class="adm-calendar-icon" style='right:0px'onclick="BX.calendar({node:this, field:'IPOLSDEK_deliveryDate', form: '', bTime: false, bHideTime: true,callback_after: IPOLSDEK_oExport.onDeliveryDateChange});"></span>
-							&nbsp;&nbsp;<span id="IPOLSDEK_killDeliveryTerm" onclick='IPOLSDEK_oExport.resetDate();'></span>
-						</div>
-						
-					<?=$message['Schedule']?></td>
-					</tr>
-				<tr id='IPOLSDEK_badDeliveryTerm'><td colspan='2'><small><?=GetMessage('IPOLSDEK_JS_SOD_badDeliveryDate')?><span id='IPOLSDEK_deliveryTerm'></span>&nbsp;<?=GetMessage('IPOLSDEK_JS_SOD_HD_DAY')?></small></td></tr>
-			<?}?>
+            <?if(COption::GetOptionString(self::$MODULE_ID,'addData','N') == 'Y'){?>
+                <tr>
+                    <td><?=GetMessage('IPOLSDEK_JS_SOD_deliveryDate')?></td>
+                    <td>
+                        <div class="adm-input-wrap adm-input-wrap-calendar">
+                            <input class="adm-input adm-input-calendar" disabled id='IPOLSDEK_deliveryDate' disabled type="text" name="IPOLSDEK_deliveryDate" style='width:148px;' value="<?=$ordrVals['deliveryDate']?>">
+                            <span class="adm-calendar-icon" style='right:0px'onclick="BX.calendar({node:this, field:'IPOLSDEK_deliveryDate', form: '', bTime: false, bHideTime: true,callback_after: IPOLSDEK_oExport.onDeliveryDateChange});"></span>
+                            &nbsp;&nbsp;<span id="IPOLSDEK_killDeliveryTerm" onclick='IPOLSDEK_oExport.resetDate();'></span>
+                        </div>
+
+                        <?=$message['Schedule']?></td>
+                </tr>
+                <tr id='IPOLSDEK_badDeliveryTerm'><td colspan='2'><small><?=GetMessage('IPOLSDEK_JS_SOD_badDeliveryDate')?><span id='IPOLSDEK_deliveryTerm'></span>&nbsp;<?=GetMessage('IPOLSDEK_JS_SOD_HD_DAY')?></small></td></tr>
+            <?}?>
             <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_name')?></td><td><input id='IPOLSDEK_name' type='text' value="<?=$ordrVals['name']?>"><?=$message['name']?></td></tr>
             <tr><td valign="top"><?=GetMessage('IPOLSDEK_JS_SOD_phone')?></td><td><input id='IPOLSDEK_phone' type='text' value="<?=$ordrVals['phone']?>"></td></tr>
             <?if(array_key_exists('oldPhone',$ordrVals) && str_replace(' ','',$ordrVals['oldPhone']) != $ordrVals['phone']){?>
-			<tr><td valign="top"><?=GetMessage('IPOLSDEK_JS_SOD_oldPhone')?></td><td><?=$ordrVals['oldPhone']?></td></tr>
+                <tr><td valign="top"><?=GetMessage('IPOLSDEK_JS_SOD_oldPhone')?></td><td><?=$ordrVals['oldPhone']?></td></tr>
             <?}?>
-			<tr><td valign="top"><?=GetMessage('IPOLSDEK_JS_SOD_email')?></td><td><input id='IPOLSDEK_email' type='text' value="<?=$ordrVals['email']?>"></td></tr>
+            <tr><td valign="top"><?=GetMessage('IPOLSDEK_JS_SOD_email')?></td><td><input id='IPOLSDEK_email' type='text' value="<?=$ordrVals['email']?>"></td></tr>
             <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_comment')?></td><td><textarea id='IPOLSDEK_comment'><?=$ordrVals['comment']?></textarea><?=$message['comment']?></td></tr>
+            <?/*<tr><td><?=GetMessage('IPOLSDEK_JS_SOD_reccompany')?></td><td><input id='IPOLSDEK_reccompany'><?=$ordrVals['reccompany']?></input><?=$message['reccompany']?></td></tr>*/?>
             <tr><td colspan='2'>
-                    <?foreach(array('realSeller','sender','courierSender','GABARITES') as $hintCode){?>
+                    <?foreach(array('realSeller','sender','courierSender','GABARITES','minVats') as $hintCode){?>
                         <div id="pop-<?=$hintCode?>" class="b-popup" >
                             <div class="pop-text"><?=GetMessage("IPOLSDEK_JSC_SOD_HELPER_$hintCode")?></div>
                             <div class="close" onclick="$(this).closest('.b-popup').hide();"></div>
                         </div>
                     <?}?>
                 </td></tr>
-            <?// Оплата?>
+            <?// Payment?>
             <tr class='heading'><td colspan='2'><?=GetMessage('IPOLSDEK_JS_SOD_HD_PAYMENT')?></td></tr>
             <tr><td><?=GetMessage('IPOLSDEK_JS_SOD_isBeznal')?></td><td>
                     <?if($payment === true || floatval($payment) >= floatval(self::$orderDescr['info']['PRICE'])){?>
@@ -1584,7 +1603,13 @@ CJSCore::Init(array("jquery"));
                     </select>
                 </td>
             </tr>
-            <?//Доп. параметры?>
+            <?if(COption::GetOptionString(self::$MODULE_ID,'noVats','N') === 'N'){?>
+                <tr>
+                    <td><?=GetMessage('IPOLSDEK_JS_SOD_minVats')?>  <a href='#' class='PropHint' onclick='return IPOLSDEK_oExport.popup("pop-minVats",this);'></a></td>
+                    <td><input type='checkbox' id='IPOLSDEK_minVats' value="Y"></td>
+                </tr>
+            <?}?>
+            <?// additional servises?>
             <tr class='heading'><td colspan='2'><?=GetMessage('IPOLSDEK_AS')?></td></tr>
             <?foreach($exOpts as $id => $option)
                 if($option['SHOW']=="Y" || $option['DEF']=="Y"){
@@ -1592,9 +1617,9 @@ CJSCore::Init(array("jquery"));
                     <tr><td><?=GetMessage("IPOLSDEK_AS_".$id."_NAME")?></td><td><input id='IPOLSDEK_AS_<?=$id?>' <?=($option['DEF']=="Y")?"checked":""?> type='checkbox' value='<?=$id?>'></td></tr>
                 <?}?>
 
-            <?// О заказе?>
+            <?// about the order?>
             <tr class='heading'><td colspan='2'><a onclick='IPOLSDEK_oExport.serverShow()' href='javascript:void(0)'><?=GetMessage('IPOLSDEK_JS_SOD_ABOUT')?></td></tr>
-            <?// Габариты родные?>
+            <?// Gabarites defauls?>
             <tr class='IPOLSDEK_detOrder' style='display:none'>
                 <td><?=GetMessage('IPOLSDEK_JS_SOD_GABARITES')?> <a href='#' class='PropHint' onclick='return IPOLSDEK_oExport.popup("pop-GABARITES",this);'></a></td>
                 <td>
@@ -1608,7 +1633,7 @@ CJSCore::Init(array("jquery"));
                     <input id='IPOLSDEK_GABS_W'   type='hidden' value="<?=$ordrVals['GABS']['W']?>">
                 </td>
             </tr>
-            <?// Габариты заданные?>
+            <?// Gabarites given?>
             <tr class='IPOLSDEK_detOrder' style='display:none'>
                 <td><?=GetMessage('IPOLSDEK_JS_SOD_CGABARITES')?></td>
                 <td>
@@ -1620,7 +1645,7 @@ CJSCore::Init(array("jquery"));
                     </div>
                 </td>
             </tr>
-            <?// Габариты упаковки?>
+            <?// Gabarites result?>
             <tr class='IPOLSDEK_detOrder' style='display:none'>
                 <td colspan="2" style='text-align:center'><?=GetMessage('IPOLSDEK_JS_SOD_PACKS_GIVEN')?><input type='hidden' id='IPOLSDEK_PLACES' value='<?=(array_key_exists('packs',$ordrVals) && is_array($ordrVals['packs'])) ? json_encode($ordrVals['packs']) : false?>'></td>
             </tr>
@@ -1638,7 +1663,7 @@ CJSCore::Init(array("jquery"));
                 <td><?=GetMessage('IPOLSDEK_JS_SOD_NDELPRICE')?></td>
                 <td id='IPOLSDEK_newPrDel'></td>
             </tr>
-            <?// Аккаунт?>
+            <?// Account?>
             <tr class='IPOLSDEK_detOrder' style='display:none'>
                 <td><?=GetMessage('IPOLSDEK_JSC_SOD_ACCOUNT')?></td>
                 <td>

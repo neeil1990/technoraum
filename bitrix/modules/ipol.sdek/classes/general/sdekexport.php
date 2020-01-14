@@ -2,7 +2,6 @@
 IncludeModuleLangFile(__FILE__);
 
 /*
-	onGoodsToRequest
 	onParseAddress
 	onFormation
 */
@@ -203,7 +202,7 @@ class sdekExport extends sdekHelper{
 			}
 		}
 
-		foreach(array('location','name','email','phone','address','street','house','flat') as $prop){
+		foreach(array('location','name','email','phone','address','street','house','flat','fName','sName','mName') as $prop){
 			if(!$arProps[$prop] || $prop=='location'){
 				$propCode = COption::GetOptionString(self::$MODULE_ID,$prop,'');
 				if($prop!='location' && (!self::$locStreet || $prop != 'street'))
@@ -223,10 +222,20 @@ class sdekExport extends sdekHelper{
 			}
 		}
 
-		foreach(array('location','name','email','phone') as $prop){
+		foreach(array('location','email','phone') as $prop){
 			$arFormation[$prop] = $arProps[$prop];
 			unset($arProps[$prop]);
 		}
+		
+		if(COption::GetOptionString(self::$MODULE_ID,'extendName','N') === 'N'){
+			$arFormation['name'] = $arProps['name'];
+		} else {
+			$arFormation['name'] = $arProps['sName']." ".$arProps['fName']." ".$arProps['mName'];
+		}
+		unset($arProps['name']);
+		unset($arProps['sName']);
+		unset($arProps['fName']);
+		unset($arProps['mName']);
 
 		// kukan phone
 		if(COption::GetOptionString(self::$MODULE_ID,'normalizePhone','N') == 'Y'){

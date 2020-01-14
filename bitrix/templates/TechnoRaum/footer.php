@@ -82,7 +82,7 @@ if($_SERVER["REQUEST_URI"] != "/")
           
           <div class="footer_bottom">
             <p class="copy">
-              © ООО «ТехноРаум», 2019
+              © ООО «ТехноРаум», 2020
             </p>            
           </div><!--/footer_bottom-->
         </div>

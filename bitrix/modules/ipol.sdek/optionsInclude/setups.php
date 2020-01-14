@@ -136,6 +136,7 @@ $paySysHtml.="</select>";
 			$('[name="addData"]').on('change',IPOLSDEK_setups.base.onTurnOnData);
 			IPOLSDEK_setups.base.senders.init();
 			IPOLSDEK_setups.base.depature.init();
+			IPOLSDEK_setups.base.properties.init();
 			IPOLSDEK_setups.base.onEnsChange();
 		},
 
@@ -246,9 +247,9 @@ $paySysHtml.="</select>";
 				}
 			},
 			onAnswerAccount: function(data){
-				if(typeof(data.text) != 'undefined' && data.text)
+				if(typeof(data.text) !== 'undefined' && data.text)
 					alert(data.text);
-				if(data.result == 'collapse')
+				if(data.result === 'collapse')
 					IPOLSDEK_setups.reload();
 				else
 					IPOLSDEK_setups.base.accounts.requestAcs();
@@ -303,8 +304,8 @@ $paySysHtml.="</select>";
 			},
 
 			add: function(settings){
-				if(typeof(settings) == 'undefined') settings = {senderName:"",cityName:"",courierCity:'',courierStreet:'',courierHouse:'',courierFlat:'',courierPhone:'',courierName:'',courierTimeBeg:'',courierTimeEnd:''};
-				if(typeof(settings.courierComment) == 'undefined') settings.courierComment = '';
+				if(typeof(settings) === 'undefined') settings = {senderName:"",cityName:"",courierCity:'',courierStreet:'',courierHouse:'',courierFlat:'',courierPhone:'',courierName:'',courierTimeBeg:'',courierTimeEnd:''};
+				if(typeof(settings.courierComment) === 'undefined') settings.courierComment = '';
 				var cnt = $('.IPOLSDEK_sender').length;
 				var HTML = "<table class='IPOLSDEK_sender' id='IPOLSDEK_added'>";
 					HTML += "<tr><td><?=GetMessage("IPOLSDEK_LBL_SENDER")?></td><td><input type='text' name='senders["+cnt+"][senderName]' value='"+settings.senderName+"'></td></tr>";
@@ -330,7 +331,7 @@ $paySysHtml.="</select>";
 			},
 
 			setEvents: function(mark){
-				var chz = (typeof(mark.html) == 'undefined') ? $(mark) : mark;
+				var chz = (typeof(mark.html) === 'undefined') ? $(mark) : mark;
 				chz.find(".IPOLSDEK_senderCity").autocomplete({
 				  source: IPOLSDEK_setups.base.senderCities,
 				  select: function(ev,ui){IPOLSDEK_setups.base.senders.changeCity(ev,ui);}
@@ -348,13 +349,13 @@ $paySysHtml.="</select>";
 					tr.find('.IPOLSDEK_badInput').removeClass('IPOLSDEK_badInput');
 					tr.parent().find('.IPOLSDEK_errTextCourier').html('');
 				}else{
-					if(check.error == 'start' || check.error == 'both')
+					if(check.error === 'start' || check.error === 'both')
 						tr.find('[name*="[courierTimeBeg]"]').addClass('IPOLSDEK_badInput');
-					if(check.error == 'end' || check.error == 'both')
+					if(check.error === 'end' || check.error === 'both')
 						tr.find('[name*="[courierTimeEnd]"]').addClass('IPOLSDEK_badInput');
 					tr.parent().find('.IPOLSDEK_errTextCourier').html(check.text);
 				}
-			},
+			}
 		},
 
 		// Города-отправители
@@ -384,6 +385,37 @@ $paySysHtml.="</select>";
 			}
 		},
 
+		// отображение свойств заявки
+		properties: {
+			getModeNF : function(){
+				// T - extended, F - usual
+				return ($('[name="extendName"]').val()==='Y');
+			},
+			checkNF : function(){
+				if(IPOLSDEK_setups.base.properties.getModeNF()){
+					$('[name="name"]').closest('tr').css('display','none');
+					$('[name="fName"]').closest('tr').css('display','');
+					$('[name="sName"]').closest('tr').css('display','');
+					$('[name="mName"]').closest('tr').css('display','');
+				} else {
+					$('[name="name"]').closest('tr').css('display','');
+					$('[name="fName"]').closest('tr').css('display','none');
+					$('[name="sName"]').closest('tr').css('display','none');
+					$('[name="mName"]').closest('tr').css('display','none');
+				}
+			},
+			turnOnNF: function(){
+				$('[name="extendName"]').val('Y');
+				IPOLSDEK_setups.base.properties.checkNF();
+			},
+			turnOffNF: function(){
+				$('[name="extendName"]').val('N');
+				IPOLSDEK_setups.base.properties.checkNF();
+			},
+			init: function(){
+				IPOLSDEK_setups.base.properties.checkNF();
+			}
+		},
 		// сервисные
 		serverShow: function(){
 			$('.IPOLSDEK_service').each(function(){
@@ -413,7 +445,7 @@ $paySysHtml.="</select>";
 				IPOLSDEK_setups.ajax({
 					data: {isdek_action:'killUpdt'},
 					success: function(data){
-						if(data=='done')
+						if(data==='done')
 							$("#IPOLSDEK_updtPlc").replaceWith('');
 						else{
 							$('.IPOLSDEK_clz').css('display','');
@@ -432,25 +464,25 @@ $paySysHtml.="</select>";
 		syncList: function(params){
 			var dataObj = {text:false,status:false};
 			var reqObj  = {isdek_action: 'callUpdateList',full: true};
-			if(typeof(params) == 'undefined'){
+			if(typeof(params) === 'undefined'){
 				IPOLSDEK_setups.cities.controlSunc();
 				dataObj.text = '<?=GetMessage("IPOLSDEK_OTHR_lastModList_START")?>';
 			}else{
 				dataObj.text   = params.text;
 				dataObj.status = params.result;
-				if(params.result != 'error')
+				if(params.result !== 'error')
 					reqObj['listDone'] = true;
 			}
 
 			if(dataObj.text){
-				if($('#IPOLSDEK_syncInfo').length == 0)
+				if($('#IPOLSDEK_syncInfo').length === 0)
 					$('#IPOLSDEK_sT_sunc').after('<br><span id="IPOLSDEK_syncInfo"></span>');
 				$('#IPOLSDEK_syncInfo').html(dataObj.text);
 				if(dataObj.status == 'error')
 					$('#IPOLSDEK_syncInfo').css('color','red');
 			}
 
-			if(dataObj.status != 'error' && dataObj.status != 'end'){
+			if(dataObj.status !== 'error' && dataObj.status !== 'end'){
 				IPOLSDEK_setups.ajax({
 					data: reqObj,
 					dataType: 'json',
@@ -458,7 +490,7 @@ $paySysHtml.="</select>";
 					error: function(a,b,c){alert("sync "+b+" "+c);}
 				});
 			}else
-				if(dataObj.status == 'end'){
+				if(dataObj.status === 'end'){
 					alert(dataObj.text);
 					IPOLSDEK_setups.cities.controlSunc(true);
 					IPOLSDEK_setups.reload();
@@ -479,11 +511,15 @@ $paySysHtml.="</select>";
 		},
 
 		importCities: function(){
+		    var migrated = <?=($migrated)?'true':'false'?>;
 			$('#IPOLSDEK_IMPORTCITIES').attr('disabled','disabled');
-			IPOLSDEK_setups.ajax({
-				data: {'isdek_action':'setImport','mode':'Y'},
-				success: IPOLSDEK_setups.reload
-			});
+
+		    if(!migrated || confirm('<?=GetMessage("IPOLSDEK_LBL_NONEEDIMPORT")?>')) {
+                IPOLSDEK_setups.ajax({
+                    data: {'isdek_action': 'setImport', 'mode': 'Y'},
+                    success: IPOLSDEK_setups.reload
+                });
+            }
 		},
 
 		autoloads: function(){
@@ -532,7 +568,7 @@ $paySysHtml.="</select>";
 </script>
 
 <?
-foreach(array("depature","showInOrders","realSeller","addDeparture","shipments","prntActOrdr","numberOfPrints","numberOfShtrihs","deliveryAsPosition","normalizePhone","addData","NDSUseCatalog","address","pvzPicker","noPVZnoOrder","hideNal","hideNOC","autoSelOne","noYmaps","profilesMode","cntExpress","mindEnsure","mindNDSEnsure","forceRoundDelivery","AS","noVats","addMeasureName","statusSTORE","statusTRANZT","statusCORIER","tarifs","warhouses","dostTimeout","timeoutRollback","TURNOFF","TARSHOW","autoAddCities") as $code)
+foreach(array("depature","showInOrders","realSeller","addDeparture","shipments","prntActOrdr","numberOfPrints","numberOfShtrihs","deliveryAsPosition","normalizePhone","addData","NDSUseCatalog","address","pvzPicker","ymapsAPIKey","noPVZnoOrder","hideNal","hideNOC","autoSelOne","noYmaps","profilesMode","cntExpress","mindEnsure","mindNDSEnsure","forceRoundDelivery","AS","noVats","addMeasureName","statusSTORE","statusTRANZT","statusCORIER","tarifs","warhouses","dostTimeout","timeoutRollback","TURNOFF","TARSHOW","autoAddCities","useOldWidjetConnect","debugMode") as $code)
 	sdekOption::placeHint($code);
 
 $deadServerCheck = COption::GetOptionString($module_id,'sdekDeadServer',false);
@@ -543,6 +579,9 @@ if($deadServerCheck && (mktime() - $deadServerCheck) < (COption::GetOptionString
 			<div class="adm-info-message-title"><?=GetMessage('IPOLSDEK_DEAD_SERVER_HEADER')?></div>
 				<?=GetMessage('IPOLSDEK_DEAD_SERVER_TITLE')?>&nbsp;<?=date('H:i:s d.m.Y',$deadServerCheck)?>.
 				<br>
+				<br>
+				<?sdekOption::placeFAQ('DEAD_SERVER')?>
+				<br>
 				<input type='button' id='IPOLSDEK_ressurect' onclick='IPOLSDEK_setups.base.ressurect()' value='<?=GetMessage("IPOLSDEK_DEAD_SERVER_BTN")?>'>
 			<div class="adm-info-message-icon"></div>
 		  </div>
@@ -550,22 +589,8 @@ if($deadServerCheck && (mktime() - $deadServerCheck) < (COption::GetOptionString
 	</td></tr>
 <?}
 
-if(!file_exists($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".$module_id."/list.php")){
+if(!file_exists(\Ipolh\SDEK\Bitrix\Controller\pvzController::getFilePath())){
 	Ipolh\SDEK\Bitrix\Tools::placeErrorLabel(GetMessage('IPOLSDEK_NOLIST_ERR_TITLE'),GetMessage('IPOLSDEK_NOLIST_ERR_HEADER'));
-}
-
-if(file_exists($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".$module_id."/errorLog.txt")){
-	$errorStr=file_get_contents($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".$module_id."/errorLog.txt");
-	if(strlen($errorStr)>0){
-		Ipolh\SDEK\Bitrix\Tools::placeErrorLabel(GetMessage('IPOLSDEK_FNDD_ERR_TITLE'),GetMessage('IPOLSDEK_FNDD_ERR_HEADER'));
-	}
-}
-
-if(file_exists($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".$module_id."/hint.txt")){
-	$updateStr=file_get_contents($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".$module_id."/hint.txt");
-	if(strlen($updateStr)>0){
-		Ipolh\SDEK\Bitrix\Tools::placeWarningLabel($updateStr,"<div class='IPOLSDEK_clz' onclick='IPOLSDEK_setups.base.clrUpdt()'></div>",300);
-	}
 }
 
 $dost = sdekdriver::getDelivery(true);
@@ -806,7 +831,7 @@ foreach(sdekExport::getAllProfiles() as $profile)
 <tr style='display:none' class='IPOLSDEK_service'>
 	<td><?=GetMessage('IPOLSDEK_OTHR_lastModList')?></td>
 	<td>
-		<? $ft = filemtime($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".$module_id."/list.php");?>
+		<? $ft = filemtime($_SERVER["DOCUMENT_ROOT"]."/bitrix/js/".$module_id."/list.json");?>
 		<span id='IPOLSDEK_updtTime'><?=($ft)?date("d.m.Y H:i:s",$ft):GetMessage("IPOLSDEK_OTHR_NOTCOMMITED");?></span>
 		<input id='IPOLSDEK_sT_sunc' type='button' value='<?=GetMessage('IPOLSDEK_OTHR_lastModList_BUTTON')?>' onclick='IPOLSDEK_setups.base.syncList()'/>
 	</td>
@@ -842,11 +867,25 @@ foreach(sdekExport::getAllProfiles() as $profile)
 	</td>
 </tr>
 <tr style='display:none' class='IPOLSDEK_service'>
+	<td><?=GetMessage('IPOLSDEK_OPT_debugMode')?></td>
+	<td>
+		<input type='checkbox' value='Y' name='debugMode' <?=(COption::GetOptionString($module_id,'debugMode','N') === 'Y') ? 'checked' : ''?>/>
+	</td>
+</tr>
+<tr style='display:none' class='IPOLSDEK_service'>
 	<td><?=GetMessage('IPOLSDEK_OPT_autoAddCities')?></td>
 	<td>
 		<input type='checkbox' value='Y' name='autoAddCities' <?=(COption::GetOptionString($module_id,'autoAddCities','Y') === 'Y') ? 'checked' : ''?>/>
 	</td>
 </tr>
+<tr style='display:none' class='IPOLSDEK_service'>
+	<td><?=GetMessage('IPOLSDEK_OPT_useOldWidjetConnect')?></td>
+	<td>
+		<input type='checkbox' value='Y' name='useOldWidjetConnect' <?=(COption::GetOptionString($module_id,'useOldWidjetConnect','N') === 'Y') ? 'checked' : ''?>/>
+	</td>
+</tr>
+<?if(!$import){?>
 <tr style='display:none' class='IPOLSDEK_service'><td colspan='2' style='text-align:center'>
 	<br><input type='button' value='<?=GetMessage('IPOLSDEK_OTHR_importCities_BUTTON')?>' id='IPOLSDEK_IMPORTCITIES' onclick='IPOLSDEK_setups.base.importCities()'/>
 </td></tr>
+<?}?>

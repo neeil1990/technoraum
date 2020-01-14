@@ -147,63 +147,71 @@ else
 <!--TABS-END-->
 
 	<?$APPLICATION->IncludeComponent(
-		"bitrix:catalog.recommended.products",
-		".recommended.products",
-		array(
-			"ACTION_VARIABLE" => "action_crp",
-			"ADDITIONAL_PICT_PROP_8" => "PHOTO",
-			"ADD_PROPERTIES_TO_BASKET" => "Y",
-			"BASKET_URL" => "/personal/cart/",
-			"CACHE_TIME" => "86400",
-			"CACHE_TYPE" => "A",
-			"CART_PROPERTIES_8" => array(
-				0 => ",",
-			),
-			"CODE" => $_REQUEST["PRODUCT_CODE"],
-			"CONVERT_CURRENCY" => "N",
-			"DETAIL_URL" => "",
-			"ELEMENT_SORT_FIELD" => "SORT",
-			"ELEMENT_SORT_FIELD2" => "ID",
-			"ELEMENT_SORT_ORDER" => "ASC",
-			"ELEMENT_SORT_ORDER2" => "DESC",
-			"HIDE_NOT_AVAILABLE" => "N",
-			"IBLOCK_ID" => $arParams["IBLOCK_ID"],
-			"IBLOCK_TYPE" => "catalog",
-			"ID" => $ElementID,
-			"LABEL_PROP_8" => "-",
-			"LINE_ELEMENT_COUNT" => "3",
-			"MESS_BTN_BUY" => "Купить",
-			"MESS_BTN_DETAIL" => "Похожие товары",
-			"MESS_BTN_SUBSCRIBE" => "Подписаться",
-			"MESS_NOT_AVAILABLE" => "Нет в наличии",
-			"OFFERS_PROPERTY_LINK" => "LIKE_PRODUCT",
-			"PAGE_ELEMENT_COUNT" => "50",
-			"PARTIAL_PRODUCT_PROPERTIES" => "N",
-			"PRICE_CODE" => array(
-				0 => "price",
-			),
-			"PRICE_VAT_INCLUDE" => "N",
-			"PRODUCT_DISPLAY_MODE" => "N",
-			"PRODUCT_ID_VARIABLE" => "id",
-			"PRODUCT_PROPS_VARIABLE" => "prop",
-			"PRODUCT_QUANTITY_VARIABLE" => "quantity",
-			"PRODUCT_SUBSCRIPTION" => "N",
-			"PROPERTY_CODE_8" => array(
-				0 => ",",
-			),
-			"PROPERTY_LINK" => "LIKE_PRODUCT",
-			"SHOW_DISCOUNT_PERCENT" => "N",
-			"SHOW_IMAGE" => "Y",
-			"SHOW_NAME" => "Y",
-			"SHOW_OLD_PRICE" => "Y",
-			"SHOW_PRICE_COUNT" => "1",
-			"SHOW_PRODUCTS_8" => "N",
-			"TEMPLATE_THEME" => "blue",
-			"USE_PRODUCT_QUANTITY" => "N",
-			"COMPONENT_TEMPLATE" => ".recommended.products"
+	"bitrix:catalog.recommended.products", 
+	".recommended.products", 
+	array(
+		"ACTION_VARIABLE" => "action_crp",
+		"ADDITIONAL_PICT_PROP_8" => "PHOTO",
+		"ADD_PROPERTIES_TO_BASKET" => "Y",
+		"BASKET_URL" => "/personal/cart/",
+		"CACHE_TIME" => "86400",
+		"CACHE_TYPE" => "A",
+		"CART_PROPERTIES_8" => array(
+			0 => ",",
 		),
-		false
-	);?>
+		"CODE" => $_REQUEST["PRODUCT_CODE"],
+		"CONVERT_CURRENCY" => "Y",
+		"DETAIL_URL" => "",
+		"ELEMENT_SORT_FIELD" => "SORT",
+		"ELEMENT_SORT_FIELD2" => "ID",
+		"ELEMENT_SORT_ORDER" => "ASC",
+		"ELEMENT_SORT_ORDER2" => "DESC",
+		"HIDE_NOT_AVAILABLE" => "N",
+		"IBLOCK_ID" => $arParams["IBLOCK_ID"],
+		"IBLOCK_TYPE" => "catalog",
+		"ID" => $ElementID,
+		"LABEL_PROP_8" => "-",
+		"LINE_ELEMENT_COUNT" => "3",
+		"MESS_BTN_BUY" => "Купить",
+		"MESS_BTN_DETAIL" => "Похожие товары",
+		"MESS_BTN_SUBSCRIBE" => "Подписаться",
+		"MESS_NOT_AVAILABLE" => "Нет в наличии",
+		"OFFERS_PROPERTY_LINK" => "LIKE_PRODUCT",
+		"PAGE_ELEMENT_COUNT" => "50",
+		"PARTIAL_PRODUCT_PROPERTIES" => "N",
+		"PRICE_CODE" => array(
+			0 => "price",
+		),
+		"PRICE_VAT_INCLUDE" => "N",
+		"PRODUCT_DISPLAY_MODE" => "N",
+		"PRODUCT_ID_VARIABLE" => "id",
+		"PRODUCT_PROPS_VARIABLE" => "prop",
+		"PRODUCT_QUANTITY_VARIABLE" => "quantity",
+		"PRODUCT_SUBSCRIPTION" => "N",
+		"PROPERTY_CODE_8" => array(
+			0 => ",",
+		),
+		"PROPERTY_LINK" => "LIKE_PRODUCT",
+		"SHOW_DISCOUNT_PERCENT" => "N",
+		"SHOW_IMAGE" => "Y",
+		"SHOW_NAME" => "Y",
+		"SHOW_OLD_PRICE" => "Y",
+		"SHOW_PRICE_COUNT" => "1",
+		"SHOW_PRODUCTS_8" => "N",
+		"TEMPLATE_THEME" => "blue",
+		"USE_PRODUCT_QUANTITY" => "N",
+		"COMPONENT_TEMPLATE" => ".recommended.products",
+		"CURRENCY_ID" => "RUB",
+		"SHOW_PRODUCTS_16" => "N",
+		"PROPERTY_CODE_16" => array(
+		),
+		"CART_PROPERTIES_16" => array(
+		),
+		"ADDITIONAL_PICT_PROP_16" => "MORE_PHOTO",
+		"LABEL_PROP_16" => "-"
+	),
+	false
+);?>
 	<div style="margin-top: 100px;"></div>
 
 	<?$APPLICATION->IncludeComponent(
@@ -220,7 +228,7 @@ else
 			0 => ",",
 		),
 		"CODE" => $_REQUEST["PRODUCT_CODE"],
-		"CONVERT_CURRENCY" => "N",
+		"CONVERT_CURRENCY" => "Y",
 		"DETAIL_URL" => "",
 		"ELEMENT_SORT_FIELD" => "SORT",
 		"ELEMENT_SORT_FIELD2" => "ID",
@@ -260,7 +268,15 @@ else
 		"SHOW_PRODUCTS_8" => "N",
 		"TEMPLATE_THEME" => "blue",
 		"USE_PRODUCT_QUANTITY" => "N",
-		"COMPONENT_TEMPLATE" => ".recommended.products"
+		"COMPONENT_TEMPLATE" => ".recommended.products",
+		"CURRENCY_ID" => "RUB",
+		"SHOW_PRODUCTS_16" => "N",
+		"PROPERTY_CODE_16" => array(
+		),
+		"CART_PROPERTIES_16" => array(
+		),
+		"ADDITIONAL_PICT_PROP_16" => "MORE_PHOTO",
+		"LABEL_PROP_16" => "-"
 	),
 	false
 );?>

@@ -3,10 +3,11 @@ namespace Ipolh\SDEK;
 
 IncludeModuleLangFile(__FILE__);
 
-class pvzWidjetHandler
+class pvzWidjetHandler /*extends abstractGeneral*/
 {
-    protected static $MODULE_ID  = IPOLH_SDEK;
+
     protected static $MODULE_LBL = IPOLH_SDEK_LBL;
+    protected static $MODULE_ID  = IPOLH_SDEK;
 
 	protected static $selDeliv = '';
 	
@@ -74,7 +75,8 @@ class pvzWidjetHandler
 	
 	public static function getMapsScript(){
 		$path = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
-		if($key = \COption::GetOptionString(self::$MODULE_ID,'ymapsAPIKey',false)){
+		$defaultYandexKey = \COption::GetOptionString('fileman', 'yandex_map_api_key', '');
+		if($key = \COption::GetOptionString(self::$MODULE_ID,'ymapsAPIKey',$defaultYandexKey)){
 			$path .= '&apikey='.$key;
 		}
 		return $path;

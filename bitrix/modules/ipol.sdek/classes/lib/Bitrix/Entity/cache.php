@@ -38,14 +38,14 @@ class cache extends \CPHPCache
 
     public function checkCache($hash)
     {
-		if(
-			!(defined('IPOLSDEK_NOCACHE') && IPOLSDEK_NOCACHE === true) &&
-			$this->InitCache($this->getLife(),$hash,$this->getPath())
-		)
-		{
-			$this->inited = true;
-			return true;
+        if(self::isOn()){
+            if ($this->InitCache($this->getLife(), $hash, $this->getPath()))
+            {
+                $this->inited = true;
+				return true;
+            }
 		}
+
 		return false;
     }
 
@@ -53,16 +53,21 @@ class cache extends \CPHPCache
     {
         $this->checkCache($hash);
 
-        return $this->GetVars();
+        return ($this->inited) ? $this->GetVars() : false;
     }
 
     public function setCache($hash, $data)
     {
-        $this->checkCache($hash);
-
-        $this->StartDataCache();
-        $this->EndDataCache($data);
+        if(self::isOn()){
+			$this->checkCache($hash);
+            $this->StartDataCache();
+            $this->EndDataCache($data);
+        }
     }
+	
+	protected static function isOn(){
+		return !(defined('IPOLSDEK_NOCACHE') && IPOLSDEK_NOCACHE === true);
+	}
 
     /**
      * @return int

@@ -45,6 +45,7 @@
 
 				$cache = new Ipolh\SDEK\Bitrix\Entity\cache();
 				$cachename = "calculate|$profile|".$this->sender."|".$this->receiver."|".implode('|',$this->gabs)."|".$this->accountId;
+
 				if($cache->checkCache($cachename)){
 					$result = $cache->getCache($cachename);
 				}else{
@@ -74,10 +75,14 @@
 						),
 						'TARIF' => $result['tarif']
 					);
+
+                    CDeliverySDEK::$lastCnt = $result['price'];
 				}else{
 					$erStr = '';
-					foreach($result as $erCode => $erLabl)
-						$erStr.="$erLabl ($erCode) ";
+					if(!empty($result) && is_array($result)){
+						foreach($result as $erCode => $erLabl)
+							$erStr.="$erLabl ($erCode) ";
+					}
 					$this->profiles[$profile] = array(
 						'RESULT' => 'ERROR',
 						'TEXT'	 => CDeliverySDEK::zaDEjsonit($erStr)

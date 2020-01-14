@@ -32,7 +32,6 @@
 		},
 
 		onRezult: function(data){
-			console.log('onRezult',data);
 			switch(data.step){
 				case 'init': 
 					data.text += ' <?=GetMessage("IPOLSDEK_IMPORT_PROCESS_ONINIT_1")?>: '+data.result.total+'.<br><?=GetMessage("IPOLSDEK_IMPORT_PROCESS_ONINIT_2")?>';
@@ -43,7 +42,7 @@
 				case 'contSync': IPOLSDEK_cityImport.request({mode:'setSync'});
 				break;
 				case 'startImport':
-					if(IPOLSDEK_cityImport.stat == 'aftSenc'){
+					if(IPOLSDEK_cityImport.stat === 'aftSenc'){
 						data.text += "<?=GetMessage("IPOLSDEK_IMPORT_PROCESS_IEND")?>";
 						IPOLSDEK_cityImport.killCount();
 					}else{
@@ -65,7 +64,7 @@
 			
 		},
 
-		// таймер
+		// пїЅпїЅпїЅпїЅпїЅпїЅ
 		counter: false,
 		curTime: false,
 
@@ -83,7 +82,7 @@
 			$('#IPOLSDEK_timeout').html('');
 		},
 
-		// настройки
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		timeOutCheck: function(){
 			$('#IPOLSDEK_timeoutCnter').val(IPOLSDEK_cityImport.getTime());
 		},
@@ -93,7 +92,7 @@
 				val = 60;
 			return val;
 		},
-		// прочее
+		// пїЅпїЅпїЅпїЅпїЅпїЅ
 		kill: function(){
 			IPOLSDEK_cityImport.hideButtons();
 			IPOLSDEK_cityImport.stat = 'killed';
@@ -134,7 +133,22 @@
 		border: 1px dotted black;
 	}
 </style>
-<tr><td colspan="2"><?=GetMessage('IPOLSDEK_IMPORT_LBL_BEWIZE')?></td></tr>
+
+<?
+if($migrated){
+    Ipolh\SDEK\Bitrix\Tools::placeErrorLabel(
+        GetMessage('IPOLSDEK_IMPORT_LBL_HAS20'),
+        GetMessage('IPOLSDEK_LBL_ATTENTION')
+    );
+}
+?>
+
+<?
+Ipolh\SDEK\Bitrix\Tools::placeWarningLabel(
+    GetMessage('IPOLSDEK_IMPORT_LBL_BEWIZE'),
+    GetMessage('IPOLSDEK_LBL_ATTENTION')
+);
+?>
 <tr><td style="color:#555;" colspan="2">
 	<?sdekOption::placeFAQ('IMPORT')?>
 </td></tr>

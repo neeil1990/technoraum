@@ -8,7 +8,15 @@ $arUrlRewrite=array (
     'PATH' => '/desktop_app/router.php',
     'SORT' => 100,
   ),
-  152 => 
+  154 => 
+  array (
+    'CONDITION' => '#^ /catalog/([^/]+?)/\\??(.*)#',
+    'RULE' => 'SECTION_CODE=$1&$2',
+    'ID' => 'bitrix:catalog.top',
+    'PATH' => '/include/product_popup.php',
+    'SORT' => 100,
+  ),
+  155 => 
   array (
     'CONDITION' => '#^ /catalog/(.+?)/\\??(.*)#',
     'RULE' => 'SECTION_CODE_PATH=$1&$2',
@@ -72,7 +80,7 @@ $arUrlRewrite=array (
     'PATH' => '/actions/index.php',
     'SORT' => 100,
   ),
-  151 => 
+  156 => 
   array (
     'CONDITION' => '#^/catalog/#',
     'RULE' => '',

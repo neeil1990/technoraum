@@ -61,6 +61,8 @@ while($element=$tmpValue->Fetch()){
 	$senderCities[$element['SDEK_ID']] = $element['NAME']." (".$element['REGION'].")";
 }
 
+$defaultYandexKey = COption::GetOptionString('fileman', 'yandex_map_api_key', '');
+
 $arAllOptions = array(
 	"logData" => array(
 		array("logSDEK",GetMessage("IPOLSDEK_OPT_logSDEK"),false,array("text")), // LEGACY
@@ -113,12 +115,16 @@ $arAllOptions = array(
 	"orderProps" => Array(//�������� ������ ������ �����
 		Array("location", GetMessage("IPOLSDEK_JS_SOD_location"), 'LOCATION', Array("text")),
 		Array("name", GetMessage("IPOLSDEK_JS_SOD_name"), 'FIO', Array("text")),
+		Array("fName", GetMessage("IPOLSDEK_OPT_fName"), 'FIRSTNAME', Array("text")),
+		Array("sName", GetMessage("IPOLSDEK_OPT_sName"), 'SECONDNAME', Array("text")),
+		Array("mName", GetMessage("IPOLSDEK_OPT_mName"), 'MIDDLENAME', Array("text")),
 		Array("email", GetMessage("IPOLSDEK_JS_SOD_email"), 'EMAIL', Array("text")),
 		Array("phone", GetMessage("IPOLSDEK_JS_SOD_phone"), 'PHONE', Array("text")),
 		Array("address", GetMessage("IPOLSDEK_JS_SOD_line"), 'ADDRESS', Array("text")),
 		Array("street", GetMessage("IPOLSDEK_JS_SOD_street"), 'STREET', Array("text")),
 		Array("house", GetMessage("IPOLSDEK_JS_SOD_house"), 'HOUSE', Array("text")),
-		Array("flat", GetMessage("IPOLSDEK_JS_SOD_flat"), 'FLAT', Array("text"))
+		Array("flat", GetMessage("IPOLSDEK_JS_SOD_flat"), 'FLAT', Array("text")),
+		Array("extendName", GetMessage("IPOLSDEK_OPT_extendName"), 'N', Array("checkbox")),
 	),
 	"usualOrderProps" => Array(
 		Array("comment", GetMessage("IPOLSDEK_OPT_comment"),'B',Array("selectbox"),array('N'=>GetMessage('IPOLSDEK_OPT_comment_N'),'M'=>GetMessage('IPOLSDEK_OPT_comment_M'),'B'=>GetMessage('IPOLSDEK_OPT_comment_B'))),
@@ -133,9 +139,11 @@ $arAllOptions = array(
 		array("pvzID",GetMessage("IPOLSDEK_OPT_pvzID"),"",array("text")),
 		array("pvzPicker",GetMessage("IPOLSDEK_OPT_pvzPicker"),"ADDRESS",array("text")),
 		array("buttonName",GetMessage("IPOLSDEK_OPT_buttonName"),"",array("text")),
+		array("ymapsAPIKey",GetMessage("IPOLSDEK_OPT_ymapsAPIKey"),$defaultYandexKey,array("text")),
 		array("autoSelOne",GetMessage("IPOLSDEK_OPT_autoSelOne"),"",array("checkbox")),
 		array("mindVWeight",GetMessage("IPOLSDEK_OPT_mindVWeight"),"Y",array("checkbox")),
-		array("widjetVersion",GetMessage("IPOLSDEK_OPT_widjetVersion"),"ipol.sdekPickup",array("type")),
+		// array("widjetVersion",GetMessage("IPOLSDEK_OPT_widjetVersion"),"ipol.sdekPickup",array("type")),
+		array("widjetVersion",GetMessage("IPOLSDEK_OPT_widjetVersion"),"ipol.sdekPickup",array("selectbox"),array('ipol.sdekPickup'=>GetMessage('IPOLSDEK_OPT_ipol.sdekPickup'),'ipol.sdekWidjet'=>GetMessage('IPOLSDEK_OPT_ipol.sdekWidjet'))),
 		array("noYmaps",GetMessage("IPOLSDEK_OPT_noYmaps"),"N",array("checkbox")),
 	),
 	"basket" => array(
@@ -164,6 +172,7 @@ $arAllOptions = array(
 		array("dostTimeout",GetMessage("IPOLSDEK_OPT_dostTimeout"),'6',array("text")),//������� ������� ��������
 		array("timeoutRollback",GetMessage("IPOLSDEK_OPT_timeoutRollback"),'15',array("text")),//������� ������� ��������
 		array("autoAddCities",GetMessage("IPOLSDEK_OPT_autoAddCities"),'N',array("checkbox")),//������� ������� ��������
+		array("debugMode",GetMessage("IPOLSDEK_OPT_debugMode"),'N',array("checkbox")), // turn on debug
 	),
 	"warhouses" => array(
 		array("warhouses",GetMessage("IPOLSDEK_OPT_warhouses"),false,array('checkbox')),
@@ -179,8 +188,22 @@ $arAllOptions = array(
 		array("countries",GetMessage("IPOLSDEK_OPT_countries"),'{"rus":{"act":"Y"}}',array('text')),
 		array("noteOrderDateCC",GetMessage("IPOLSDEK_OPT_noteOrderDateCC"),'N',array('checkbox')),
 	),
+	"debug" => array(
+		array("debug_widget",GetMessage("IPOLSDEK_OPT_debug_widget"),"N",array("checkbox")),
+		array("debug_startLogging",GetMessage("IPOLSDEK_OPT_debug_startLogging"),"Y",array("checkbox")),
+		array("debug_fileMode",GetMessage("IPOLSDEK_OPT_debug_fileMode"),"w",array("selectbox"),array('w'=>GetMessage('IPOLSDEK_OPT_debug_fileMode_w'),'a'=>GetMessage('IPOLSDEK_OPT_debug_fileMode_a'))),
+	),
+	"debug_events" => array(
+		array("debug_calculation",GetMessage("IPOLSDEK_OPT_debug_calculation"),"Y",array("checkbox")),
+		array("debug_turnOffWidget",GetMessage("IPOLSDEK_OPT_debug_turnOffWidget"),"Y",array("checkbox")),
+		array("debug_compability",GetMessage("IPOLSDEK_OPT_debug_compability"),"N",array("checkbox")),
+		array("debug_calculate",GetMessage("IPOLSDEK_OPT_debug_calculate"),"N",array("checkbox")),
+		array("debug_shipments",GetMessage("IPOLSDEK_OPT_debug_shipments"),"N",array("checkbox")),
+		array("debug_orderSend",GetMessage("IPOLSDEK_OPT_debug_orderSend"),"N",array("checkbox")),
+		array("debug_statusCheck",GetMessage("IPOLSDEK_OPT_debug_statusCheck"),"N",array("checkbox"))
+	)
 );
-
+	// shipments options
 if($converted){
 	$arAllOptions['common'][]= array("shipments",GetMessage("IPOLSDEK_OPT_shipments"),'N',array("checkbox"));
 		// ������� ��������
@@ -194,30 +217,6 @@ if($converted){
 		}
 }
 
-if($isLogged){
-	$import = (COption::GetOptionString($module_id,'importMode','N') == 'Y');
-	$autoloads = (COption::GetOptionString($module_id,'autoloads','N' ) === 'Y'); // AUTO
-
-	$aTabs = array(
-		array("DIV" => "edit1", "TAB" => GetMessage("IPOLSDEK_TAB_FAQ"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_FAQ")),
-		array("DIV" => "edit2", "TAB" => GetMessage("MAIN_TAB_SET"), "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
-		array("DIV" => "edit3", "TAB" => GetMessage("IPOLSDEK_TAB_LIST"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_LIST")),
-		array("DIV" => "edit4", "TAB" => GetMessage("IPOLSDEK_TAB_RIGHTS"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_RIGHTS")),
-		array("DIV" => "edit5", "TAB" => GetMessage("IPOLSDEK_TAB_CITIES"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_CITIES")),
-	);
-	if($import)
-		$aTabs[] = array("DIV" => "edit6", "TAB" => GetMessage("IPOLSDEK_TAB_IMPORT"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_IMPORT"));
-	if($autoloads) // AUTO
-		$aTabs[] = array("DIV" => "edit".(($import)?'7':'6'), "TAB" => GetMessage("IPOLSDEK_TAB_AUTOLOADS"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_AUTOLOADS"));
-	foreach(GetModuleEvents($module_id,"onTabsBuild",true) as $arEvent)
-		ExecuteModuleEventEx($arEvent,Array(&$arTabs));
-	$divId = count($aTabs);
-	if(count($arTabs))
-		foreach($arTabs as $tabName => $path)
-			$aTabs[]=array("DIV" => "edit".(++$divId), "TAB" => $tabName, "TITLE" => $tabName);
-}else
-	$aTabs = array(array("DIV" => "edit1", "TAB" => GetMessage("IPOLSDEK_TAB_LOGIN"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_LOGIN")));
-
 //Restore defaults
 if ($USER->IsAdmin() && $_SERVER["REQUEST_METHOD"]=="GET" && strlen($RestoreDefaults)>0 && check_bitrix_sessid())
     COption::RemoveOption($module_id);
@@ -230,17 +229,22 @@ if($REQUEST_METHOD=="POST" && strlen($Update.$Apply.$RestoreDefaults)>0 && check
 		// blockPVZ
 		if($_REQUEST['noPVZnoOrder'] == 'Y' && COption::GetOptionString($module_id,'noPVZnoOrder','N') == 'N'){
 			if($converted){
-				RegisterModuleDependences("sale", "OnSaleOrderBeforeSaved", $module_id, "Ipolh\SDEK\subscribeHandler", "noPVZNewTemplate");
-				RegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\SDEK\subscribeHandler", "noPVZOldTemplate");
+				RegisterModuleDependences("sale", "OnSaleOrderBeforeSaved", $module_id, "Ipolh\\SDEK\\subscribeHandler", "noPVZNewTemplate");
+				RegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\\SDEK\\subscribeHandler", "noPVZOldTemplate");
 			}else
-				RegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\SDEK\subscribeHandler", "noPVZOldTemplate");
+				RegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\\SDEK\\subscribeHandler", "noPVZOldTemplate");
 		}elseif((!array_key_exists('noPVZnoOrder',$_REQUEST) || $_REQUEST['noPVZnoOrder'] == 'N') && COption::GetOptionString($module_id,'noPVZnoOrder','N') == 'Y'){
 			if($converted){
-				UnRegisterModuleDependences("sale", "OnSaleOrderBeforeSaved", $module_id, "Ipolh\SDEK\subscribeHandler", "noPVZNewTemplate");
-				UnRegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\SDEK\subscribeHandler", "noPVZOldTemplate");
+				UnRegisterModuleDependences("sale", "OnSaleOrderBeforeSaved", $module_id, "Ipolh\\SDEK\\subscribeHandler", "noPVZNewTemplate");
+				UnRegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\\SDEK\\subscribeHandler", "noPVZOldTemplate");
 			}else
-				UnRegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\SDEK\subscribeHandler", "noPVZOldTemplate");
+				UnRegisterModuleDependences("sale", "OnSaleComponentOrderOneStepProcess", $module_id, "Ipolh\\SDEK\\subscribeHandler", "noPVZOldTemplate");
 		}
+		// logfile
+		if((!array_key_exists('debugMode',$_REQUEST) || $_REQUEST['debugMode'] != 'Y') && COption::GetOptionString($module_id,'debugMode','N') == 'Y'){
+			\Ipolh\SDEK\Bitrix\Admin\Logger::killLog();
+		}
+		
 		
 		foreach($_REQUEST['addDeparture'] as $key => $place)
 			if(!$place)
@@ -258,6 +262,7 @@ if($REQUEST_METHOD=="POST" && strlen($Update.$Apply.$RestoreDefaults)>0 && check
 			file_exists($_SERVER['DOCUMENT_ROOT'].'/bitrix/js/'.$module_id.'/tmpExport.txt')
 		){
 			unlink($_SERVER['DOCUMENT_ROOT'].'/bitrix/js/'.$module_id.'/tmpExport.txt');
+            \Ipolh\SDEK\Bitrix\Controller\pvzController::updateList();
 		}
 
 		$arNumReq = array('numberOfPrints','termInc','lengthD','widthD','heightD','weightD');
@@ -278,6 +283,38 @@ if($REQUEST_METHOD=="POST" && strlen($Update.$Apply.$RestoreDefaults)>0 && check
 
 	sdekOption::clearCache(true);
 }
+
+if($isLogged){
+	$import    = (COption::GetOptionString($module_id,'importMode','N') === 'Y'); // IMPORT
+	$autoloads = (COption::GetOptionString($module_id,'autoloads','N') === 'Y'); // AUTO
+	$debug     = (COption::GetOptionString($module_id,'debugMode','N') === 'Y'); // DEGUB
+
+	$aTabs = array(
+		array("DIV" => "edit1", "TAB" => GetMessage("IPOLSDEK_TAB_FAQ"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_FAQ")),
+		array("DIV" => "edit2", "TAB" => GetMessage("MAIN_TAB_SET"), "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
+		array("DIV" => "edit3", "TAB" => GetMessage("IPOLSDEK_TAB_LIST"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_LIST")),
+		array("DIV" => "edit4", "TAB" => GetMessage("IPOLSDEK_TAB_RIGHTS"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_RIGHTS")),
+		array("DIV" => "edit5", "TAB" => GetMessage("IPOLSDEK_TAB_CITIES"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_CITIES")),
+	);
+	if($import){
+		$aTabs[] = array("DIV" => "edit6", "TAB" => GetMessage("IPOLSDEK_TAB_IMPORT"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_IMPORT"));
+	}
+	if($autoloads){ // AUTO
+		$aTabs[] = array("DIV" => "edit".(($import)?'7':'6'), "TAB" => GetMessage("IPOLSDEK_TAB_AUTOLOADS"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_AUTOLOADS"));
+	}
+	if($debug){
+		$tab = intval($import) + intval ($autoloads);
+		$aTabs[] = array("DIV" => "edit".(6 + $tab), "TAB" => GetMessage("IPOLSDEK_TAB_DEBUG"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_DEBUG"));
+	}
+	
+	foreach(GetModuleEvents($module_id,"onTabsBuild",true) as $arEvent)
+		ExecuteModuleEventEx($arEvent,Array(&$arTabs));
+	$divId = count($aTabs);
+	if(count($arTabs))
+		foreach($arTabs as $tabName => $path)
+			$aTabs[]=array("DIV" => "edit".(++$divId), "TAB" => $tabName, "TITLE" => $tabName);
+}else
+	$aTabs = array(array("DIV" => "edit1", "TAB" => GetMessage("IPOLSDEK_TAB_LOGIN"), "TITLE" => GetMessage("IPOLSDEK_TAB_TITLE_LOGIN")));
 
 function setSenders(){
 	$arSenders = array();
@@ -354,12 +391,12 @@ function ShowParamsHTMLByArray($arParams){
 						echo "<div><input type='text' class='IPOLSDEK_{$Option[0]}'><input type='hidden' name='{$Option[0]}[$index]' name='{$Option[0]}[]'></div>";
 					echo "</div><br><input type='button' onclick='IPOLSDEK_setups.base.depature.add()' value='".GetMessage("IPOLSDEK_LABEL_".$Option[0])."'></td>";
 				break;
-				case 'widjetVersion':
-					echo "<td colspan='2'><input type='hidden' value='ipol.sdekPickup' id='widjetVersion' name='widjetVersion'></td>";
-				break;
 				default: __AdmSettingsDrawRow($module_id, $Option); break;
 			}
-		}else{
+		}
+		elseif($Option[0] == 'widjetVersion'){
+            echo "<td colspan='2'><input type='hidden' value='ipol.sdekPickup' id='widjetVersion' name='widjetVersion'></td>";
+        } else{
 			$optVal=COption::GetOptionString($module_id,$Option['0'],$Option['2']);
 			$str='';
 			foreach($Option[4] as $key => $val){
@@ -380,6 +417,9 @@ function showOrderOptions(){//������ ���������� 
 	global $arPayers;
 	$arNomatterProps=array('street'=>true,'house'=>true,'flat'=>true);
 	foreach($GLOBALS['arAllOptions']['orderProps'] as $orderProp){
+		if($orderProp[0] == 'extendName'){
+			continue;
+		}
 		$value=COption::getOptionString($module_id,$orderProp[0],$orderProp[2]);
 		if(!trim($value)){
 			$showErr=true;
@@ -429,6 +469,7 @@ function showOrderOptions(){//������ ���������� 
 			$showErr=false;
 		
 		$styleTdStr = ($orderProp[0] == 'street')?'style="border-top: 1px solid #BCC2C4;"':'';
+		
 	?>
 		<tr>
 			<td width="50%" <?=$styleTdStr?> class="adm-detail-content-cell-l"><?=$orderProp[1]?><?=($orderProp[0]=='address')?" <a href='#' class='PropHint' onclick='return IPOLSDEK_setups.popup(\"pop-address\",$(this));'></a>":''?></td>
@@ -457,6 +498,10 @@ function showOrderOptions(){//������ ���������� 
 					<?}
 				}?>
 				&nbsp;&nbsp;<span class='errorText' <?if(!$showErr){?>style='display:none'<?}?>><?=($arError['str'])?$arError['str']:GetMessage('IPOLSDEK_LABEL_shPr')?></span>
+				<?if($orderProp[0] == 'name'){?>
+					&nbsp;&nbsp;<a href='javascript:void(0)' onclick='IPOLSDEK_setups.base.properties.turnOnNF()'><?=GetMessage('IPOLSDEK_LBL_turnOnExtendName')?></a>
+					<input type='hidden' value="<?=(COption::GetOptionString($module_id,'extendName','N') == 'Y') ? 'Y' : 'N'?>" name="extendName">
+				<?}elseif($orderProp[0] == 'fName'){?>&nbsp;&nbsp;<a href='javascript:void(0)' onclick='IPOLSDEK_setups.base.properties.turnOffNF()'><?=GetMessage('IPOLSDEK_LBL_turnOffExtendName')?></a><?}?>
 			</td>
 		</tr>
 	<?}
@@ -472,17 +517,17 @@ $tabControl = new CAdminTabControl("tabControl", $aTabs);
 				type : 'POST',
 				url  : "/bitrix/js/<?=$module_id?>/ajax.php",
 			};
-			if(typeof(params.data) != 'undefined')
+			if(typeof(params.data) !== 'undefined')
 				ajaxParams.data = params.data;
-			if(typeof(params.dataType) != 'undefined')
+			if(typeof(params.dataType) !== 'undefined')
 				ajaxParams.dataType = params.dataType;
-			if(typeof(params.success) != 'undefined')
+			if(typeof(params.success) !== 'undefined')
 				ajaxParams.success = params.success;
 			$.ajax(ajaxParams);
 		},
 
 		copyObj: function(obj){
-			if(obj == null || typeof(obj) != 'object')
+			if(obj == null || typeof(obj) !== 'object')
 				return obj;
 			if(obj.constructor == Array)
 				return [].concat(obj);
@@ -556,6 +601,10 @@ $tabControl = new CAdminTabControl("tabControl", $aTabs);
 	if($autoloads){
 		$tabControl->BeginNextTab();
 		include_once($_SERVER['DOCUMENT_ROOT']."/bitrix/modules/".$module_id."/optionsInclude/autoloads.php");
+	}
+	if($debug){
+		$tabControl->BeginNextTab();
+		include_once($_SERVER['DOCUMENT_ROOT']."/bitrix/modules/".$module_id."/optionsInclude/debug.php");
 	}
 	if(count($arTabs))
 		foreach($arTabs as $tabName => $path){
