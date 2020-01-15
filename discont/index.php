@@ -20,7 +20,7 @@ $APPLICATION->SetTitle("Дисконтная система");
 				<p class="grey">Моечная и уборочная техника из Германии </p>
 				<p class="subtitle">Магазины</p>
 				<? $APPLICATION->IncludeFile(SITE_TEMPLATE_PATH."/include/discont_shops.php",Array(),Array("MODE"=>"html")); ?>
-				<p class="subtitle">Сервисный центр</p>
+				<p class="subtitle">Сервисные центры</p>
 				<? $APPLICATION->IncludeFile(SITE_TEMPLATE_PATH."/include/discont_service.php",Array(),Array("MODE"=>"html")); ?>
 			</div>
 			<div class="discount_bubbles">
