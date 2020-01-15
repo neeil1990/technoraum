@@ -175,6 +175,8 @@ if($_REQUEST["PAGE_ELEMENT_COUNT"]){
 		"SECTION_CODE" => $arResult["VARIABLES"]["SECTION_CODE"],
 		"SECTION_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"],
 		"DETAIL_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["element"],
+		"CONVERT_CURRENCY" => "Y",
+        'CURRENCY_ID' => $arParams['CURRENCY_ID'],
 		"SECTION_USER_FIELDS" => array('UF_*'),
 	),
 	$component
