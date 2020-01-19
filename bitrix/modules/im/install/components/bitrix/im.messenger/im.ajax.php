@@ -207,7 +207,7 @@ else if ($_POST['IM_FILE_SAVE_TO_DISK'] == 'Y')
 	echo \Bitrix\Im\Common::objectEncode(Array(
 		'CHAT_ID' => $_POST['CHAT_ID'],
 		'FILE_ID' => $_POST['FILE_ID'],
-		'NEW_FILE_ID' => $result? $result->getId(): 0,
+		'NEW_FILE_ID' => $result? $result['FILE']->getId(): 0,
 		'ERROR' => !$result? 'ERROR': ''
 	));
 }
@@ -218,7 +218,7 @@ else if ($_POST['IM_FILE_UPLOAD_FROM_DISK'] == 'Y')
 	CUtil::decodeURIComponent($_POST);
 	$_POST['FILES'] = CUtil::JsObjectToPhp($_POST['FILES']);
 
-	$result = CIMDisk::UploadFileFromDisk($_POST['CHAT_ID'], $_POST['FILES'], $_POST['MESSAGE'], $_POST['OL_SILENT'] == 'Y');
+	$result = CIMDisk::UploadFileFromDisk($_POST['CHAT_ID'], $_POST['FILES'], $_POST['MESSAGE'], ['LINES_SILENT_MODE' => $_POST['OL_SILENT'] == 'Y']);
 	if (!$result)
 	{
 		$errorMessage = 'ERROR';
@@ -565,8 +565,7 @@ else if ($_POST['IM_SEND_MESSAGE'] == 'Y')
 	{
 		CIMStatus::Set($USER->GetId(), Array('IDLE' => null));
 	}
-
-
+	
 	$message = CIMMessenger::GetById($insertID, Array('WITH_FILES' => 'Y'));
 	$arMessages[$insertID]['params'] = $message['PARAMS'];
 
@@ -693,10 +692,9 @@ else if ($_POST['IM_SHARE_MESSAGE'] == 'Y')
 		$errorMessage = 'CANT_SHARE_MESSAGE';
 	}
 
-	$arResult = Array(
+	echo \Bitrix\Im\Common::objectEncode(Array(
 		'ERROR' => $errorMessage
-	);
-	echo \Bitrix\Im\Common::objectEncode($arResult);
+	));
 }
 else if ($_POST['IM_URL_ATTACH_DELETE'] == 'Y')
 {

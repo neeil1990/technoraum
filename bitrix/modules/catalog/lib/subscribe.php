@@ -795,6 +795,11 @@ class SubscribeTable extends Entity\DataManager
 		$contactTypes = static::getContactTypes();
 		foreach($contactTypes as $typeId => $typeData)
 		{
+			if (empty($dataSendToNotice[$typeId]))
+			{
+				continue;
+			}
+
 			$eventKey = EventManager::getInstance()
 				->addEventHandler('catalog', 'OnSubscribeSubmit', $typeData['HANDLER']);
 

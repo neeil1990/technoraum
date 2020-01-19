@@ -227,6 +227,11 @@ abstract class Base extends \CBitrixComponent
 	 */
 	public static function getSettingsScript($componentPath, $settingsName)
 	{
+		if ($settingsName === 'filter_conditions')
+		{
+			if (Loader::includeModule('catalog'))
+				\CJSCore::Init(['core_condtree']);
+		}
 		$path = $componentPath.'/settings/'.$settingsName.'/script.js';
 		$file = new Main\IO\File(Main\Application::getDocumentRoot().$path);
 
@@ -304,6 +309,11 @@ abstract class Base extends \CBitrixComponent
 		{
 			$params['PRODUCT_ID_VARIABLE'] = 'id';
 		}
+		$params['ACTION_COMPARE_VARIABLE'] = isset($params['ACTION_COMPARE_VARIABLE']) ? trim($params['ACTION_COMPARE_VARIABLE']) : '';
+		if ($params['ACTION_COMPARE_VARIABLE'] == '' || !preg_match(self::PARAM_TITLE_MASK, $params['ACTION_COMPARE_VARIABLE']))
+		{
+			$params['ACTION_COMPARE_VARIABLE'] = $params['ACTION_VARIABLE'];
+		}
 
 		$params['PRODUCT_QUANTITY_VARIABLE'] = isset($params['PRODUCT_QUANTITY_VARIABLE']) ? trim($params['PRODUCT_QUANTITY_VARIABLE']) : '';
 		if ($params['PRODUCT_QUANTITY_VARIABLE'] == '' || !preg_match(self::PARAM_TITLE_MASK, $params['PRODUCT_QUANTITY_VARIABLE']))
@@ -317,12 +327,26 @@ abstract class Base extends \CBitrixComponent
 			$params['PRODUCT_PROPS_VARIABLE'] = 'prop';
 		}
 
-		$params['SET_TITLE'] = $params['SET_TITLE'] !== 'N';
-		$params['SET_BROWSER_TITLE'] = isset($params['SET_BROWSER_TITLE']) && $params['SET_BROWSER_TITLE'] === 'N' ? 'N' : 'Y';
-		$params['SET_META_KEYWORDS'] = isset($params['SET_META_KEYWORDS']) && $params['SET_META_KEYWORDS'] === 'N' ? 'N' : 'Y';
-		$params['SET_META_DESCRIPTION'] = isset($params['SET_META_DESCRIPTION']) && $params['SET_META_DESCRIPTION'] === 'N' ? 'N' : 'Y';
-		$params['ADD_SECTIONS_CHAIN'] = isset($params['ADD_SECTIONS_CHAIN']) && $params['ADD_SECTIONS_CHAIN'] === 'Y';
+		// landing mode
+		if (
+			isset($params['ALLOW_SEO_DATA'])
+			&& ($params['ALLOW_SEO_DATA'] === 'Y' || $params['ALLOW_SEO_DATA'] === 'N')
+		)
+		{
+			$params['SET_TITLE'] = $params['ALLOW_SEO_DATA'] === 'Y';
+			$params['SET_BROWSER_TITLE'] = $params['ALLOW_SEO_DATA'];
+			$params['SET_META_KEYWORDS'] = $params['ALLOW_SEO_DATA'];
+			$params['SET_META_DESCRIPTION'] = $params['ALLOW_SEO_DATA'];
+		}
+		else
+		{
+			$params['SET_TITLE'] = $params['SET_TITLE'] !== 'N';
+			$params['SET_BROWSER_TITLE'] = isset($params['SET_BROWSER_TITLE']) && $params['SET_BROWSER_TITLE'] === 'N' ? 'N' : 'Y';
+			$params['SET_META_KEYWORDS'] = isset($params['SET_META_KEYWORDS']) && $params['SET_META_KEYWORDS'] === 'N' ? 'N' : 'Y';
+			$params['SET_META_DESCRIPTION'] = isset($params['SET_META_DESCRIPTION']) && $params['SET_META_DESCRIPTION'] === 'N' ? 'N' : 'Y';
+		}
 		$params['SET_LAST_MODIFIED'] = isset($params['SET_LAST_MODIFIED']) && $params['SET_LAST_MODIFIED'] === 'Y';
+		$params['ADD_SECTIONS_CHAIN'] = isset($params['ADD_SECTIONS_CHAIN']) && $params['ADD_SECTIONS_CHAIN'] === 'Y';
 		$params['DISPLAY_COMPARE'] = isset($params['DISPLAY_COMPARE']) && $params['DISPLAY_COMPARE'] === 'Y';
 		$params['COMPARE_PATH'] = isset($params['COMPARE_PATH']) ? trim($params['COMPARE_PATH']) : '';
 		$params['COMPARE_NAME'] = isset($params['COMPARE_NAME']) ? trim($params['COMPARE_NAME']) : 'CATALOG_COMPARE_LIST';
@@ -339,6 +363,8 @@ abstract class Base extends \CBitrixComponent
 		$params['USE_PRODUCT_QUANTITY'] = isset($params['USE_PRODUCT_QUANTITY']) && $params['USE_PRODUCT_QUANTITY'] === 'Y';
 
 		$params['ADD_PROPERTIES_TO_BASKET'] = isset($params['ADD_PROPERTIES_TO_BASKET']) && $params['ADD_PROPERTIES_TO_BASKET'] === 'N' ? 'N' : 'Y';
+		if (Iblock\Model\PropertyFeature::isEnabledFeatures())
+			$params['ADD_PROPERTIES_TO_BASKET'] = 'Y';
 		if ($params['ADD_PROPERTIES_TO_BASKET'] === 'N')
 		{
 			$params['PRODUCT_PROPERTIES'] = array();
@@ -644,7 +670,10 @@ abstract class Base extends \CBitrixComponent
 	{
 		// This function returns array with prices description and access rights
 		// in case catalog module n/a prices get values from element properties
-		$this->storage['PRICES'] = \CIBlockPriceTools::GetCatalogPrices(false, $this->arParams['PRICE_CODE']);
+		$this->storage['PRICES'] = \CIBlockPriceTools::GetCatalogPrices(
+			isset($this->arParams['IBLOCK_ID']) && $this->arParams['IBLOCK_ID'] > 0 ? $this->arParams['IBLOCK_ID'] : false,
+			$this->arParams['PRICE_CODE']
+		);
 		$this->storage['PRICES_ALLOW'] = \CIBlockPriceTools::GetAllowCatalogPrices($this->storage['PRICES']);
 		$this->storage['PRICES_CAN_BUY'] = array();
 		$this->storage['PRICES_MAP'] = array();
@@ -676,6 +705,46 @@ abstract class Base extends \CBitrixComponent
 
 		if ($this->useCatalog)
 			Catalog\Product\Price::loadRoundRules($this->storage['PRICES_ALLOW']);
+	}
+
+	/**
+	 * Load catalog vats in component storage.
+	 *
+	 * @return void
+	 */
+	protected function initVats()
+	{
+		$this->storage['VATS'] = [];
+		$this->storage['IBLOCKS_VAT'] = [];
+		if ($this->useCatalog)
+		{
+			$iterator = Catalog\VatTable::getList([
+				'select' => ['ID', 'RATE'],
+				'order' => ['ID' => 'ASC']
+			]);
+			while ($row = $iterator->fetch())
+				$this->storage['VATS'][(int)$row['ID']] = (float)$row['RATE'];
+			unset($row, $iterator);
+
+			if (!empty($this->storage['CATALOGS']))
+			{
+				foreach ($this->storage['CATALOGS'] as $catalog)
+				{
+					$this->storage['IBLOCKS_VAT'][$catalog['IBLOCK_ID']] = 0;
+					if ($catalog['PRODUCT_IBLOCK_ID'] > 0)
+						$this->storage['IBLOCKS_VAT'][$catalog['PRODUCT_IBLOCK_ID']] = 0;
+				}
+				unset($catalog);
+
+				$iterator = Catalog\CatalogIblockTable::getList([
+					'select' => ['IBLOCK_ID', 'VAT_ID'],
+					'filter' => ['@IBLOCK_ID' => array_keys($this->storage['IBLOCKS_VAT'])]
+				]);
+				while ($row = $iterator->fetch())
+					$this->storage['IBLOCKS_VAT'][(int)$row['IBLOCK_ID']] = (int)$row['VAT_ID'];
+				unset($row, $iterator);
+			}
+		}
 	}
 
 	/**
@@ -799,7 +868,7 @@ abstract class Base extends \CBitrixComponent
 		// general filter
 		$this->filterFields = $this->getFilter();
 		$this->filterFields['IBLOCK_ID'] = $this->arParams['IBLOCK_ID'];
-		$this->initPricesQuery();
+		$this->prepareElementQueryFields();
 
 		// try cloud
 		$ids = $this->request->get('items') ?: array();
@@ -1563,27 +1632,25 @@ abstract class Base extends \CBitrixComponent
 	 */
 	protected function getElementList($iblockId, $products)
 	{
-		$selectFields = $this->selectFields;
-		$filterFields = $this->filterFields;
+		$selectFields = $this->getIblockSelectFields($iblockId);
 
+		$filterFields = $this->filterFields;
 		if ($iblockId > 0)
 		{
 			$filterFields['IBLOCK_ID'] = $iblockId;
 		}
-
 		if (!empty($products))
 		{
 			$filterFields['ID'] = $products;
 		}
 
-		if ($this->isIblockCatalog || $this->offerIblockExist($iblockId))
-		{
-			$selectFields[] = 'CATALOG_TYPE';
-		}
+		$globalFilter = [];
+		if (!empty($this->globalFilter))
+			$globalFilter = $this->convertFilter($this->globalFilter);
 
 		$elementIterator = \CIBlockElement::GetList(
 			$this->sortFields,
-			array_merge($this->globalFilter, $filterFields),
+			array_merge($globalFilter, $filterFields),
 			false,
 			$this->navParams,
 			$selectFields
@@ -1603,7 +1670,7 @@ abstract class Base extends \CBitrixComponent
 		$this->selectFields = $this->getSelect();
 		$this->filterFields = $this->getFilter();
 		$this->sortFields = $this->getSort();
-		$this->initPricesQuery();
+		$this->prepareElementQueryFields();
 	}
 
 	/**
@@ -1613,11 +1680,31 @@ abstract class Base extends \CBitrixComponent
 	 */
 	protected function getSelect()
 	{
-		return array(
+		$result = [
 			'ID', 'IBLOCK_ID', 'CODE', 'XML_ID', 'NAME', 'ACTIVE', 'DATE_ACTIVE_FROM', 'DATE_ACTIVE_TO', 'SORT',
 			'PREVIEW_TEXT', 'PREVIEW_TEXT_TYPE', 'DETAIL_TEXT', 'DETAIL_TEXT_TYPE', 'DATE_CREATE', 'CREATED_BY', 'TAGS',
 			'TIMESTAMP_X', 'MODIFIED_BY', 'IBLOCK_SECTION_ID', 'DETAIL_PAGE_URL', 'DETAIL_PICTURE', 'PREVIEW_PICTURE'
+		];
+
+		$checkPriceProperties = (
+			!$this->useCatalog
+			|| (
+				isset($this->arParams['IBLOCK_ID'])
+				&& $this->arParams['IBLOCK_ID'] > 0
+				&& !isset($this->storage['CATALOGS'][$this->arParams['IBLOCK_ID']])
+			)
 		);
+
+		if ($checkPriceProperties && !empty($this->storage['PRICES']))
+		{
+			foreach ($this->storage['PRICES'] as $row)
+			{
+				if (!empty($row['SELECT']))
+					$result[] = $row['SELECT'];
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -1645,34 +1732,178 @@ abstract class Base extends \CBitrixComponent
 		return array();
 	}
 
+	/**
+	 * Prepare element getList parameters.
+	 *
+	 * @return void
+	 */
+	protected function prepareElementQueryFields()
+	{
+		$result = $this->prepareQueryFields($this->selectFields, $this->filterFields, $this->sortFields);
+		$this->selectFields = $result['SELECT'];
+		$this->filterFields = $result['FILTER'];
+		$this->sortFields = $result['ORDER'];
+		if (!empty($this->globalFilter))
+		{
+			$result = $this->prepareQueryFields([], $this->globalFilter, []);
+			$this->globalFilter = $result['FILTER'];
+		}
+		unset($result);
+	}
+
+	/**
+	 * Prepare select, filter, order.
+	 *
+	 * @param array $select
+	 * @param array $filter
+	 * @param array $order
+	 * @return array
+	 */
+	protected function prepareQueryFields(array $select, array $filter, array $order)
+	{
+		if ($this->useCatalog)
+		{
+			$select = $this->convertSelect($select);
+			$order = $this->convertOrder($order);
+			$filter = $this->convertFilter($filter);
+			$filter = \CProductQueryBuilder::modifyFilterFromOrder(
+				$filter,
+				$order,
+				['QUANTITY' => $this->arParams['SHOW_PRICE_COUNT']]
+			);
+		}
+
+		if (!empty($order))
+		{
+			foreach (array_keys($order) as $field)
+				$select[] = strtoupper($field);
+			unset($field);
+		}
+		if (!empty($select))
+			$select = array_unique($select);
+
+		return [
+			'SELECT' => $select,
+			'FILTER' => $filter,
+			'ORDER' => $order
+		];
+	}
+
+	/**
+	 * @deprecated
+	 * @see \Bitrix\Iblock\Component\Base::prepareElementQueryFields
+	 */
 	protected function initPricesQuery()
 	{
-		foreach (array_keys($this->sortFields) as $fieldName)
+		$this->prepareElementQueryFields();
+	}
+
+	/**
+	 * Return select product fields to execute.
+	 *
+	 * @param int $iblockId
+	 * @param array $selectFields
+	 * @return array
+	 */
+	protected function getProductSelect($iblockId, array $selectFields)
+	{
+		if (!$this->useCatalog)
+			return $selectFields;
+
+		$additionalFields = $this->getProductFields($iblockId);
+		$result = $selectFields;
+
+		if (!empty($additionalFields))
 		{
-			$fieldName = strtoupper($fieldName);
-			$priceId = 0;
-
-			if (strncmp($fieldName, 'CATALOG_PRICE_', 14) === 0)
-			{
-				$priceId = (int)substr($fieldName, 14);
-			}
-			elseif (strncmp($fieldName, 'CATALOG_CURRENCY_', 17) === 0)
-			{
-				$priceId = (int)substr($fieldName, 17);
-			}
-			elseif (strncmp($fieldName, 'CATALOG_PRICE_SCALE_', 20) === 0)
-			{
-				$priceId = (int)substr($fieldName, 20);
-			}
-
-			if ($priceId <= 0)
-				continue;
-
-			if (!isset($this->filterFields['CATALOG_SHOP_QUANTITY_'.$priceId]))
-			{
-				$this->filterFields['CATALOG_SHOP_QUANTITY_'.$priceId] = $this->arParams['SHOW_PRICE_COUNT'];
-			}
+			$result = array_merge($result, $additionalFields);
+			$result = array_unique($result);
 		}
+		unset($additionalFields);
+
+		return $result;
+	}
+
+	/**
+	 * Returns product fields for iblock.
+	 *
+	 * @param int $iblockId
+	 * @return array
+	 */
+	protected function getProductFields($iblockId)
+	{
+		if (!$this->isIblockCatalog && !$this->offerIblockExist($iblockId))
+			return [];
+
+		$result = [
+			'TYPE', 'AVAILABLE', 'BUNDLE',
+			'QUANTITY', 'QUANTITY_TRACE', 'CAN_BUY_ZERO', 'MEASURE',
+			'SUBSCRIBE',
+			'VAT_ID', 'VAT_INCLUDED',
+			'WEIGHT', 'WIDTH', 'LENGTH', 'HEIGHT',
+			'PAYMENT_TYPE', 'RECUR_SCHEME_LENGTH', 'RECUR_SCHEME_TYPE',
+			'TRIAL_PRICE_ID'
+		];
+
+		if ($this->isEnableCompatible())
+		{
+			$result = array_merge(
+				$result,
+				[
+					'QUANTITY_TRACE_RAW', 'CAN_BUY_ZERO_RAW', 'SUBSCRIBE_RAW',
+					'PURCHASING_PRICE', 'PURCHASING_CURRENCY',
+					'BARCODE_MULTI',
+					'WITHOUT_ORDER'
+				]
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Convert old product selected fields to new.
+	 *
+	 * @param array $select
+	 * @return array
+	 */
+	protected function convertSelect(array $select)
+	{
+		if (!$this->useCatalog)
+			return $select;
+		return \CProductQueryBuilder::convertOldSelect($select);
+	}
+
+	/**
+	 * Convert old product filter keys to new.
+	 *
+	 * @param array $filter
+	 * @return array
+	 */
+	protected function convertFilter(array $filter)
+	{
+		if (!$this->useCatalog)
+			return $filter;
+		return \CProductQueryBuilder::convertOldFilter($filter);
+	}
+
+	/**
+	 * Convert old product order keys to new.
+	 *
+	 * @param array $order
+	 * @return array
+	 */
+	protected function convertOrder(array $order)
+	{
+		if (!$this->useCatalog)
+			return $order;
+		return \CProductQueryBuilder::convertOldOrder($order);
+	}
+
+	protected function getIblockSelectFields($iblockId)
+	{
+		if (!$this->useCatalog)
+			return $this->selectFields;
+		return $this->getProductSelect($iblockId, $this->selectFields);
 	}
 
 	/**
@@ -1777,7 +2008,6 @@ abstract class Base extends \CBitrixComponent
 		$name = '';
 		$conditionNameMap = array(
 			'CondIBXmlID' => 'XML_ID',
-//			'CondIBActive' => 'ACTIVE',
 			'CondIBSection' => 'SECTION_ID',
 			'CondIBDateActiveFrom' => 'DATE_ACTIVE_FROM',
 			'CondIBDateActiveTo' => 'DATE_ACTIVE_TO',
@@ -1787,8 +2017,8 @@ abstract class Base extends \CBitrixComponent
 			'CondIBTimestampX' => 'TIMESTAMP_X',
 			'CondIBModifiedBy' => 'MODIFIED_BY',
 			'CondIBTags' => 'TAGS',
-			'CondCatQuantity' => 'CATALOG_QUANTITY',
-			'CondCatWeight' => 'CATALOG_WEIGHT'
+			'CondCatQuantity' => 'QUANTITY',
+			'CondCatWeight' => 'WEIGHT'
 		);
 
 		if (isset($conditionNameMap[$condition['CLASS_ID']]))
@@ -1911,8 +2141,8 @@ abstract class Base extends \CBitrixComponent
 				{
 					$offerPropFilter[] = array(
 						'LOGIC' => 'OR',
-						'CATALOG_AVAILABLE' => 'Y',
-						'CATALOG_SUBSCRIBE' => 'Y'
+						'AVAILABLE' => 'Y',
+						'SUBSCRIBE' => 'Y'
 					);
 				}
 
@@ -1975,47 +2205,78 @@ abstract class Base extends \CBitrixComponent
 			'IPROPERTY_VALUES'
 		);
 
-		/* it is not the final version */
-		$element['PRODUCT'] = array(
-			'TYPE' => null,
-			'AVAILABLE' => null,
-			'MEASURE' => null,
-			'VAT_ID' => null,
-			'VAT_RATE' => null,
-			'VAT_INCLUDED' => null,
-			'QUANTITY' => null,
-			'QUANTITY_TRACE' => null,
-			'CAN_BUY_ZERO' => null,
-			'SUBSCRIPTION' => null,
-			'BUNDLE' => null
-		);
+		if (isset($element['~TYPE']))
+		{
+			$productFields = $this->getProductFields($element['IBLOCK_ID']);
+			$translateFields = $this->getCompatibleProductFields();
 
-		if (isset($element['CATALOG_TYPE']))
-		{
-			$element['CATALOG_TYPE'] = (int)$element['CATALOG_TYPE']; // this key will be deprecated
-			$element['PRODUCT']['TYPE'] = $element['CATALOG_TYPE'];
+			$element['PRODUCT'] = array(
+				'TYPE' => (int)$element['~TYPE'],
+				'AVAILABLE' => $element['~AVAILABLE'],
+				'BUNDLE' => $element['~BUNDLE'],
+				'QUANTITY' => $element['~QUANTITY'],
+				'QUANTITY_TRACE' => $element['~QUANTITY_TRACE'],
+				'CAN_BUY_ZERO' => $element['~CAN_BUY_ZERO'],
+				'MEASURE' => (int)$element['~MEASURE'],
+				'SUBSCRIBE' => $element['~SUBSCRIBE'],
+				'VAT_ID' => (int)$element['~VAT_ID'],
+				'VAT_RATE' => 0,
+				'VAT_INCLUDED' => $element['~VAT_INCLUDED'],
+				'WEIGHT' => (float)$element['~WEIGHT'],
+				'WIDTH' => (float)$element['~WIDTH'],
+				'LENGTH' => (float)$element['~LENGTH'],
+				'HEIGHT' => (float)$element['~HEIGHT'],
+				'PAYMENT_TYPE' => $element['~PAYMENT_TYPE'],
+				'RECUR_SCHEME_TYPE' => $element['~RECUR_SCHEME_TYPE'],
+				'RECUR_SCHEME_LENGTH' => (int)$element['~RECUR_SCHEME_LENGTH'],
+				'TRIAL_PRICE_ID' => (int)$element['~TRIAL_PRICE_ID']
+			);
+
+			$vatId = 0;
+			$vatRate = 0;
+			if ($element['PRODUCT']['VAT_ID'] > 0)
+				$vatId = $element['PRODUCT']['VAT_ID'];
+			elseif ($this->storage['IBLOCKS_VAT'][$element['IBLOCK_ID']] > 0)
+				$vatId = $this->storage['IBLOCKS_VAT'][$element['IBLOCK_ID']];
+			if ($vatId > 0 && isset($this->storage['VATS'][$vatId]))
+				$vatRate = $this->storage['VATS'][$vatId];
+			$element['PRODUCT']['VAT_RATE'] = $vatRate;
+			unset($vatRate, $vatId);
+
+			if ($this->isEnableCompatible())
+			{
+				foreach ($translateFields as $currentKey => $oldKey)
+					$element[$oldKey] = $element[$currentKey];
+				unset($currentKey, $oldKey);
+				$element['~CATALOG_VAT'] = $element['PRODUCT']['VAT_RATE'];
+				$element['CATALOG_VAT'] = $element['PRODUCT']['VAT_RATE'];
+			}
+			else
+			{
+				// temporary (compatibility custom templates)
+				$element['~CATALOG_TYPE'] = $element['PRODUCT']['TYPE'];
+				$element['CATALOG_TYPE'] = $element['PRODUCT']['TYPE'];
+				$element['~CATALOG_QUANTITY'] = $element['PRODUCT']['QUANTITY'];
+				$element['CATALOG_QUANTITY'] = $element['PRODUCT']['QUANTITY'];
+				$element['~CATALOG_QUANTITY_TRACE'] = $element['PRODUCT']['QUANTITY_TRACE'];
+				$element['CATALOG_QUANTITY_TRACE'] = $element['PRODUCT']['QUANTITY_TRACE'];
+				$element['~CATALOG_CAN_BUY_ZERO'] = $element['PRODUCT']['CAN_BUY_ZERO'];
+				$element['CATALOG_CAN_BUY_ZERO'] = $element['PRODUCT']['CAN_BUY_ZERO'];
+				$element['~CATALOG_SUBSCRIBE'] = $element['PRODUCT']['SUBSCRIBE'];
+				$element['CATALOG_SUBSCRIBE'] = $element['PRODUCT']['SUBSCRIBE'];
+			}
+
+			foreach ($productFields as $field)
+				unset($element[$field], $element['~'.$field]);
+			unset($field);
 		}
-		if (isset($element['CATALOG_MEASURE']))
+		else
 		{
-			$element['CATALOG_MEASURE'] = (int)$element['CATALOG_MEASURE']; // this key will be deprecated
-			$element['PRODUCT']['MEASURE'] = $element['CATALOG_MEASURE'];
+			$element['PRODUCT'] = array(
+				'TYPE' => null,
+				'AVAILABLE' => null
+			);
 		}
-		/*
-		 * this keys will be deprecated
-		 * CATALOG_*
-		 */
-		if (isset($element['CATALOG_AVAILABLE']))
-		{
-			$element['PRODUCT']['AVAILABLE'] = $element['CATALOG_AVAILABLE'];
-			$element['PRODUCT']['VAT_RATE'] = $element['CATALOG_VAT'];
-			$element['PRODUCT']['VAT_INCLUDED'] = $element['CATALOG_VAT_INCLUDED'];
-			$element['PRODUCT']['QUANTITY'] = $element['CATALOG_QUANTITY'];
-			$element['PRODUCT']['QUANTITY_TRACE'] = $element['CATALOG_QUANTITY_TRACE'];
-			$element['PRODUCT']['CAN_BUY_ZERO'] = $element['CATALOG_CAN_BUY_ZERO'];
-			$element['PRODUCT']['SUBSCRIPTION'] = $element['CATALOG_SUBSCRIPTION'];
-			$element['PRODUCT']['BUNDLE'] = $element['CATALOG_BUNDLE'];
-		}
-		/* it is not the final version - end*/
 
 		$element['PROPERTIES'] = array();
 		$element['DISPLAY_PROPERTIES'] = array();
@@ -3061,11 +3322,15 @@ abstract class Base extends \CBitrixComponent
 	 */
 	protected function initUrlTemplates()
 	{
-		/** @global \CMain $APPLICATION */
-		global $APPLICATION;
-
 		$actionVar = $this->arParams['ACTION_VARIABLE'];
 		$productIdVar = $this->arParams['PRODUCT_ID_VARIABLE'];
+		$compareActionVar = $this->arParams['ACTION_COMPARE_VARIABLE'];
+
+		$clearParams = Main\HttpRequest::getSystemParameters();
+		$clearParams[] = $actionVar;
+		$clearParams[] = $productIdVar;
+		$clearParams[] = $compareActionVar;
+		$clearParams[] = '';
 
 		if (!empty($this->arParams['CUSTOM_CURRENT_PAGE']))
 		{
@@ -3073,51 +3338,47 @@ abstract class Base extends \CBitrixComponent
 		}
 		else
 		{
-			$pageUrl = $this->request->isAjaxRequest()
-				? $this->arParams['CURRENT_BASE_PAGE']
-				: $APPLICATION->GetCurPageParam();
-		}
-
-		$currentPath = \CHTTP::urlDeleteParams(
-			$pageUrl,
-			array($productIdVar, $actionVar, ''),
-			array('delete_system_params' => true)
-		);
-		$currentPath .= (stripos($currentPath, '?') === false ? '?' : '&');
-
-		if ($this->arParams['USE_COMPARE_LIST'] == 'Y')
-		{
-			$comparePath = $currentPath;
-		}
-		else
-		{
-			if ($this->arParams['COMPARE_PATH'] == '')
+			if ($this->request->isAjaxRequest())
 			{
-				$comparePath = $currentPath;
+				$pageUrl = $this->arParams['CURRENT_BASE_PAGE'];
 			}
 			else
 			{
-				$comparePath = \CHTTP::urlDeleteParams(
-					$this->arParams['COMPARE_PATH'],
-					array(''),
-					array('delete_system_params' => true)
-				);
-				$comparePath .= (stripos($comparePath, '?') === false ? '?' : '&');
+				$pageUrl = Main\Application::getInstance()->getContext()->getRequest()->getDecodedUri();
+
 			}
 		}
+		$currentUri = new Main\Web\Uri($pageUrl);
 
-		$urls = array();
-		$urls['~BUY_URL_TEMPLATE'] = $currentPath.$actionVar.'='.self::ACTION_BUY.'&'.$productIdVar.'=#ID#';
-		$urls['~ADD_URL_TEMPLATE'] = $currentPath.$actionVar.'='.self::ACTION_ADD_TO_BASKET.'&'.$productIdVar.'=#ID#';
-		$urls['~SUBSCRIBE_URL_TEMPLATE'] = $currentPath.$actionVar.'='.self::ACTION_SUBSCRIBE.'&'.$productIdVar.'=#ID#';
-		$urls['~COMPARE_URL_TEMPLATE'] = $comparePath.$actionVar.'='.self::ACTION_ADD_TO_COMPARE.'&'.$productIdVar.'=#ID#';
-		$urls['~COMPARE_DELETE_URL_TEMPLATE'] = $comparePath.$actionVar.'='.self::ACTION_DELETE_FROM_COMPARE.'&'.$productIdVar.'=#ID#';
+		if ($this->arParams['USE_COMPARE_LIST'] == 'N' && $this->arParams['COMPARE_PATH'] != '')
+		{
+			$compareUri = new Main\Web\Uri($this->arParams['COMPARE_PATH']);
+		}
+		else
+		{
+			$compareUri = $currentUri;
+		}
 
-		$urls['BUY_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~BUY_URL_TEMPLATE']);
-		$urls['ADD_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~ADD_URL_TEMPLATE']);
-		$urls['SUBSCRIBE_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~SUBSCRIBE_URL_TEMPLATE']);
-		$urls['COMPARE_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~COMPARE_URL_TEMPLATE']);
-		$urls['COMPARE_DELETE_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~COMPARE_DELETE_URL_TEMPLATE']);
+		$currentUri->deleteParams($clearParams);
+		$compareUri->deleteParams($clearParams);
+
+		$urls = [];
+		$urls['BUY_URL_TEMPLATE'] = $currentUri->addParams([$actionVar => self::ACTION_BUY, $productIdVar => '#ID#'])->getUri();
+		$urls['ADD_URL_TEMPLATE'] = $currentUri->addParams([$actionVar => self::ACTION_ADD_TO_BASKET, $productIdVar => '#ID#'])->getUri();
+		$urls['SUBSCRIBE_URL_TEMPLATE'] = $currentUri->addParams([$actionVar => self::ACTION_SUBSCRIBE, $productIdVar => '#ID#'])->getUri();
+
+		$urls['COMPARE_URL_TEMPLATE'] = $compareUri->addParams([$compareActionVar => self::ACTION_ADD_TO_COMPARE, $productIdVar => '#ID#'])->getUri();
+		$urls['COMPARE_DELETE_URL_TEMPLATE'] = $compareUri->addParams([$compareActionVar => self::ACTION_DELETE_FROM_COMPARE, $productIdVar => '#ID#'])->getUri();
+
+		unset($compareUri, $currentUri, $clearParams);
+
+		foreach (array_keys($urls) as $index)
+		{
+			$value = str_replace('%23ID%23', '#ID#', $urls[$index]); // format compatibility
+			$urls['~'.$index] = $value;
+			$urls[$index] = Main\Text\HtmlFilter::encode($value, ENT_QUOTES);
+		}
+		unset($index);
 
 		$this->storage['URLS'] = $urls;
 	}
@@ -3213,7 +3474,7 @@ abstract class Base extends \CBitrixComponent
 				$element['MIN_PRICE'] = \CIBlockPriceTools::getMinPriceFromList($element['PRICES']);
 			}
 
-			$element['CAN_BUY'] = \CIBlockPriceTools::CanBuy($element['IBLOCK_ID'], $this->storage['PRICES'], $element);
+			$element['CAN_BUY'] = !empty($element['PRICES']);
 		}
 	}
 
@@ -3319,13 +3580,12 @@ abstract class Base extends \CBitrixComponent
 			$offersFilter = $this->getOffersFilter($catalog['IBLOCK_ID']);
 			$offersFilter[$productProperty] = $this->productWithOffers[$iblockId];
 
-			$offersOrder = $this->getOffersSort();
-
 			$offersSelect = array(
 				'ID' => 1,
 				'IBLOCK_ID' => 1,
 				$productProperty => 1,
-				'CATALOG_TYPE' => 1
+				'PREVIEW_PICTURE' => 1,
+				'DETAIL_PICTURE' => 1
 			);
 			if (!empty($iblockParams['OFFERS_FIELD_CODE']))
 			{
@@ -3334,19 +3594,26 @@ abstract class Base extends \CBitrixComponent
 				unset($code);
 			}
 
+			$offersSelect = $this->getProductSelect($iblockId, array_keys($offersSelect));
+
+			$getListParams = $this->prepareQueryFields($offersSelect, $offersFilter, $this->getOffersSort());
+			$offersSelect = $getListParams['SELECT'];
+			$offersFilter = $getListParams['FILTER'];
+			$offersOrder = $getListParams['ORDER'];
+			unset($getListParams);
+
 			$checkFields = array();
 			foreach (array_keys($offersOrder) as $code)
 			{
 				$code = strtoupper($code);
-				$offersSelect[$code] = 1;
-				if ($code == 'ID' || $code == 'CATALOG_AVAILABLE')
+				if ($code == 'ID' || $code == 'AVAILABLE')
 					continue;
 				$checkFields[] = $code;
 			}
 			unset($code);
 
-			$offersSelect['PREVIEW_PICTURE'] = 1;
-			$offersSelect['DETAIL_PICTURE'] = 1;
+			$productFields = $this->getProductFields($iblockId);
+			$translateFields = $this->getCompatibleProductFields();
 
 			$offersId = array();
 			$offersCount = array();
@@ -3355,7 +3622,7 @@ abstract class Base extends \CBitrixComponent
 				$offersFilter,
 				false,
 				false,
-				array_keys($offersSelect)
+				$offersSelect
 			);
 			while($row = $iterator->GetNext())
 			{
@@ -3388,47 +3655,65 @@ abstract class Base extends \CBitrixComponent
 				$row['PROPERTIES'] = array();
 				$row['DISPLAY_PROPERTIES'] = array();
 
-				/* it is not the final version */
 				$row['PRODUCT'] = array(
-					'TYPE' => null,
-					'AVAILABLE' => null,
-					'MEASURE' => null,
-					'VAT_ID' => null,
-					'VAT_RATE' => null,
-					'VAT_INCLUDED' => null,
-					'QUANTITY' => null,
-					'QUANTITY_TRACE' => null,
-					'CAN_BUY_ZERO' => null,
-					'SUBSCRIPTION' => null,
-					'BUNDLE' => null
+					'TYPE' => (int)$row['~TYPE'],
+					'AVAILABLE' => $row['~AVAILABLE'],
+					'BUNDLE' => $row['~BUNDLE'],
+					'QUANTITY' => $row['~QUANTITY'],
+					'QUANTITY_TRACE' => $row['~QUANTITY_TRACE'],
+					'CAN_BUY_ZERO' => $row['~CAN_BUY_ZERO'],
+					'MEASURE' => (int)$row['~MEASURE'],
+					'SUBSCRIBE' => $row['~SUBSCRIBE'],
+					'VAT_ID' => (int)$row['~VAT_ID'],
+					'VAT_RATE' => 0,
+					'VAT_INCLUDED' => $row['~VAT_INCLUDED'],
+					'WEIGHT' => (float)$row['~WEIGHT'],
+					'WIDTH' => (float)$row['~WIDTH'],
+					'LENGTH' => (float)$row['~LENGTH'],
+					'HEIGHT' => (float)$row['~HEIGHT'],
+					'PAYMENT_TYPE' => $row['~PAYMENT_TYPE'],
+					'RECUR_SCHEME_TYPE' => $row['~RECUR_SCHEME_TYPE'],
+					'RECUR_SCHEME_LENGTH' => (int)$row['~RECUR_SCHEME_LENGTH'],
+					'TRIAL_PRICE_ID' => (int)$row['~TRIAL_PRICE_ID']
 				);
 
-				if (isset($row['CATALOG_TYPE']))
+				$vatId = 0;
+				$vatRate = 0;
+				if ($row['PRODUCT']['VAT_ID'] > 0)
+					$vatId = $row['PRODUCT']['VAT_ID'];
+				elseif ($this->storage['IBLOCKS_VAT'][$catalog['IBLOCK_ID']] > 0)
+					$vatId = $this->storage['IBLOCKS_VAT'][$catalog['IBLOCK_ID']];
+				if ($vatId > 0 && isset($this->storage['VATS'][$vatId]))
+					$vatRate = $this->storage['VATS'][$vatId];
+				$row['PRODUCT']['VAT_RATE'] = $vatRate;
+				unset($vatRate, $vatId);
+
+				if ($enableCompatible)
 				{
-					$row['CATALOG_TYPE'] = (int)$row['CATALOG_TYPE']; // this key will be deprecated
-					$row['PRODUCT']['TYPE'] = $row['CATALOG_TYPE'];
+					foreach ($translateFields as $currentKey => $oldKey)
+						$row[$oldKey] = $row[$currentKey];
+					unset($currentKey, $oldKey);
+					$row['~CATALOG_VAT'] = $row['PRODUCT']['VAT_RATE'];
+					$row['CATALOG_VAT'] = $row['PRODUCT']['VAT_RATE'];
 				}
-				if (isset($row['CATALOG_MEASURE']))
+				else
 				{
-					$row['CATALOG_MEASURE'] = (int)$row['CATALOG_MEASURE']; // this key will be deprecated
-					$row['PRODUCT']['MEASURE'] = $row['CATALOG_MEASURE'];
+					// temporary (compatibility custom templates)
+					$row['~CATALOG_TYPE'] = $row['PRODUCT']['TYPE'];
+					$row['CATALOG_TYPE'] = $row['PRODUCT']['TYPE'];
+					$row['~CATALOG_QUANTITY'] = $row['PRODUCT']['QUANTITY'];
+					$row['CATALOG_QUANTITY'] = $row['PRODUCT']['QUANTITY'];
+					$row['~CATALOG_QUANTITY_TRACE'] = $row['PRODUCT']['QUANTITY_TRACE'];
+					$row['CATALOG_QUANTITY_TRACE'] = $row['PRODUCT']['QUANTITY_TRACE'];
+					$row['~CATALOG_CAN_BUY_ZERO'] = $row['PRODUCT']['CAN_BUY_ZERO'];
+					$row['CATALOG_CAN_BUY_ZERO'] = $row['PRODUCT']['CAN_BUY_ZERO'];
+					$row['~CATALOG_SUBSCRIBE'] = $row['PRODUCT']['SUBSCRIBE'];
+					$row['CATALOG_SUBSCRIBE'] = $row['PRODUCT']['SUBSCRIBE'];
 				}
-				/*
-				 * this keys will be deprecated
-				 * CATALOG_*
-				 */
-				if (isset($row['CATALOG_AVAILABLE']))
-				{
-					$row['PRODUCT']['AVAILABLE'] = $row['CATALOG_AVAILABLE'];
-					$row['PRODUCT']['VAT_RATE'] = $row['CATALOG_VAT'];
-					$row['PRODUCT']['VAT_INCLUDED'] = $row['CATALOG_VAT_INCLUDED'];
-					$row['PRODUCT']['QUANTITY'] = $row['CATALOG_QUANTITY'];
-					$row['PRODUCT']['QUANTITY_TRACE'] = $row['CATALOG_QUANTITY_TRACE'];
-					$row['PRODUCT']['CAN_BUY_ZERO'] = $row['CATALOG_CAN_BUY_ZERO'];
-					$row['PRODUCT']['SUBSCRIPTION'] = $row['CATALOG_SUBSCRIPTION'];
-					$row['PRODUCT']['BUNDLE'] = $row['CATALOG_BUNDLE'];
-				}
-				/* it is not the final version - end*/
+
+				foreach ($productFields as $field)
+					unset($row[$field], $row['~'.$field]);
+				unset($field);
 
 				if ($row['PRODUCT']['TYPE'] == Catalog\ProductTable::TYPE_OFFER)
 					$this->calculatePrices[$row['ID']] = $row['ID'];
@@ -3483,14 +3768,14 @@ abstract class Base extends \CBitrixComponent
 
 			if (!empty($offersId))
 			{
-				$propertyList = $this->getPropertyList(
-					$catalog['IBLOCK_ID'],
-					array_merge(
-						$iblockParams['OFFERS_PROPERTY_CODE'],
-						$iblockParams['OFFERS_TREE_PROPS']
-					)
-				);
-				if (!empty($propertyList))
+				$loadPropertyCodes = $iblockParams['OFFERS_PROPERTY_CODE'];
+				if (Iblock\Model\PropertyFeature::isEnabledFeatures())
+					$loadPropertyCodes = array_merge($loadPropertyCodes, $iblockParams['OFFERS_TREE_PROPS']);
+
+				$propertyList = $this->getPropertyList($catalog['IBLOCK_ID'], $loadPropertyCodes);
+				unset($loadPropertyCodes);
+
+				if (!empty($propertyList) || $this->useDiscountCache)
 				{
 					\CIBlockElement::GetPropertyValuesArray($offers, $catalog['IBLOCK_ID'], $offersFilter);
 					foreach ($offers as &$row)
@@ -3503,22 +3788,25 @@ abstract class Base extends \CBitrixComponent
 								\CCatalogDiscount::SetProductPropertiesCache($row['ID'], $row["PROPERTIES"]);
 						}
 
-						foreach ($propertyList as $pid)
+						if (!empty($propertyList))
 						{
-							if (!isset($row["PROPERTIES"][$pid]))
-								continue;
-							$prop = &$row["PROPERTIES"][$pid];
-							$boolArr = is_array($prop["VALUE"]);
-							if(
-								($boolArr && !empty($prop["VALUE"])) ||
-								(!$boolArr && (string)$prop["VALUE"] !== '')
-							)
+							foreach ($propertyList as $pid)
 							{
-								$row["DISPLAY_PROPERTIES"][$pid] = \CIBlockFormatProperties::GetDisplayValue($row, $prop, "catalog_out");
+								if (!isset($row["PROPERTIES"][$pid]))
+									continue;
+								$prop = &$row["PROPERTIES"][$pid];
+								$boolArr = is_array($prop["VALUE"]);
+								if (
+									($boolArr && !empty($prop["VALUE"])) ||
+									(!$boolArr && (string)$prop["VALUE"] !== '')
+								)
+								{
+									$row["DISPLAY_PROPERTIES"][$pid] = \CIBlockFormatProperties::GetDisplayValue($row, $prop, "catalog_out");
+								}
+								unset($boolArr, $prop);
 							}
-							unset($boolArr, $prop);
+							unset($pid);
 						}
-						unset($pid);
 					}
 					unset($row);
 				}
@@ -3554,14 +3842,14 @@ abstract class Base extends \CBitrixComponent
 
 		if ($this->arParams['HIDE_NOT_AVAILABLE_OFFERS'] === 'Y')
 		{
-			$offersFilter['CATALOG_AVAILABLE'] = 'Y';
+			$offersFilter['AVAILABLE'] = 'Y';
 		}
 		elseif ($this->arParams['HIDE_NOT_AVAILABLE_OFFERS'] === 'L')
 		{
 			$offersFilter['CUSTOM_FILTER'] = array(
 				'LOGIC' => 'OR',
-				'CATALOG_AVAILABLE' => 'Y',
-				'CATALOG_SUBSCRIBE' => 'Y'
+				'AVAILABLE' => 'Y',
+				'SUBSCRIBE' => 'Y'
 			);
 		}
 
@@ -3581,8 +3869,8 @@ abstract class Base extends \CBitrixComponent
 	protected function getOffersSort()
 	{
 		$offersOrder = array(
-			$this->arParams['OFFERS_SORT_FIELD'] => $this->arParams['OFFERS_SORT_ORDER'],
-			$this->arParams['OFFERS_SORT_FIELD2'] => $this->arParams['OFFERS_SORT_ORDER2']
+			strtoupper($this->arParams['OFFERS_SORT_FIELD']) => $this->arParams['OFFERS_SORT_ORDER'],
+			strtoupper($this->arParams['OFFERS_SORT_FIELD2']) => $this->arParams['OFFERS_SORT_ORDER2']
 		);
 		if (!isset($offersOrder['ID']))
 			$offersOrder['ID'] = 'DESC';
@@ -3656,6 +3944,7 @@ abstract class Base extends \CBitrixComponent
 		$this->initCatalogInfo();
 		$this->initIblockPropertyFeatures();
 		$this->initPrices();
+		$this->initVats();
 		$this->initUrlTemplates();
 
 		$this->initElementList();
@@ -3795,7 +4084,6 @@ abstract class Base extends \CBitrixComponent
 
 		if (
 			($action == self::ACTION_ADD_TO_BASKET || $action == self::ACTION_BUY || $action == self::ACTION_SUBSCRIBE)
-			&& $productId > 0
 			&& Loader::includeModule('sale')
 			&& Loader::includeModule('catalog')
 		)
@@ -3926,11 +4214,20 @@ abstract class Base extends \CBitrixComponent
 		$quantity = 0;
 		$productProperties = array();
 
-		$product = $this->getProductInfo($productId);
-		if (empty($product))
+		$productId = (int)$productId;
+		if ($productId <= 0)
 		{
-			$errorMsg = Loc::getMessage('CATALOG_PRODUCT_NOT_FOUND');
+			$errorMsg = Loc::getMessage('CATALOG_PRODUCT_ID_IS_ABSENT');
 			$successfulAdd = false;
+		}
+		if ($successfulAdd)
+		{
+			$product = $this->getProductInfo($productId);
+			if (empty($product))
+			{
+				$errorMsg = Loc::getMessage('CATALOG_PRODUCT_NOT_FOUND');
+				$successfulAdd = false;
+			}
 		}
 		if ($successfulAdd)
 		{
@@ -4027,18 +4324,37 @@ abstract class Base extends \CBitrixComponent
 		if ($successfulAdd)
 		{
 			$rewriteFields = $this->getRewriteFields($action);
-			if (!Add2BasketByProductID($productId, $quantity, $rewriteFields, $productProperties))
+			if (isset($rewriteFields['SUBSCRIBE']) && $rewriteFields['SUBSCRIBE'] == 'Y')
 			{
-				if ($ex = $APPLICATION->GetException())
+				if (!SubscribeProduct($productId, $rewriteFields, $productProperties))
 				{
-					$errorMsg = $ex->GetString();
-				}
-				else
-				{
-					$errorMsg = Loc::getMessage('CATALOG_ERROR2BASKET');
-				}
+					if ($ex = $APPLICATION->GetException())
+					{
+						$errorMsg = $ex->GetString();
+					}
+					else
+					{
+						$errorMsg = Loc::getMessage('CATALOG_ERROR2BASKET');
+					}
 
-				$successfulAdd = false;
+					$successfulAdd = false;
+				}
+			}
+			else
+			{
+				$product = [
+					'PRODUCT_ID' => $productId,
+					'QUANTITY' => $quantity
+				];
+				if (!empty($productProperties))
+					$product['PROPS'] = $productProperties;
+				$basketResult = Catalog\Product\Basket::addProduct($product, $rewriteFields);
+				if (!$basketResult->isSuccess())
+				{
+					$errorMsg = implode('; ', $basketResult->getErrorMessages());
+					$successfulAdd = false;
+				}
+				unset($basketResult);
 			}
 		}
 
@@ -4870,6 +5186,67 @@ abstract class Base extends \CBitrixComponent
 		foreach (array_keys($this->oldData[$id]['PRICES']) as $priceCode)
 			unset($this->oldData[$id]['PRICES'][$priceCode]['_SORT']);
 		unset($priceCode);
+	}
+
+	/**
+	 * Returns old product keys.
+	 *
+	 * @return array
+	 */
+	protected function getCompatibleProductFields()
+	{
+		return [
+			'TYPE' => 'CATALOG_TYPE',
+			'AVAILABLE' => 'CATALOG_AVAILABLE',
+			'BUNDLE' => 'CATALOG_BUNDLE',
+			'QUANTITY' => 'CATALOG_QUANTITY',
+			'QUANTITY_TRACE' => 'CATALOG_QUANTITY_TRACE',
+			'CAN_BUY_ZERO' => 'CATALOG_CAN_BUY_ZERO',
+			'MEASURE' => 'CATALOG_MEASURE',
+			'SUBSCRIBE' => 'CATALOG_SUBSCRIBE',
+			'VAT_ID' => 'CATALOG_VAT_ID',
+			'VAT_INCLUDED' => 'CATALOG_VAT_INCLUDED',
+			'WEIGHT' => 'CATALOG_WEIGHT',
+			'WIDTH' => 'CATALOG_WIDTH',
+			'LENGTH' => 'CATALOG_LENGTH',
+			'HEIGHT' => 'CATALOG_HEIGHT',
+			'PAYMENT_TYPE' => 'CATALOG_PRICE_TYPE',
+			'RECUR_SCHEME_LENGTH' => 'CATALOG_RECUR_SCHEME_LENGTH',
+			'RECUR_SCHEME_TYPE' => 'CATALOG_RECUR_SCHEME_TYPE',
+			'QUANTITY_TRACE_RAW' => 'CATALOG_QUANTITY_TRACE_ORIG',
+			'CAN_BUY_ZERO_RAW' => 'CATALOG_CAN_BUY_ZERO_ORIG',
+			'SUBSCRIBE_RAW' => 'CATALOG_SUBSCRIBE_ORIG',
+			'PURCHASING_PRICE' => 'CATALOG_PURCHASING_PRICE',
+			'PURCHASING_CURRENCY' => 'CATALOG_PURCHASING_CURRENCY',
+			'BARCODE_MULTI' => 'CATALOG_BARCODE_MULTI',
+			'TRIAL_PRICE_ID' => 'CATALOG_TRIAL_PRICE_ID',
+			'WITHOUT_ORDER' => 'CATALOG_WITHOUT_ORDER',
+			'~TYPE' => '~CATALOG_TYPE',
+			'~AVAILABLE' => '~CATALOG_AVAILABLE',
+			'~BUNDLE' => '~CATALOG_BUNDLE',
+			'~QUANTITY' => '~CATALOG_QUANTITY',
+			'~QUANTITY_TRACE' => '~CATALOG_QUANTITY_TRACE',
+			'~CAN_BUY_ZERO' => '~CATALOG_CAN_BUY_ZERO',
+			'~MEASURE' => '~CATALOG_MEASURE',
+			'~SUBSCRIBE' => '~CATALOG_SUBSCRIBE',
+			'~VAT_ID' => '~CATALOG_VAT_ID',
+			'~VAT_INCLUDED' => '~CATALOG_VAT_INCLUDED',
+			'~WEIGHT' => '~CATALOG_WEIGHT',
+			'~WIDTH' => '~CATALOG_WIDTH',
+			'~LENGTH' => '~CATALOG_LENGTH',
+			'~HEIGHT' => '~CATALOG_HEIGHT',
+			'~PAYMENT_TYPE' => '~CATALOG_PRICE_TYPE',
+			'~RECUR_SCHEME_LENGTH' => '~CATALOG_RECUR_SCHEME_LENGTH',
+			'~RECUR_SCHEME_TYPE' => '~CATALOG_RECUR_SCHEME_TYPE',
+			'~QUANTITY_TRACE_RAW' => '~CATALOG_QUANTITY_TRACE_ORIG',
+			'~CAN_BUY_ZERO_RAW' => '~CATALOG_CAN_BUY_ZERO_ORIG',
+			'~SUBSCRIBE_RAW' => '~CATALOG_SUBSCRIBE_ORIG',
+			'~PURCHASING_PRICE' => '~CATALOG_PURCHASING_PRICE',
+			'~PURCHASING_CURRENCY' => '~CATALOG_PURCHASING_CURRENCY',
+			'~BARCODE_MULTI' => '~CATALOG_BARCODE_MULTI',
+			'~TRIAL_PRICE_ID' => '~CATALOG_TRIAL_PRICE_ID',
+			'~WITHOUT_ORDER' => '~CATALOG_WITHOUT_ORDER'
+		];
 	}
 
 	/* compatibility tools end */

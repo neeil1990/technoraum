@@ -59,11 +59,11 @@ $uriSave->addParams(array(
 ));
 
 // domain
-if (\Bitrix\Main\Loader::includeModule('bitrix24'))
+if (Manager::isB24())
 {
 	$domainName = isset($domains[$row['DOMAIN_ID']['CURRENT']]['DOMAIN'])
 				? $domains[$row['DOMAIN_ID']['CURRENT']]['DOMAIN']
-				: $row['DOMAIN_ID']['CURRENT'];
+				: '';
 }
 else
 {
@@ -73,7 +73,7 @@ else
 
 <form action="<?= \htmlspecialcharsbx($uriSave->getUri());?>" method="post" class="ui-form ui-form-gray-padding landing-form-collapsed landing-form-settings" id="landing-site-set-form">
 	<input type="hidden" name="fields[SAVE_FORM]" value="Y" />
-	<input type="hidden" name="fields[TYPE]" value="<?= $arParams['TYPE'];?>" />
+	<input type="hidden" name="fields[TYPE]" value="<?= $row['TYPE']['CURRENT'];?>" />
 	<input type="hidden" name="fields[CODE]" value="<?= $row['CODE']['CURRENT'];?>" />
 	<input type="hidden" name="fields[TPL_ID]" value="<?= $row['TPL_ID']['CURRENT'];?>" />
 	<input type="hidden" name="fields[LANDING_ID_404]" value="<?= $row['LANDING_ID_404']['CURRENT'];?>" />
@@ -195,7 +195,9 @@ else
 						}
 					}
 				endif;?>
-				<?if (isset($hooks['SETTINGS']) && isset($pageFields['SETTINGS_AGREEMENT_ID']) && Manager::isB24()/*tmp*/):?>
+				<?if (isset($hooks['SETTINGS']) && isset($pageFields['SETTINGS_AGREEMENT_ID'])):
+					$agreementId = $pageFields['SETTINGS_AGREEMENT_ID']->getValue();
+					?>
 					<tr class="landing-form-title-catalog">
 						<td colspan="2">
 							<?=Loc::getMessage('LANDING_TPL_HOOK_SETT_HEADER_USERCONSENT');?>
@@ -207,17 +209,17 @@ else
 						</td>
 						<td class="ui-form-right-cell">
 							<div class="ui-checkbox-hidden-input landing-form-page-userconsent">
-								<input type="checkbox" id="checkbox-userconsent-use" class="ui-checkbox">
+								<input type="checkbox" id="checkbox-userconsent-use" class="ui-checkbox"<?= $agreementId ? ' checked="checked"' : '';?>>
 								<div class="ui-checkbox-hidden-input-inner">
 									<label class="ui-checkbox-label" for="checkbox-userconsent-use">
 										<?= Loc::getMessage('LANDING_TPL_HOOK_SETT_HEADER_USERCONSENT_USE');?>
 									</label>
 									<div class="landing-form-wrapper">
 										<?$APPLICATION->IncludeComponent(
-											'bitrix:intranet.userconsent.selector',
+											'bitrix:landing.userconsent.selector',
 											'',
 											array(
-												'ID' => $pageFields['SETTINGS_AGREEMENT_ID']->getValue(),
+												'ID' => $agreementId,
 												'INPUT_NAME' => 'fields[ADDITIONAL_FIELDS][SETTINGS_AGREEMENT_ID]'
 											)
 										);?>
@@ -253,8 +255,11 @@ else
 		top.window['landingSettingsSaved'] = false;
 		<?if ($arParams['SUCCESS_SAVE']):?>
 		top.window['landingSettingsSaved'] = true;
-		top.BX.onCustomEvent('BX.Main.Filter:apply');
+		top.BX.onCustomEvent('BX.Landing.Filter:apply');
 		editComponent.actionClose();
 		<?endif;?>
+		BX.Landing.Env.createInstance({
+			params: {type: '<?= $arParams['TYPE'];?>'}
+		});
 	});
 </script>

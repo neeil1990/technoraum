@@ -38,4 +38,5 @@ $MESS["SBB_GOOD_2"] = "Produkt";
 $MESS["SBB_GOODS"] = "Produkte";
 $MESS["SBB_DELETE"] = "Löschen";
 $MESS["SBB_IN_BASKET"] = "Im Warenkorb";
+$MESS["SBB_GIFTS_BLOCK_TITLE"] = "Wählen Sie ein Geschenk aus";
 ?>

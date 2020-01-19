@@ -1007,7 +1007,10 @@
 			{
 				this.showFloatingWindowTimeout = setTimeout(function()
 				{
-					this.floatingWindow.show();
+					if(this.currentCall && this.floatingWindow && this.callView)
+					{
+						this.floatingWindow.show();
+					}
 				}.bind(this), 300);
 
 			}

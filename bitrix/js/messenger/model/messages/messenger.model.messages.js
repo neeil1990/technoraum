@@ -517,6 +517,15 @@ class ModelMessages
 
 	static decodeBbCode(textElement, textOnly = false, enableBigSmile = true)
 	{
+		let codeReplacement = [];
+
+		textElement = textElement.replace(/\[CODE\]\n?(.*?)\[\/CODE\]/sig, function(whole, text)
+		{
+			let id = codeReplacement.length;
+			codeReplacement.push(text);
+			return '####REPLACEMENT_MARK_'+id+'####';
+		});
+
 		textElement = textElement.replace(/\[LIKE\]/ig, '<span class="bx-smile bx-im-smile-like"></span>');
 		textElement = textElement.replace(/\[DISLIKE\]/ig, '<span class="bx-smile bx-im-smile-dislike"></span>');
 
@@ -674,6 +683,12 @@ class ModelMessages
 
 
 			return '<img class="bx-smile bx-icon" '+attributes+'>';
+		});
+
+		codeReplacement.forEach((code, index) => {
+			textElement = textElement.replace('####REPLACEMENT_MARK_'+index+'####',
+				!textOnly? '<div class="bx-im-message-content-code">'+code+'</div>': code
+			)
 		});
 
 		return textElement;

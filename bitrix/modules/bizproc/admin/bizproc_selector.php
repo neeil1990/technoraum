@@ -51,6 +51,7 @@ $arWorkflowTemplate = isset($_POST['arWorkflowTemplate']) && is_array($_POST['ar
 $arWorkflowParameters = isset($_POST['arWorkflowParameters']) && is_array($_POST['arWorkflowParameters'])? $_POST['arWorkflowParameters']: array();
 $arWorkflowVariables = isset($_POST['arWorkflowVariables']) && is_array($_POST['arWorkflowVariables'])? $_POST['arWorkflowVariables']: array();
 $arWorkflowConstants = isset($_POST['arWorkflowConstants']) && is_array($_POST['arWorkflowConstants'])? $_POST['arWorkflowConstants']: array();
+$arGlobalConstants = \Bitrix\Bizproc\Workflow\Type\GlobalConst::getAll();
 
 $selectorMode = isset($_POST['selectorMode']) ? $_POST['selectorMode']: null;
 
@@ -79,7 +80,7 @@ switch($_POST['fieldType'])
 {
 	case "int":
 	case "double":
-		$arFilter = Array("int", "double", 'mixed');
+		$arFilter = ["int", "double", 'mixed', 'string'];
 		break;
 
 	case "date":
@@ -191,6 +192,25 @@ function BPSHideShow(id)
 							$fieldId .= ' > printable';
 						?>
 						<option value="{=Constant:<?=htmlspecialcharsbx($fieldId)?>}<?if($_POST['fieldType']=='user')echo '; '?>"><?=htmlspecialcharsbx($documentField['Name'])?></option>
+					<?endif?>
+				<?endforeach?>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<a href="javascript:void(0)" onclick="BPSHideShow('BPSId61')"><b><?echo GetMessage("BP_SEL_GCONST")?></b></a>
+		</td>
+	</tr>
+	<tr id="BPSId61" style="display:none">
+		<td>
+			<select id="BPSId61S" size="13" style="width:100%" ondblclick="BPSVInsert(this.value)">
+				<?foreach($arGlobalConstants as $fieldId => $documentField):?>
+					<?if($arFilter===false || in_array($documentFieldTypes[$documentField["Type"]]["BaseType"], $arFilter)):
+						if ($_POST['fieldType']=='text')
+							$fieldId .= ' > printable';
+						?>
+						<option value="{=GlobalConst:<?=htmlspecialcharsbx($fieldId)?>}<?if($_POST['fieldType']=='user')echo '; '?>"><?=htmlspecialcharsbx($documentField['Name'])?></option>
 					<?endif?>
 				<?endforeach?>
 			</select>

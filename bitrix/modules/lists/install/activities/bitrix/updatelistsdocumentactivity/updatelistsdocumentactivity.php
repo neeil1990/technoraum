@@ -20,10 +20,30 @@ class CBPUpdateListsDocumentActivity
 		$documentType = $this->DocumentType;
 		$elementId = $this->ElementId;
 
+		//check for Multiple values
+		if (is_array($elementId))
+		{
+			$elementId = array_shift($elementId);
+		}
+
 		$documentId = [$documentType[0], $documentType[1], $elementId];
 		$fields = $this->Fields;
 
 		$documentService = $this->workflow->GetService("DocumentService");
+
+		$realDocumentType = null;
+		try
+		{
+			$realDocumentType = $documentService->GetDocumentType($documentId);
+		}
+		catch (Exception $e) {}
+
+		if (!$realDocumentType || $realDocumentType !== $documentType)
+		{
+			$this->WriteToTrackingService(GetMessage('BPULDA_ERROR_DT'), 0, CBPTrackingType::Error);
+			return CBPActivityExecutionStatus::Closed;
+		}
+
 		$documentService->UpdateDocument($documentId, $fields);
 
 		return CBPActivityExecutionStatus::Closed;
@@ -92,14 +112,16 @@ class CBPUpdateListsDocumentActivity
 		}
 		elseif ($documentType)
 		{
-			if (!isset($arCurrentValues['fields']))
-			{
-				$arCurrentValues['fields'] = [];
-			}
-
+			$arCurrentValues['fields'] = [];
 			$listsDocumentFields = self::getDocumentFields($documentType);
-			foreach ($arCurrentValues['fields'] as $key => $value)
+			foreach ($arCurrentValues as $key => $value)
 			{
+				if (strpos($key, 'fields__') !== 0)
+				{
+					continue;
+				}
+				$key = substr($key, 8);
+
 				$property = $listsDocumentFields[$key];
 
 				if (!$property || !$property["Editable"] || $key == 'IBLOCK_ID' || $key == 'CREATED_BY')
@@ -110,8 +132,8 @@ class CBPUpdateListsDocumentActivity
 				$arErrors = [];
 				$arCurrentValues['fields'][$key] = $documentService->GetFieldInputValue(
 					$documentType,
-					$value,
-					[$key => $value],
+					$property,
+					'fields__'.$key,
 					$arCurrentValues,
 					$arErrors
 				);
@@ -181,13 +203,23 @@ class CBPUpdateListsDocumentActivity
 		$iblockId = $documentType? substr($documentType[2], 7) : null;
 		$listFields = $iblockId? static::getVisibleFieldsList($iblockId) : [];
 
-		if (!isset($arCurrentValues['fields']))
+		foreach ($arCurrentValues as $fieldKey => $fieldValue)
 		{
-			$arCurrentValues['fields'] = [];
-		}
+			if (strpos($fieldKey, 'fields__') !== 0)
+			{
+				continue;
+			}
+			$fieldKey = substr($fieldKey, 8);
 
-		foreach ($arCurrentValues['fields'] as $fieldKey => $fieldValue)
-		{
+			if (substr($fieldKey, -5) === '_text')
+			{
+				$fieldKey = substr($fieldKey, 0, -5);
+				if (isset($arCurrentValues['fields__'.$fieldKey]))
+				{
+					continue;
+				}
+			}
+
 			$property = $arDocumentFields[$fieldKey];
 
 			if (!$property["Editable"] || $fieldKey == 'IBLOCK_ID' || $fieldKey == 'CREATED_BY' || !in_array($fieldKey, $listFields))
@@ -197,8 +229,8 @@ class CBPUpdateListsDocumentActivity
 			$r = $documentService->GetFieldInputValue(
 				$documentType,
 				$property,
-				$fieldKey,
-				[$fieldKey => $fieldValue],
+				'fields__'.$fieldKey,
+				$arCurrentValues,
 				$arFieldErrors
 			);
 
@@ -256,7 +288,7 @@ class CBPUpdateListsDocumentActivity
 		{
 			$field = \Bitrix\Bizproc\FieldType::normalizeProperty($field);
 			$field['Id'] = $key;
-			$field['FieldName'] = 'fields['.$key.']';
+			$field['FieldName'] = 'fields__'.$key;
 			$fields[$key] = $field;
 		}
 

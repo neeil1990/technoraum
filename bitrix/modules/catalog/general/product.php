@@ -1040,7 +1040,8 @@ class CAllCatalogProduct
 						'>=QUANTITY_TO' => $quantity,
 						'=QUANTITY_TO' => null
 					)
-				)
+				),
+				'order' => array('CATALOG_GROUP_ID' => 'ASC')
 			));
 			while ($row = $iterator->fetch())
 			{
@@ -1121,7 +1122,7 @@ class CAllCatalogProduct
 				$arDiscounts = CCatalogDiscount::GetDiscount(
 					$intProductID,
 					$intIBlockID,
-					$priceData['CATALOG_GROUP_ID'],
+					array($priceData['CATALOG_GROUP_ID']),
 					$arUserGroups,
 					$renewal,
 					$siteID,
@@ -1459,7 +1460,7 @@ class CAllCatalogProduct
 			return false;
 		}
 
-		\Bitrix\Main\Type\Collection::sortByColumn($priceList, 'BASKET_CODE');
+		Main\Type\Collection::sortByColumn($priceList, ['BASKET_CODE' => SORT_ASC, 'CATALOG_GROUP_ID' => SORT_ASC]);
 
 		$vatList = CCatalogProduct::GetVATDataByIDList(array_keys($products));
 		if (!empty($vatList))
@@ -1588,7 +1589,7 @@ class CAllCatalogProduct
 				$discountList[$priceData['PRODUCT_ID']] = \CCatalogDiscount::GetDiscount(
 					$productId,
 					$iblockListId[$priceData['PRODUCT_ID']],
-					$priceData['CATALOG_GROUP_ID'],
+					array($priceData['CATALOG_GROUP_ID']),
 					$arUserGroups,
 					$renewal,
 					$siteID,
@@ -1964,6 +1965,49 @@ class CAllCatalogProduct
 		}
 		unset($intItemID);
 		return $boolFlag;
+	}
+
+	/**
+	 * @deprecated deprecated since catalog 18.7.0
+	 * @see \CProductQueryBuilder::makeQuery()
+	 *
+	 * @param array $order
+	 * @param array $filter
+	 * @param array $select
+	 * @return array
+	 */
+	public static function GetQueryBuildArrays($order, $filter, $select)
+	{
+		$result = [
+			'SELECT' => '',
+			'FROM' => '',
+			'WHERE' => '',
+			'ORDER' => []
+		];
+
+		$getListParameters = [];
+		if (!empty($select) && is_array($select))
+			$getListParameters['select'] = $select;
+		if (!empty($filter) && is_array($filter))
+			$getListParameters['filter'] = $filter;
+		if (!empty($order) && is_array($order))
+			$getListParameters['order'] = $order;
+
+		$query = \CProductQueryBuilder::makeQuery($getListParameters);
+		if (!empty($query))
+		{
+			if (!empty($query['select']))
+				$result['SELECT'] = ', '.implode(', ', $query['select']).' ';
+			if (!empty($query['join']))
+				$result['FROM'] = ' '.implode(' ', $query['join']).' ';
+			if (!empty($query['filter']))
+				$result['WHERE'] = ' and '.implode(' and ', $query['filter']);
+			if (!empty($query['order']))
+				$result['ORDER'] = $query['order'];
+		}
+		unset($query);
+
+		return $result;
 	}
 
 	/**
@@ -2540,7 +2584,7 @@ class CAllCatalogProduct
 			'PRICE' => $priceData['PRICE'],
 			'BASE_PRICE' => $priceData['PRICE'],
 			'DISCOUNT_PRICE' => 0,
-			'CURRENCY' => $priceData['PRICE'],
+			'CURRENCY' => $priceData['CURRENCY'],
 			'CAN_BUY' => 'Y',
 			'DELAY' => 'N',
 			'PRICE_TYPE_ID' => (int)$priceData['CATALOG_GROUP_ID']
@@ -2563,6 +2607,7 @@ class CAllCatalogProduct
 
 		if ($freezeCoupons)
 			Sale\DiscountCouponsManager::unFreezeCouponStorage();
+		$discount->setExecuteModuleFilter(array('all', 'sale', 'catalog'));
 
 		if ($isCompatibilityUsed === true)
 		{

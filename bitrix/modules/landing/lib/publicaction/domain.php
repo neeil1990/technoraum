@@ -159,7 +159,7 @@ class Domain
 			],
 			'filter' => $filter
 		]);
-		$return['available'] = !($domain = $res->fetch());
+		$return['available'] = !($domainRow = $res->fetch());
 
 		// check sites in trash
 		if (!$return['available'])
@@ -169,8 +169,9 @@ class Domain
 					'ID'
 				),
 				'filter' => array(
-					'DOMAIN_ID' => $domain['ID'],
-					'=DELETED' => 'Y'
+					'DOMAIN_ID' => $domainRow['ID'],
+					'=DELETED' => 'Y',
+					'CHECK_PERMISSIONS' => 'N'
 				)
 			));
 			if ($resSite->fetch())
@@ -183,6 +184,7 @@ class Domain
 		// external available check
 		if (
 			$return['available'] &&
+			$return['domain'] &&
 			Manager::isB24()
 		)
 		{
@@ -191,9 +193,10 @@ class Domain
 				$siteController = Manager::getExternalSiteController();
 				if ($siteController)
 				{
-					$return['available'] = !(boolean)$siteController::isDomainExists(
-						$domain
+				 	$checkResult = $siteController::isDomainExists(
+						$return['domain']
 					);
+					$return['available'] = $checkResult < 2;
 				}
 			}
 			catch (SystemException $ex)

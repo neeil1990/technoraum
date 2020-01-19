@@ -33,31 +33,41 @@ if(strlen($result["ERROR"]) <= 0 && $saleModulePermissions >= "U" && check_bitri
 			$options = '<option value="">'.\Bitrix\Main\Localization\Loc::getMessage('SALE_DLVRS_ADDT_SP_NOT_SELECTED').'</option>';
 			$deliveryId = isset($_REQUEST['deliveryId']) ? (int)$_REQUEST['deliveryId'] : 0;
 			$spSelected = isset($_REQUEST['spSelected']) ? trim($_REQUEST['spSelected']) : '';
-			$shippingPoints = \Sale\Handlers\Delivery\Additional\RusPost\Helper::getEnabledShippingPointsList($deliveryId);
+			$pointsResult = \Sale\Handlers\Delivery\Additional\RusPost\Helper::getEnabledShippingPointsListResult($deliveryId);
 
-			if(!empty($shippingPoints))
+			if($pointsResult->isSuccess())
 			{
-				foreach($shippingPoints as $sPoint)
+				$shippingPoints = $pointsResult->getData();
+
+				if(!empty($shippingPoints))
 				{
-					if($sPoint['enabled'] == 1)
+					foreach($shippingPoints as $sPoint)
 					{
-						$options .= '<option value="'.$sPoint['operator-postcode'].'"'.
-							($spSelected == $sPoint['operator-postcode'] ? ' selected ' : '').'>'.
-							$sPoint['operator-postcode'].' '.$sPoint['ops-address'].
-							'</option>';
+						if($sPoint['enabled'] == 1)
+						{
+							$options .= '<option value="'.$sPoint['operator-postcode'].'"'.
+								($spSelected == $sPoint['operator-postcode'] ? ' selected ' : '').'>'.
+								$sPoint['operator-postcode'].' '.$sPoint['ops-address'].
+								'</option>';
+						}
 					}
 				}
-			}
 
-			$result = '<select style="width: 450px;" id="sale-delivery-ruspost-shipment-points">'.$options.'</select>';
+				$result = '<select style="width: 450px;" id="sale-delivery-ruspost-shipment-points">'.$options.'</select>';
+			}
+			else
+			{
+				$result = '<div style="color: red;">'.implode("\n<br>", $pointsResult->getErrorMessages()).'</div>';
+			}
 
 			die($result);
 			break;
 
 		case "locations_compare":
+
 			$stage = isset($_REQUEST['stage']) ? trim($_REQUEST['stage']): 'start';
 			$step = isset($_REQUEST['step']) ? trim($_REQUEST['step']): '';
-			$timeout = isset($_REQUEST['timeout']) ? trim($_REQUEST['timeout']): 30;
+			$timeout = isset($_REQUEST['timeout']) ? trim($_REQUEST['timeout']): 24;
 			$progress = isset($_REQUEST['progress']) ? trim($_REQUEST['progress']): 0;
 
 			if(strlen($stage) <= 0)

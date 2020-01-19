@@ -245,6 +245,16 @@ class HttpRequest extends Request
 		return $this->server->getRequestMethod();
 	}
 
+	/**
+	 * Returns server port.
+	 *
+	 * @return string | null
+	 */
+	public function getServerPort()
+	{
+		return $this->server->getServerPort();
+	}
+
 	public function isPost()
 	{
 		return ($this->getRequestMethod() == "POST");

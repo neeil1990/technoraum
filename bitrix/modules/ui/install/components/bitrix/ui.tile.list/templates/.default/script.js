@@ -52,11 +52,8 @@
 
 			this.selected = isSelected;
 		},
-		onClick: function ()
-		{
 
-		},
-		zzz: function ()
+		onClick: function ()
 		{
 
 		}

@@ -106,7 +106,7 @@
 	{
 		$db_res = CFilterDictionary::GetList(array(), array("TYPE"=>"W"));
 		$option = "";
-		$active = COption::GetOptionString("forum", "FILTER_DICT_W", '', SITE);
+		$active = COption::GetOptionString("forum", "FILTER_DICT_W", '', SITE_ID);
 		while ($res = $db_res->GetNext())
 			$option .= "<option value='".$res["ID"].($res["ID"] == $active ? " selected " : "")."'>".$res["TITLE"]."</option>";
 

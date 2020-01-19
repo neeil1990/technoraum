@@ -84,6 +84,8 @@ class Result extends BaseResult
 		// TODO when join, add primary and hide it in ARRAY result, but use for OBJECT fetch
 		// e.g. when first fetchObject, remove data modifier that cuts 'unexpected' primary fields
 
+		// TODO wakeup reference objects with only primary if there are enough data in result
+
 		// base object initialization
 		$this->initializeFetchObject();
 
@@ -373,7 +375,21 @@ class Result extends BaseResult
 			{
 				/** @var Collection $collection */
 				$collection = $this->fetchCollection();
+
+				// remember original result
+				$originalResult = $this->result;
+
 				$this->result = new ArrayResult($collection->getAll());
+
+				// recover count total
+				try
+				{
+					if ($originalResult->getCount())
+					{
+						$this->result->setCount($originalResult->getCount());
+					}
+				}
+				catch (\Bitrix\Main\ObjectPropertyException $e) {}
 			}
 		}
 	}

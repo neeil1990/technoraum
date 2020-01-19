@@ -20,6 +20,8 @@ $return = array(
 			'extra' => array(
 				'editable' => array(
 					// visual
+					'HIDE_COUPON' => array(
+					),
 					'SHOW_FILTER' => array(
 						'style' => true,
 					),

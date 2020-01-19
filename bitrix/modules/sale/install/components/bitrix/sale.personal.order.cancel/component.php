@@ -38,15 +38,19 @@ if (strlen($id) <= 0 && $arParams["PATH_TO_LIST"] != htmlspecialcharsbx($APPLICA
 	LocalRedirect($arParams["PATH_TO_LIST"]);
 }
 
+$registry = \Bitrix\Sale\Registry::getInstance(\Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER);
+/** @var \Bitrix\Sale\Order $orderClass */
+$orderClass = $registry->getOrderClassName();
+
 $order = null;
 if ($bUseAccountNumber)
 {
-	$order = \Bitrix\Sale\Order::loadByAccountNumber($id);
+	$order = $orderClass::loadByAccountNumber($id);
 }
 
 if (!$order)
 {
-	$order = \Bitrix\Sale\Order::load($id);
+	$order = $orderClass::load($id);
 }
 
 if (!$order)

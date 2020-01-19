@@ -49,7 +49,7 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 				'DEFERRED_REFRESH' => 'N',
 				'SHOW_FILTER' => 'N',
 				'TOTAL_BLOCK_DISPLAY' => ['top', 'bottom'],
-				'AJAX_PATH' => '/bitrix/blocks/bitrix/store.cart/ajax.php'
+				'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID')
 			),
 		 	false
 		);?>

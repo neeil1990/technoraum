@@ -5,13 +5,8 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
 }
 
 return [
-	'js' => [
-		'/bitrix/js/main/polyfill/complex/base-polyfill.js',
-		'/bitrix/js/main/polyfill/complex/babel-external-helpers.js',
-	],
 	'rel' => [
-		'main.polyfill.includes',
-		'main.polyfill.fill',
+		'main.polyfill.core',
 		'main.polyfill.customevent'
 	],
 	'skip_core' => true,

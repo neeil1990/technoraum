@@ -105,4 +105,5 @@ $MESS["IBLOCK_LINKED_ELEMENT_TITLE"] = "Перейти в административный раздел";
 $MESS["IBLOCK_FIELD_HINT_XML_ID"] = "Для уже существующих элементов обязателен. При создании можно не указывать. В этом случае после создания внешний код будет содержать ID элемента";
 $MESS["IBLOCK_IMPORT_FROM"] = "Импортирован из";
 $MESS["IBLOCK_LINK_TO_MEDIA"] = "ссылка на публикацию";
+$MESS["IBLOCK_ELEMENT_OFFERS_IS_ABSENT"] = "Не созданы торговые предложения";
 ?>

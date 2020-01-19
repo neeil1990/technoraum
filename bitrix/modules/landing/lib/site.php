@@ -2,6 +2,8 @@
 namespace Bitrix\Landing;
 
 use \Bitrix\Main\Localization\Loc;
+use \Bitrix\Main\Event;
+use \Bitrix\Main\EventResult;
 
 Loc::loadMessages(__FILE__);
 
@@ -14,30 +16,72 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 	public static $internalClass = 'SiteTable';
 
 	/**
-	 * Get public url for site.
+	 * Return true if site exists and available.
 	 * @param int $id Site id.
+	 * @param bool $deleted And from recycle bin.
+	 * @return bool
+	 */
+	public static function ping($id, $deleted = false)
+	{
+		$filter = [
+			'ID' => $id
+		];
+		if ($deleted)
+		{
+			$filter['=DELETED'] = ['Y', 'N'];
+		}
+		$check = Site::getList([
+			'select' => [
+				'ID'
+			],
+			'filter' => $filter
+		]);
+		return (boolean) $check->fetch();
+	}
+
+	/**
+	 * Get public url for site.
+	 * @param int[] $id Site id or array of ids.
 	 * @param boolean $full Return full site url with relative path.
-	 * @return string
+	 * @return string|array
 	 */
 	public static function getPublicUrl($id, $full = true)
 	{
+		$paths = [];
+		$isB24 = Manager::isB24();
+
+		$siteKeyCode = Site\Type::getKeyCode();
+		$defaultPubPath = rtrim(Manager::getPublicationPath(), '/');
+		$hostUrl = Domain::getHostUrl();
+		$disableCloud = defined('LANDING_DISABLE_CLOUD') &&
+						LANDING_DISABLE_CLOUD === true;
 		$res = self::getList(array(
 			'select' => array(
 				'DOMAIN_PROTOCOL' => 'DOMAIN.PROTOCOL',
 				'DOMAIN_NAME' => 'DOMAIN.DOMAIN',
+				'DOMAIN_ID',
+				'SMN_SITE_ID',
 				'CODE',
-				'SMN_SITE_ID'
+				'TYPE',
+				'ID'
 			),
 			'filter' => array(
 				'ID' => $id,
-				'=DELETED' => ['Y', 'N']
+				'=DELETED' => ['Y', 'N'],
+				'CHECK_PERMISSIONS' => 'N'
 			)
 		));
-		if ($row = $res->fetch())
+		while ($row = $res->fetch())
 		{
-			$bitrix24 = Manager::isB24();
+			$pubPath = '';
+			$isB24localVar = $isB24;
 
-			if (!$bitrix24)
+			if ($row['TYPE'] == 'SMN')
+			{
+				$isB24localVar = false;
+			}
+
+			if (!$isB24localVar || $disableCloud)
 			{
 				$pubPath = Manager::getPublicationPath(
 					null,
@@ -46,18 +90,49 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 				$pubPath = rtrim($pubPath, '/');
 			}
 
+			if ($siteKeyCode == 'ID')
+			{
+				$row['CODE'] = '/' . $row['ID'] . '/';
+			}
+
 			// force https
 			if (Manager::isHttps())
 			{
 				$row['DOMAIN_PROTOCOL'] = \Bitrix\Landing\Internals\DomainTable::PROTOCOL_HTTPS;
 			}
 
-			return $row['DOMAIN_PROTOCOL'] . '://' .
-					$row['DOMAIN_NAME'] .
-					(!$bitrix24 ? $pubPath : '') .
-					(!$bitrix24 && $full ? $row['CODE'] : '');
+			if ($row['DOMAIN_ID'])
+			{
+				$paths[$row['ID']] = ($disableCloud ? $hostUrl : $row['DOMAIN_PROTOCOL'] . '://' . $row['DOMAIN_NAME']) . $pubPath;
+				if ($full)
+				{
+					if ($disableCloud && $isB24localVar)
+					{
+						$paths[$row['ID']] .= $row['CODE'];
+					}
+					else if (!$isB24localVar)
+					{
+						$paths[$row['ID']] .= '/';
+					}
+				}
+			}
+			else
+			{
+				$paths[$row['ID']] = $hostUrl . $defaultPubPath . ($full ? $row['CODE'] : '');
+			}
+
+			unset($pubPath);
 		}
-		return '';
+		unset($res, $row);
+
+		if (is_array($id))
+		{
+			return $paths;
+		}
+		else
+		{
+			return isset($paths[$id]) ? $paths[$id] : '';
+		}
 	}
 
 	/**
@@ -67,6 +142,11 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 	 */
 	public static function getHooks($id)
 	{
+		if (!Rights::hasAccessForSite($id, Rights::ACCESS_TYPES['read']))
+		{
+			return [];
+		}
+
 		return Hook::getForSite($id);
 	}
 
@@ -118,7 +198,9 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 			'PAGE' => Loc::getMessage('LANDING_TYPE_PAGE'),
 			'STORE' => Loc::getMessage('LANDING_TYPE_STORE'),
 			'SMN' => Loc::getMessage('LANDING_TYPE_SMN'),
-			'PREVIEW' => Loc::getMessage('LANDING_TYPE_PREVIEW')
+			'PREVIEW' => Loc::getMessage('LANDING_TYPE_PREVIEW'),
+			'KNOWLEDGE' => Loc::getMessage('LANDING_TYPE_KNOWLEDGE'),
+			'GROUP' => Loc::getMessage('LANDING_TYPE_GROUP')
 		);
 
 		return $types;
@@ -136,10 +218,46 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 	/**
 	 * Delete site by id.
 	 * @param int $id Site id.
+	 * @param bool $pagesDelete Delete all pages before.
 	 * @return \Bitrix\Main\Result
 	 */
-	public static function delete($id)
+	public static function delete($id, $pagesDelete = false)
 	{
+		// @tmp, task#188952
+		Debug::log('DISABLE_DELETE_SITE',[
+			'id' => $id,
+			'trace' => \Bitrix\Main\Diag\Helper::getBackTrace(10)
+		]);
+		$result = new \Bitrix\Main\Entity\DeleteResult();
+		$result->addError(
+			new \Bitrix\Main\Error(
+				'Deleted not allowed',
+				'NOT_ALLOWED'
+			)
+		);
+		return $result;
+
+		// first delete all pages if you want
+		if ($pagesDelete)
+		{
+			$res = Landing::getList([
+				'select' => [
+					'ID'
+				],
+				'filter' => [
+					'=DELETED' => ['Y', 'N']
+				]
+			]);
+			while ($row = $res->fetch())
+			{
+				$resDel = Landing::delete($row['ID'], true);
+				if (!$resDel->isSuccess())
+				{
+					return $resDel;
+				}
+			}
+		}
+		// delete site
 		$result = parent::delete($id);
 		return $result;
 	}
@@ -151,6 +269,32 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 	 */
 	public static function markDelete($id)
 	{
+		$event = new Event('landing', 'onBeforeSiteRecycle', array(
+			'id' => $id,
+			'delete' => 'Y'
+		));
+		$event->send();
+
+		foreach ($event->getResults() as $result)
+		{
+			if ($result->getType() == EventResult::ERROR)
+			{
+				$return = new \Bitrix\Main\Result;
+				foreach ($result->getErrors() as $error)
+				{
+					$return->addError(
+						$error
+					);
+				}
+				return $return;
+			}
+		}
+
+		if (($currentScope = Site\Type::getCurrentScopeId()))
+		{
+			Agent::addUniqueAgent('clearRecycleScope', [$currentScope]);
+		}
+
 		return parent::update($id, array(
 			'DELETED' => 'Y'
 		));
@@ -163,6 +307,27 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 	 */
 	public static function markUnDelete($id)
 	{
+		$event = new Event('landing', 'onBeforeSiteRecycle', array(
+			'id' => $id,
+			'delete' => 'N'
+		));
+		$event->send();
+
+		foreach ($event->getResults() as $result)
+		{
+			if ($result->getType() == EventResult::ERROR)
+			{
+				$return = new \Bitrix\Main\Result;
+				foreach ($result->getErrors() as $error)
+				{
+					$return->addError(
+						$error
+					);
+				}
+				return $return;
+			}
+		}
+
 		return parent::update($id, array(
 			'DELETED' => 'N'
 		));
@@ -191,6 +356,11 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 			'METAOG_IMAGE',
 			'BACKGROUND_PICTURE'
 		);
+
+		if (isset($params['scope']))
+		{
+			Site\Type::setScope($params['scope']);
+		}
 
 		// check params
 		if (
@@ -282,6 +452,7 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 			if (empty($export))
 			{
 				$export = array(
+					'charset' => SITE_CHARSET,
 					'code' => isset($params['code'])
 								? $params['code']
 								: trim($row['SITE_CODE'], '/'),
@@ -335,34 +506,35 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 				}
 				// site hooks
 				$hookFields = &$export['fields']['ADDITIONAL_FIELDS'];
-				foreach (Hook::getForSite($row['SITE_ID']) as $hCode => $hook)
+				foreach (Hook::getForSite($row['SITE_ID']) as $hookCode => $hook)
 				{
-					if ($hCode == 'SETTINGS')
+					if ($hookCode == 'SETTINGS')
 					{
 						continue;
 					}
 					foreach ($hook->getFields() as $fCode => $field)
 					{
-						$hCodeFull = $hCode . '_' . $fCode;
-						if (!in_array($hCodeFull, $params['hooks_disable']))
+						$hookCodeFull = $hookCode . '_' . $fCode;
+						if (!in_array($hookCodeFull, $params['hooks_disable']))
 						{
-							$hookFields[$hCodeFull] = $field->getValue();
-							if (!$hookFields[$hCodeFull])
+							$hookFields[$hookCodeFull] = $field->getValue();
+							if (!$hookFields[$hookCodeFull])
 							{
-								unset($hookFields[$hCodeFull]);
+								unset($hookFields[$hookCodeFull]);
 							}
 							else if (
-								in_array($hCodeFull, $params['hooks_files']) &&
-								intval($hookFields[$hCodeFull]) > 0
+								in_array($hookCodeFull, $params['hooks_files']) &&
+								intval($hookFields[$hookCodeFull]) > 0
 							)
 							{
-								$hookFields[$hCodeFull] = File::getFilePath(
-									$hookFields[$hCodeFull]
+								$hookFields['~' . $hookCodeFull] = $hookFields[$hookCodeFull];
+								$hookFields[$hookCodeFull] = File::getFilePath(
+									$hookFields[$hookCodeFull]
 								);
-								if ($hookFields[$hCodeFull])
+								if ($hookFields[$hookCodeFull])
 								{
-									$hookFields[$hCodeFull] = Manager::getUrlFromFile(
-										$hookFields[$hCodeFull]
+									$hookFields[$hookCodeFull] = Manager::getUrlFromFile(
+										$hookFields[$hookCodeFull]
 									);
 								}
 							}
@@ -432,34 +604,35 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 			}
 			// page hooks
 			$hookFields = &$export['items'][$row['ID']]['fields']['ADDITIONAL_FIELDS'];
-			foreach (Hook::getForLanding($row['ID']) as $hCode => $hook)
+			foreach (Hook::getForLanding($row['ID']) as $hookCode => $hook)
 			{
-				if ($hCode == 'SETTINGS')
+				if ($hookCode == 'SETTINGS')
 				{
 					continue;
 				}
 				foreach ($hook->getFields() as $fCode => $field)
 				{
-					$hCodeFull = $hCode . '_' . $fCode;
-					if (!in_array($hCodeFull, $params['hooks_disable']))
+					$hookCodeFull = $hookCode . '_' . $fCode;
+					if (!in_array($hookCodeFull, $params['hooks_disable']))
 					{
-						$hookFields[$hCodeFull] = $field->getValue();
-						if (!$hookFields[$hCodeFull])
+						$hookFields[$hookCodeFull] = $field->getValue();
+						if (!$hookFields[$hookCodeFull])
 						{
-							unset($hookFields[$hCodeFull]);
+							unset($hookFields[$hookCodeFull]);
 						}
 						else if (
-							in_array($hCodeFull, $params['hooks_files']) &&
-							intval($hookFields[$hCodeFull]) > 0
+							in_array($hookCodeFull, $params['hooks_files']) &&
+							intval($hookFields[$hookCodeFull]) > 0
 						)
 						{
-							$hookFields[$hCodeFull] = File::getFilePath(
-								$hookFields[$hCodeFull]
+							$hookFields['~' . $hookCodeFull] = $hookFields[$hookCodeFull];
+							$hookFields[$hookCodeFull] = File::getFilePath(
+								$hookFields[$hookCodeFull]
 							);
-							if ($hookFields[$hCodeFull])
+							if ($hookFields[$hookCodeFull])
 							{
-								$hookFields[$hCodeFull] = Manager::getUrlFromFile(
-									$hookFields[$hCodeFull]
+								$hookFields[$hookCodeFull] = Manager::getUrlFromFile(
+									$hookFields[$hookCodeFull]
 								);
 							}
 						}
@@ -517,8 +690,10 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 						'repo_block' => $repoBlock,
 						'cards' => $exportBlock['cards'],
 						'nodes' => $exportBlock['nodes'],
+						'menu' => $exportBlock['menu'],
 						'style' => $exportBlock['style'],
-						'attrs' => $exportBlock['attrs']
+						'attrs' => $exportBlock['attrs'],
+						'dynamic' => $exportBlock['dynamic']
 					);
 					foreach ($exportItem as $key => $item)
 					{
@@ -603,7 +778,7 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 	/**
 	 * Get md5 hash for site, using http host.
 	 * @param int $id Site id.
-	 * @param string Domain name for this site.
+	 * @param string $domain Domain name for this site.
 	 * @return string
 	 */
 	public static function getPublicHash($id, $domain = null)
@@ -660,7 +835,7 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 
 	/**
 	 * Event handler for check existing pages of main module's site.
-	 * @param string Main site id.
+	 * @param string $siteId Main site id.
 	 * @return bool
 	 */
 	public static function onBeforeMainSiteDelete($siteId)
@@ -670,7 +845,8 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 				'ID'
 			),
 			'filter' => array(
-				'=SITE.SMN_SITE_ID' => $siteId
+				'=SITE.SMN_SITE_ID' => $siteId,
+				'CHECK_PERMISSIONS' => 'N'
 			)
 		));
 
@@ -688,11 +864,13 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 
 	/**
 	 * Event handler for delete pages of main module's site.
-	 * @param string Main site id.
+	 * @param string $siteId Main site id.
 	 * @return void
 	 */
 	public static function onMainSiteDelete($siteId)
 	{
+		Rights::setOff();
+
 		$realSiteId = null;
 		// delete pages
 		$res = Landing::getList(array(
@@ -732,5 +910,7 @@ class Site extends \Bitrix\Landing\Internals\BaseTable
 		{
 			self::delete($realSiteId);
 		}
+
+		Rights::setOn();
 	}
 }

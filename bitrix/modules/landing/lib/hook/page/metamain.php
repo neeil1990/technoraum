@@ -2,7 +2,8 @@
 namespace Bitrix\Landing\Hook\Page;
 
 use \Bitrix\Landing\Field;
-use Bitrix\Landing\Manager;
+use \Bitrix\Landing\Manager;
+use \Bitrix\Landing\Landing\Seo;
 use \Bitrix\Main\Localization\Loc;
 
 Loc::loadMessages(__FILE__);
@@ -61,7 +62,30 @@ class MetaMain extends \Bitrix\Landing\Hook\Page
 	 */
 	public function enabled()
 	{
+		if ($this->issetCustomExec())
+		{
+			return true;
+		}
+
 		return $this->fields['USE']->getValue() == 'Y';
+	}
+
+	/**
+	 * Exec or not hook in edit mode.
+	 * @return boolean
+	 */
+	public function enabledInEditMode()
+	{
+		return false;
+	}
+
+	/**
+	 * Exec or not hook in intranet mode.
+	 * @return boolean
+	 */
+	public function enabledInIntranetMode()
+	{
+		return false;
 	}
 
 	/**
@@ -70,9 +94,15 @@ class MetaMain extends \Bitrix\Landing\Hook\Page
 	 */
 	public function exec()
 	{
-		$title = \htmlspecialcharsbx(trim($this->fields['TITLE']));
-		$description = trim($this->fields['DESCRIPTION']);
-		$keywords = trim($this->fields['KEYWORDS']);
+		if ($this->execCustom())
+		{
+			return;
+		}
+
+		$title = \htmlspecialcharsbx(Seo::processValue('title', $this->fields['TITLE']));
+		$description = Seo::processValue('description', $this->fields['DESCRIPTION']);
+		$keywords = Seo::processValue('keywords', $this->fields['KEYWORDS']);
+
 		if ($title != '')
 		{
 			Manager::setPageTitle($title);

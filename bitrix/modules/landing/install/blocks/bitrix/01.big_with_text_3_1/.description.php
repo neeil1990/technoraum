@@ -10,6 +10,7 @@ return array(
 	'block' => array(
 		'name' => Loc::getMessage('LANDING_BLOCK_CVR003.1._NAME'),
 		'section' => array('cover'),
+		'dynamic' => false,
 	),
 	'cards' => array(),
 	'nodes' => array(
@@ -43,6 +44,10 @@ return array(
 			'.landing-block-node-text' => array(
 				'name' => Loc::getMessage('LANDING_BLOCK_CVR003.1._NODES_LANDINGBLOCKNODETEXT'),
 				'type' => 'typo',
+			),
+			'.landing-block-node-img' => array(
+				'name' => Loc::getMessage('LANDING_BLOCK_CVR003.1._NODES_LANDINGBLOCKNODE_IMG'),
+				'type' => 'background-attachment',
 			),
 		),
 	),

@@ -60,6 +60,7 @@ RatingLike = function(likeId, entityTypeId, entityId, available, userId, localiz
 	this.mouseOverHandler = null;
 	this.version = (BXRL.render && this.topPanel ? 2 : 1);
 	this.mouseInShowPopupNode = {};
+	this.listXHR = null;
 
 	if (typeof lastVoteRepo[key] != 'undefined')
 	{
@@ -711,7 +712,7 @@ RatingLike.Init = function(likeId, params)
 		}
 		else
 		{
-			BXRL[likeId].pathToAjax = '/mobile/ajax.php?mobile_action=like';
+			BXRL[likeId].pathToAjax = BX.message('SITE_DIR') + 'mobile/ajax.php?mobile_action=like';
 			BX.bind(BXRL[likeId].topPanel, 'click', function(e) {
 				BXRL.render.openMobileReactionsPage({
 					entityTypeId: BXRL[likeId].entityTypeId,
@@ -721,12 +722,9 @@ RatingLike.Init = function(likeId, params)
 			});
 		}
 	}
-	else
+	else if (BXRL[likeId].buttonText != undefined)
 	{
-		if (BXRL[likeId].buttonText != undefined)
-		{
-			BXRL[likeId].buttonText.innerHTML = BXRL[likeId].localize['LIKE_D'];
-		}
+		BXRL[likeId].buttonText.innerHTML = BXRL[likeId].localize['LIKE_D'];
 	}
 	// get like-user-list
 
@@ -942,14 +940,7 @@ RatingLike.OpenWindow = function(likeId, clickEvent, target, targetId)
 			closeByEsc: true,
 			zIndexAbsolute: (globalZIndex > 1000 ? globalZIndex + 1 : 1000),
 			bindOptions: { position: "top" },
-			animationOptions: {
-				show: {
-					type: 'opacity-transform'
-				},
-				close: {
-					type: 'opacity'
-				}
-			},
+			animation: "fading-slide",
 			events : {
 				onPopupClose : function() { BXRLW = null; },
 				onPopupDestroy : function() {  }
@@ -1255,7 +1246,12 @@ RatingLike.List = function(likeId, page, reaction, clear)
 		});
 	}
 
-	BX.ajax({
+	if (BXRL[likeId].listXHR)
+	{
+		BXRL[likeId].listXHR.abort();
+	}
+
+	BXRL[likeId].listXHR = BX.ajax({
 		url: BXRL[likeId].pathToAjax,
 		method: 'POST',
 		dataType: 'json',
@@ -1270,6 +1266,11 @@ RatingLike.List = function(likeId, page, reaction, clear)
 		},
 		onsuccess: function(data)
 		{
+			if (!data)
+			{
+				return false;
+			}
+
 			BXRL[likeId].countText.innerHTML = data.items_all;
 
 			if (parseInt(data.items_page) == 0)

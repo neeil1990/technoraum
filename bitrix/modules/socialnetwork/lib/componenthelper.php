@@ -1149,7 +1149,7 @@ class ComponentHelper
 			$text = $parser->convertHtmlToBB($text);
 		}
 
-		preg_match_all("/\[url\s*=\s*([^\]]*)\](.+?)\[\/url\]/ies".BX_UTF_PCRE_MODIFIER, $text, $res);
+		preg_match_all("/\[url\s*=\s*([^\]]*)\](.+?)\[\/url\]/is".BX_UTF_PCRE_MODIFIER, $text, $res);
 
 		if (
 			!empty($res)
@@ -1992,6 +1992,8 @@ class ComponentHelper
 					'sourceEntityType' => $sourceEntityType,
 					'sourceEntityId' => $sourceEntityId,
 					'taskId' => $taskId,
+					'taskUrl' => \CTaskNotifications::getNotificationPath(['ID' => $task['CREATED_BY']], $task['ID'], false),
+					'taskResponsibleId' => $task['CREATED_BY'],
 					'taskName' => htmlspecialcharsback($task['TITLE']),
 					'sourceEntityLink' => (
 						$sourceEntityType == CreateTask::SOURCE_TYPE_BLOG_COMMENT
@@ -2126,6 +2128,8 @@ class ComponentHelper
 				'sourceEntityType' => $sourceEntityType,
 				'sourceEntityId' => $sourceEntityId,
 				'taskId' => $taskId,
+				'taskUrl' => \CTaskNotifications::getNotificationPath(['ID' => $task['CREATED_BY']], $task['ID'], false),
+				'taskResponsibleId' => $task['CREATED_BY'],
 				'taskName' => htmlspecialcharsback($task['TITLE']),
 				'suffix' => (
 					$provider->getType() == Provider::TYPE_COMMENT
@@ -2249,7 +2253,7 @@ class ComponentHelper
 			}
 
 			if (
-				$authId == 'sale'
+				in_array($authId, [ 'sale', 'shop' ])
 				&& !ModuleManager::isModuleInstalled("sale")
 			)
 			{
@@ -2306,22 +2310,35 @@ class ComponentHelper
 
 		$currentUserId = $USER->getId();
 		$limit = (isset($params['limit']) && intval($params['limit']) > 0 ? intval($params['limit']) : 500);
+		$useProjects = (!empty($params['useProjects']) && $params['useProjects'] == 'Y' ? 'Y' : 'N');
+		$siteId = (!empty($params['siteId']) ? $params['siteId'] : SITE_ID);
+		$landing = (!empty($params['landing']) && $params['landing'] == 'Y' ? 'Y' : '');
 
 		$currentCache = \Bitrix\Main\Data\Cache::createInstance();
 
 		$cacheTtl = defined("BX_COMP_MANAGED_CACHE") ? 3153600 : 3600*4;
-		$cacheId = 'dest_group_'.SITE_ID.'_'.$currentUserId.'_'.$limit;
-		$cacheDir = '/sonet/dest_sonet_groups/'.SITE_ID.'/'.$currentUserId;
+		$cacheId = 'dest_group_'.$siteId.'_'.$currentUserId.'_'.$limit.$useProjects.$landing;
+		$cacheDir = '/sonet/dest_sonet_groups/'.$siteId.'/'.$currentUserId;
 
 		if($currentCache->startDataCache($cacheTtl, $cacheId, $cacheDir))
 		{
 			global $CACHE_MANAGER;
 
 			$limitReached = false;
-			$groupList = \CSocNetLogDestination::getSocnetGroup(array(
+
+			$filter = [
 				'features' => array("blog", array("premoderate_post", "moderate_post", "write_post", "full_post")),
-				'limit' => $limit
-			), $limitReached);
+				'limit' => $limit,
+				'useProjects' => $useProjects,
+				'site_id' => $siteId,
+			];
+
+			if ($landing == 'Y')
+			{
+				$filter['landing'] = 'Y';
+			}
+
+			$groupList = \CSocNetLogDestination::getSocnetGroup($filter, $limitReached);
 
 			if(defined("BX_COMP_MANAGED_CACHE"))
 			{
@@ -2332,13 +2349,16 @@ class ComponentHelper
 					$CACHE_MANAGER->registerTag("sonet_group_".$group["entityId"]);
 				}
 				$CACHE_MANAGER->registerTag("sonet_user2group_U".$currentUserId);
+				if ($landing == 'Y')
+				{
+					$CACHE_MANAGER->registerTag("sonet_group");
+				}
 				$CACHE_MANAGER->endTagCache();
 			}
 			$currentCache->endDataCache(array(
 				'groups' => $groupList,
 				'limitReached' => $limitReached
 			));
-
 		}
 		else
 		{
@@ -2819,7 +2839,7 @@ class ComponentHelper
 				// parse inline disk attached object ids
 				if (preg_match_all("#\\[disk file id=(\\d+)\\]#is".BX_UTF_PCRE_MODIFIER, $comment["~MESSAGE"], $matches))
 				{
-					$inlineDiskAttachedObjectIdList = array_map(function($a) { return intval(substr($a, 1)); }, $matches[1]);
+					$inlineDiskAttachedObjectIdList = array_map(function($a) { return intval($a); }, $matches[1]);
 				}
 
 				// get inline attached images;
@@ -2835,20 +2855,25 @@ class ComponentHelper
 					$filter = array(
 						'=OBJECT.TYPE_FILE' => \Bitrix\Disk\TypeFile::IMAGE
 					);
+
+					$subFilter = [];
 					if (!empty($inlineDiskObjectIdList))
 					{
-						$filter['@OBJECT_ID'] = $inlineDiskObjectIdList;
+						$subFilter['@OBJECT_ID'] = $inlineDiskObjectIdList;
 					}
-					if (!empty($inlineDiskAttachedObjectIdList))
+					elseif (!empty($inlineDiskAttachedObjectIdList))
 					{
-						$filter['@ID'] = $inlineDiskAttachedObjectIdList;
+						$subFilter['@ID'] = $inlineDiskAttachedObjectIdList;
 					}
-					if (
-						!empty($inlineDiskObjectIdList)
-						&& !empty($inlineDiskAttachedObjectIdList)
-					)
+
+					if(count($subFilter) > 1)
 					{
-						$filter['LOGIC'] = 'OR';
+						$subFilter['LOGIC'] = 'OR';
+						$filter[] = $subFilter;
+					}
+					else
+					{
+						$filter = array_merge($filter, $subFilter);
 					}
 
 					$res = \Bitrix\Disk\Internals\AttachedObjectTable::getList(array(
@@ -2905,7 +2930,7 @@ class ComponentHelper
 					"OK_MESSAGE" => "",
 					"RESULT" => $listCommentId,
 					"PUSH&PULL" => array(
-						"ACTION" => "REPLY",
+						"ACTION" => ($params["ACTION"] === "UPDATE" ? "EDIT" : "REPLY"),
 						"ID" => $listCommentId
 					),
 					"MODE" => "PULL_MESSAGE",
@@ -3040,7 +3065,10 @@ class ComponentHelper
 		$res = \CUser::getList(
 			$o = "ID",
 			$b = "ASC",
-			array("=EMAIL" => $userEmail),
+			array(
+				"=EMAIL" => $userEmail,
+				"!EXTERNAL_AUTH_ID" => [ "bot", "controller", "replica", "shop", "imconnector", "sale", "saleanonymous" ]
+			),
 			array("FIELDS" => array("ID", "EXTERNAL_AUTH_ID", "ACTIVE"))
 		);
 
@@ -3771,36 +3799,49 @@ class ComponentHelper
 		}
 
 		$result = \CBlogPost::getSocNetPermsCode($postId);
-		if(!in_array("U".$authorId, $result))
-		{
-			$result[] = "U".$authorId;
-		}
-		$result[] = "SA"; // socnet admin
 
-		if (
-			in_array("AU", $result)
-			|| in_array("G2", $result)
-		)
+		$profileBlogPost = false;
+		foreach($result as $perm)
 		{
-			$socnetPermsAdd = array();
-
-			foreach($result as $perm)
+			if (preg_match('/^UP(\d+)$/', $perm, $matches))
 			{
-				if (preg_match('/^SG(\d+)$/', $perm, $matches))
+				$profileBlogPost = true;
+				break;
+			}
+		}
+		if (!$profileBlogPost)
+		{
+			if(!in_array("U".$authorId, $result))
+			{
+				$result[] = "U".$authorId;
+			}
+			$result[] = "SA"; // socnet admin
+
+			if (
+				in_array("AU", $result)
+				|| in_array("G2", $result)
+			)
+			{
+				$socnetPermsAdd = array();
+
+				foreach($result as $perm)
 				{
-					if (
-						!in_array("SG".$matches[1]."_".UserToGroupTable::ROLE_USER, $result)
-						&& !in_array("SG".$matches[1]."_".UserToGroupTable::ROLE_MODERATOR, $result)
-						&& !in_array("SG".$matches[1]."_".UserToGroupTable::ROLE_OWNER, $result)
-					)
+					if (preg_match('/^SG(\d+)$/', $perm, $matches))
 					{
-						$socnetPermsAdd[] = "SG".$matches[1]."_".$result;
+						if (
+							!in_array("SG".$matches[1]."_".UserToGroupTable::ROLE_USER, $result)
+							&& !in_array("SG".$matches[1]."_".UserToGroupTable::ROLE_MODERATOR, $result)
+							&& !in_array("SG".$matches[1]."_".UserToGroupTable::ROLE_OWNER, $result)
+						)
+						{
+							$socnetPermsAdd[] = "SG".$matches[1]."_".$result;
+						}
 					}
 				}
-			}
-			if (count($socnetPermsAdd) > 0)
-			{
-				$result = array_merge($result, $socnetPermsAdd);
+				if (count($socnetPermsAdd) > 0)
+				{
+					$result = array_merge($result, $socnetPermsAdd);
+				}
 			}
 		}
 
@@ -3820,7 +3861,7 @@ class ComponentHelper
 			&& !empty($params['post'])
 			&& is_array($params['post'])
 				? $params['post']
-				: array()
+				: []
 		);
 
 		$siteId = (
@@ -3845,7 +3886,7 @@ class ComponentHelper
 			&& !empty($params['socnetRights'])
 			&& is_array($params['socnetRights'])
 				? $params['socnetRights']
-				: array()
+				: []
 		);
 
 		$socnetRightsOld = (
@@ -3855,8 +3896,8 @@ class ComponentHelper
 			&& is_array($params['socnetRightsOld'])
 				? $params['socnetRightsOld']
 				: array(
-					'U' => array(),
-					'SG' => array()
+					'U' => [],
+					'SG' => []
 				)
 		);
 
@@ -3866,7 +3907,7 @@ class ComponentHelper
 			&& !empty($params['mentionListOld'])
 			&& is_array($params['mentionListOld'])
 				? $params['mentionListOld']
-				: array()
+				: []
 		);
 
 		$mentionList = (
@@ -3875,7 +3916,16 @@ class ComponentHelper
 			&& !empty($params['mentionList'])
 			&& is_array($params['mentionList'])
 				? $params['mentionList']
-				: array()
+				: []
+		);
+
+		$gratData = (
+			!empty($params)
+			&& is_array($params)
+			&& !empty($params['gratData'])
+			&& is_array($params['gratData'])
+				? $params['gratData']
+				: []
 		);
 
 		$IMNotificationFields = array(
@@ -3886,7 +3936,8 @@ class ComponentHelper
 			"FROM_USER_ID" => $post["AUTHOR_ID"],
 			"TO_USER_ID" => array(),
 			"TO_SOCNET_RIGHTS" => $socnetRights,
-			"TO_SOCNET_RIGHTS_OLD" => $socnetRightsOld
+			"TO_SOCNET_RIGHTS_OLD" => $socnetRightsOld,
+			"GRAT_DATA" => $gratData
 		);
 		if (!empty($mentionListOld))
 		{
@@ -4000,7 +4051,7 @@ class ComponentHelper
 		return Option::get('socialnetwork', 'workgroups_page', $siteDir.'workgroups/', $siteId);
 	}
 
-	public static function convertBlogPostPermToDestinationList($params = array(), &$resultFields)
+	public static function convertBlogPostPermToDestinationList($params, &$resultFields)
 	{
 		global $USER;
 
@@ -4119,7 +4170,7 @@ class ComponentHelper
 		return $result;
 	}
 
-	public static function checkBlogPostDestinationList($params = array(), &$resultFields)
+	public static function checkBlogPostDestinationList($params, &$resultFields)
 	{
 		global $USER;
 
@@ -4188,6 +4239,7 @@ class ComponentHelper
 			$oneSG = false;
 			$firstSG = true;
 
+			$unavailableSGList = [];
 			$canPublish = true;
 
 			foreach($newSonetGroupIdList as $groupId)
@@ -4201,14 +4253,21 @@ class ComponentHelper
 					continue;
 				}
 
+				$canPublishToGroup = (
+					$userAdmin
+					|| \CSocNetFeaturesPerms::canPerformOperation($currentUserId, SONET_ENTITY_GROUP, $groupId, "blog", "write_post")
+					|| \CSocNetFeaturesPerms::canPerformOperation($currentUserId, SONET_ENTITY_GROUP, $groupId, "blog", "moderate_post")
+					|| \CSocNetFeaturesPerms::canPerformOperation($currentUserId, SONET_ENTITY_GROUP, $groupId, "blog", "full_post")
+				);
+
+				if (!$canPublishToGroup)
+				{
+					$unavailableSGList[] = $groupId;
+				}
+
 				$canPublish = (
 					$canPublish
-					&& (
-						$userAdmin
-						|| \CSocNetFeaturesPerms::canPerformOperation($currentUserId, SONET_ENTITY_GROUP, $groupId, "blog", "write_post")
-						|| \CSocNetFeaturesPerms::canPerformOperation($currentUserId, SONET_ENTITY_GROUP, $groupId, "blog", "moderate_post")
-						|| \CSocNetFeaturesPerms::canPerformOperation($currentUserId, SONET_ENTITY_GROUP, $groupId, "blog", "full_post")
-					)
+					&& $canPublishToGroup
 				);
 
 				if($firstSG)
@@ -4228,22 +4287,50 @@ class ComponentHelper
 				{
 					if (
 						!$postId
-						|| (
-							!empty($postFields)
-							&& $postFields["PUBLISH_STATUS"] != BLOG_PUBLISH_STATUS_PUBLISH
-						)
-					)
+						&& $resultFields["PUBLISH_STATUS"] == BLOG_PUBLISH_STATUS_PUBLISH
+					) // new post
 					{
 						$resultFields["PUBLISH_STATUS"] = BLOG_PUBLISH_STATUS_READY;
 					}
-					else
+					elseif (
+						$postId
+						&& $resultFields["PUBLISH_STATUS"] == BLOG_PUBLISH_STATUS_PUBLISH
+					) // new post
 					{
-						$resultFields["ERROR_MESSAGE"] = Loc::getMessage("SBPE_EXISTING_POST_PREMODERATION");
+						if ($postFields["PUBLISH_STATUS"] != BLOG_PUBLISH_STATUS_PUBLISH)
+						{
+							$resultFields["PUBLISH_STATUS"] = $postFields["PUBLISH_STATUS"];
+						}
+						else
+						{
+							$resultFields["ERROR_MESSAGE"] = Loc::getMessage("SBPE_EXISTING_POST_PREMODERATION");
+						}
 					}
 				}
 				else
 				{
-					$resultFields["ERROR_MESSAGE"] = Loc::getMessage("SBPE_MULTIPLE_PREMODERATION");
+					$groupNameList = [];
+					$groupUrl = Option::get('socialnetwork', 'workgroups_page', SITE_DIR.'workgroups/', SITE_ID).'group/#group_id#/';
+
+					$res = WorkgroupTable::getList([
+						'filter' => [
+							'@ID' => $unavailableSGList
+						],
+						'select' => [ 'ID', 'NAME' ]
+					]);
+					while($groupFields = $res->fetch())
+					{
+						$groupNameList[] = '<a href="'.\CComponentEngine::makePathFromTemplate(
+							$groupUrl,
+							array(
+								"group_id" => $groupFields['ID']
+							)
+						).'">'.$groupFields['NAME'].'</a>';
+					}
+
+					$resultFields["ERROR_MESSAGE"] = Loc::getMessage("SBPE_MULTIPLE_PREMODERATION2", array(
+						'#GROUPS_LIST#' => implode(', ', $groupNameList)
+					));
 				}
 			}
 		}
@@ -4418,66 +4505,66 @@ class ComponentHelper
 		if (ModuleManager::isModuleInstalled('intranet'))
 		{
 			$res = $connection->query('SELECT
-			@user_rank := IF(
-				@current_log_id = tmp.LOG_ID,
-				@user_rank + 1,
-				1
-			) as USER_RANK,
-			@current_log_id := tmp.LOG_ID,
-			tmp.USER_ID as USER_ID,
-			tmp.LOG_ID as LOG_ID,
-			tmp.WEIGHT as WEIGHT
-		FROM (
-			SELECT
-				@rownum := @rownum + 1 as ROWNUM,
-				RS1.ENTITY_ID as USER_ID,
-				SL.ID as LOG_ID,
-				MAX(RS1.VOTES) as WEIGHT
-			FROM
-				b_rating_subordinate RS1,
-				b_rating_vote RV1
-			INNER JOIN b_sonet_log SL
-				ON SL.RATING_TYPE_ID = RV1.ENTITY_TYPE_ID
-				AND SL.RATING_ENTITY_ID = RV1.ENTITY_ID
-				AND SL.ID IN ('.implode(',', $logIdList).')
-			WHERE
-				RS1.ENTITY_ID = RV1.USER_ID
-				AND RS1.RATING_ID = '.intval($ratingId).'
-			GROUP BY
-				SL.ID, RS1.ENTITY_ID
-			ORDER BY
-				SL.ID,
-				WEIGHT DESC
-		) tmp');
+				@user_rank := IF(
+					@current_log_id = tmp.LOG_ID,
+					@user_rank + 1,
+					1
+				) as USER_RANK,
+				@current_log_id := tmp.LOG_ID,
+				tmp.USER_ID as USER_ID,
+				tmp.LOG_ID as LOG_ID,
+				tmp.WEIGHT as WEIGHT
+			FROM (
+				SELECT
+					@rownum := @rownum + 1 as ROWNUM,
+					RS1.ENTITY_ID as USER_ID,
+					SL.ID as LOG_ID,
+					MAX(RS1.VOTES) as WEIGHT
+				FROM
+					b_rating_subordinate RS1,
+					b_rating_vote RV1
+				INNER JOIN b_sonet_log SL
+					ON SL.RATING_TYPE_ID = RV1.ENTITY_TYPE_ID
+					AND SL.RATING_ENTITY_ID = RV1.ENTITY_ID
+					AND SL.ID IN ('.implode(',', $logIdList).')
+				WHERE
+					RS1.ENTITY_ID = RV1.USER_ID
+					AND RS1.RATING_ID = '.intval($ratingId).'
+				GROUP BY
+					SL.ID, RS1.ENTITY_ID
+				ORDER BY
+					SL.ID,
+					WEIGHT DESC
+			) tmp');
 		}
 		else
 		{
 			$res = $connection->query('SELECT
-			@user_rank := IF(
-				@current_log_id = tmp.LOG_ID,
-				@user_rank + 1,
-				1
-			) as USER_RANK,
-			@current_log_id := tmp.LOG_ID,
-			tmp.USER_ID as USER_ID,
-			tmp.LOG_ID as LOG_ID,
-			tmp.WEIGHT as WEIGHT
-		FROM (
-			SELECT
-				@rownum := @rownum + 1 as ROWNUM,
-				RV1.USER_ID as USER_ID,
-				SL.ID as LOG_ID,
-				RV1.VALUE as WEIGHT
-			FROM
-				b_rating_vote RV1
-			INNER JOIN b_sonet_log SL
-				ON SL.RATING_TYPE_ID = RV1.ENTITY_TYPE_ID
-				AND SL.RATING_ENTITY_ID = RV1.ENTITY_ID
-				AND SL.ID IN ('.implode(',', $logIdList).')
-			ORDER BY
-				SL.ID,
-				WEIGHT DESC
-		) tmp');
+				@user_rank := IF(
+					@current_log_id = tmp.LOG_ID,
+					@user_rank + 1,
+					1
+				) as USER_RANK,
+				@current_log_id := tmp.LOG_ID,
+				tmp.USER_ID as USER_ID,
+				tmp.LOG_ID as LOG_ID,
+				tmp.WEIGHT as WEIGHT
+			FROM (
+				SELECT
+					@rownum := @rownum + 1 as ROWNUM,
+					RV1.USER_ID as USER_ID,
+					SL.ID as LOG_ID,
+					RV1.VALUE as WEIGHT
+				FROM
+					b_rating_vote RV1
+				INNER JOIN b_sonet_log SL
+					ON SL.RATING_TYPE_ID = RV1.ENTITY_TYPE_ID
+					AND SL.RATING_ENTITY_ID = RV1.ENTITY_ID
+					AND SL.ID IN ('.implode(',', $logIdList).')
+				ORDER BY
+					SL.ID,
+					WEIGHT DESC
+			) tmp');
 		}
 
 		$userWeightData = $logUserData = array();
@@ -4721,5 +4808,99 @@ class ComponentHelper
 				? $followRes
 				: true
 		);
+	}
+
+	public static function getLFCommentsParams($eventFields = array())
+	{
+		$forumMetaData = \CSocNetLogTools::getForumCommentMetaData($eventFields["EVENT_ID"]);
+
+		if (
+			$forumMetaData
+			&& $eventFields["SOURCE_ID"] > 0
+		)
+		{
+			$result = [
+				"ENTITY_TYPE" => $forumMetaData[1],
+				"ENTITY_XML_ID" => $forumMetaData[0]."_".$eventFields["SOURCE_ID"],
+				"NOTIFY_TAGS" => $forumMetaData[2]
+			];
+
+			// Calendar events could generate different livefeed entries with same SOURCE_ID
+			// That's why we should add entry ID to make comment interface work
+			if (
+				$eventFields["EVENT_ID"] == 'calendar'
+				&& !empty($eventFields["PARAMS"])
+				&& ($calendarEventParams = unserialize(htmlspecialcharsback($eventFields["PARAMS"])))
+				&& !empty($calendarEventParams['COMMENT_XML_ID'])
+			)
+			{
+				$result["ENTITY_XML_ID"] = $calendarEventParams['COMMENT_XML_ID'];
+			}
+		}
+		elseif ($eventFields["EVENT_ID"] == 'photo') // photo album
+		{
+			$result = array(
+				"ENTITY_TYPE" => 'PA',
+				"ENTITY_XML_ID" => 'PHOTO_ALBUM_'.$eventFields["ID"],
+				"NOTIFY_TAGS" => ''
+			);
+		}
+		else
+		{
+			$result = array(
+				"ENTITY_TYPE" => substr(strtoupper($eventFields["EVENT_ID"])."_".$eventFields["ID"], 0, 2),
+				"ENTITY_XML_ID" => strtoupper($eventFields["EVENT_ID"])."_".$eventFields["ID"],
+				"NOTIFY_TAGS" => ""
+			);
+		}
+
+		if (
+			strtoupper($eventFields["ENTITY_TYPE"]) == "CRMACTIVITY"
+			&& Loader::includeModule('crm')
+			&& ($activityFields = \CCrmActivity::getById($eventFields["ENTITY_ID"], false))
+			&& ($activityFields["TYPE_ID"] == \CCrmActivityType::Task)
+		)
+		{
+			$result["ENTITY_XML_ID"] = "TASK_".$activityFields["ASSOCIATED_ENTITY_ID"];
+		}
+		elseif (
+			$eventFields["ENTITY_TYPE"] == "WF"
+			&& is_numeric($eventFields["SOURCE_ID"])
+			&& intval($eventFields["SOURCE_ID"]) > 0
+			&& Loader::includeModule('bizproc')
+			&& ($workflowId = \CBPStateService::getWorkflowByIntegerId($eventFields["SOURCE_ID"]))
+		)
+		{
+			$result["ENTITY_XML_ID"] = "WF_".$workflowId;
+		}
+
+		return $result;
+	}
+
+	public static function checkCanCommentInWorkgroup($params)
+	{
+		static $canCommentCached = [];
+
+		$userId = (isset($params['userId']) ? intval($params['userId']) : 0);
+		$workgroupId = (isset($params['workgroupId']) ? intval($params['workgroupId']) : 0);
+		if (
+			$userId <= 0
+			|| $workgroupId <= 0
+		)
+		{
+			return false;
+		}
+
+		$cacheKey = $userId.'_'.$workgroupId;
+
+		if (!isset($canCommentCached[$cacheKey]))
+		{
+			$canCommentCached[$cacheKey] = (
+				\CSocNetFeaturesPerms::canPerformOperation($userId, SONET_ENTITY_GROUP, $workgroupId, "blog", "premoderate_comment")
+				|| \CSocNetFeaturesPerms::canPerformOperation($userId, SONET_ENTITY_GROUP, $workgroupId, "blog", "write_comment")
+			);
+		}
+
+		return $canCommentCached[$cacheKey];
 	}
 }

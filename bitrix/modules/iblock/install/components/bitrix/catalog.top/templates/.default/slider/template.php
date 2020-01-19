@@ -387,7 +387,7 @@ echo ('' != $arParams['MESS_NOT_AVAILABLE'] ? $arParams['MESS_NOT_AVAILABLE'] : 
 							<?
 							}
 							$arJSParams = array(
-								'PRODUCT_TYPE' => $arItem['CATALOG_TYPE'],
+								'PRODUCT_TYPE' => $arItem['PRODUCT']['TYPE'],
 								'SHOW_QUANTITY' => ($arParams['USE_PRODUCT_QUANTITY'] == 'Y'),
 								'SHOW_ADD_BASKET_BTN' => false,
 								'SHOW_BUY_BTN' => true,
@@ -426,6 +426,7 @@ echo ('' != $arParams['MESS_NOT_AVAILABLE'] ? $arParams['MESS_NOT_AVAILABLE'] : 
 									'QUANTITY' => $arParams['PRODUCT_QUANTITY_VARIABLE'],
 									'PROPS' => $arParams['PRODUCT_PROPS_VARIABLE'],
 									'EMPTY_PROPS' => $emptyProductProperties,
+									'BASKET_URL' => $arParams['~BASKET_URL'],
 									'ADD_URL_TEMPLATE' => $arResult['~ADD_URL_TEMPLATE'],
 									'BUY_URL_TEMPLATE' => $arResult['~BUY_URL_TEMPLATE']
 								)
@@ -619,7 +620,7 @@ echo ('' != $arParams['MESS_NOT_AVAILABLE'] ? $arParams['MESS_NOT_AVAILABLE'] : 
 								}
 							}
 							$arJSParams = array(
-								'PRODUCT_TYPE' => $arItem['CATALOG_TYPE'],
+								'PRODUCT_TYPE' => $arItem['PRODUCT']['TYPE'],
 								'SHOW_QUANTITY' => ($arParams['USE_PRODUCT_QUANTITY'] == 'Y'),
 								'SHOW_ADD_BASKET_BTN' => false,
 								'SHOW_BUY_BTN' => true,
@@ -659,6 +660,7 @@ echo ('' != $arParams['MESS_NOT_AVAILABLE'] ? $arParams['MESS_NOT_AVAILABLE'] : 
 									'QUANTITY' => $arParams['PRODUCT_QUANTITY_VARIABLE'],
 									'PROPS' => $arParams['PRODUCT_PROPS_VARIABLE'],
 									'SKU_PROPS' => $arItem['OFFERS_PROP_CODES'],
+									'BASKET_URL' => $arParams['~BASKET_URL'],
 									'ADD_URL_TEMPLATE' => $arResult['~ADD_URL_TEMPLATE'],
 									'BUY_URL_TEMPLATE' => $arResult['~BUY_URL_TEMPLATE']
 								),
@@ -687,7 +689,7 @@ echo ('' != $arParams['MESS_NOT_AVAILABLE'] ? $arParams['MESS_NOT_AVAILABLE'] : 
 							else
 							{
 							$arJSParams = array(
-								'PRODUCT_TYPE' => $arItem['CATALOG_TYPE'],
+								'PRODUCT_TYPE' => $arItem['PRODUCT']['TYPE'],
 								'SHOW_QUANTITY' => false,
 								'SHOW_ADD_BASKET_BTN' => false,
 								'SHOW_BUY_BTN' => false,
@@ -727,6 +729,7 @@ echo ('' != $arParams['MESS_NOT_AVAILABLE'] ? $arParams['MESS_NOT_AVAILABLE'] : 
 									'QUANTITY' => $arParams['PRODUCT_QUANTITY_VARIABLE'],
 									'PROPS' => $arParams['PRODUCT_PROPS_VARIABLE'],
 									'SKU_PROPS' => $arItem['OFFERS_PROP_CODES'],
+									'BASKET_URL' => $arParams['~BASKET_URL'],
 									'ADD_URL_TEMPLATE' => $arResult['~ADD_URL_TEMPLATE'],
 									'BUY_URL_TEMPLATE' => $arResult['~BUY_URL_TEMPLATE']
 								),

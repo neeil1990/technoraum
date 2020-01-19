@@ -43,7 +43,7 @@ $docType = $dialog->getMap()['DocumentType'];
 			echo $documentService->GetFieldInputControl(
 				$listsDocumentType,
 				$property,
-				array($dialog->getFormName(), 'fields['.$fieldKey.']'),
+				array($dialog->getFormName(), 'fields__'.$fieldKey),
 				$fieldValue,
 				(isset($baseTypes[$property['Type']])),
 				true

@@ -16,6 +16,8 @@ CREATE TABLE b_bp_workflow_template (
 	USER_ID int NULL,
 	SYSTEM_CODE varchar(50),
 	ACTIVE char(1) NOT NULL default 'Y',
+	ORIGINATOR_ID VARCHAR(255) NULL,
+	ORIGIN_ID VARCHAR(255) NULL,
 	primary key (ID),
 	index ix_bp_wf_template_mo(MODULE_ID, ENTITY, DOCUMENT_TYPE)
 );
@@ -78,8 +80,11 @@ CREATE TABLE b_bp_tracking (
 	EXECUTION_RESULT int NOT NULL default 0,
 	ACTION_NOTE text NULL,
 	MODIFIED_BY int NULL,
+	COMPLETED char(1) NOT NULL default 'N',
 	primary key (ID),
-	index ix_bp_tracking_wf(WORKFLOW_ID)
+	index ix_bp_tracking_wf(WORKFLOW_ID),
+	index ix_bp_tracking_md(MODIFIED),
+	index ix_bp_tracking_ctm(COMPLETED, TYPE, MODIFIED)
 );
 
 CREATE TABLE b_bp_task (
@@ -142,6 +147,7 @@ CREATE TABLE b_bp_rest_activity (
 	HANDLER varchar(1000) NOT NULL,
 	AUTH_USER_ID int NOT NULL default 0,
 	USE_SUBSCRIPTION char(1) NOT NULL default '',
+	USE_PLACEMENT char(1) NOT NULL default 'N',
 	NAME text NULL,
 	DESCRIPTION text NULL,
 	PROPERTIES text NULL,
@@ -188,4 +194,17 @@ CREATE TABLE b_bp_automation_trigger (
 		DOCUMENT_STATUS varchar(50) NOT NULL,
 		APPLY_RULES text,
 		PRIMARY KEY (ID)
+);
+
+CREATE TABLE b_bp_global_const (
+	ID varchar(50) NOT NULL,
+	NAME text NOT NULL,
+	DESCRIPTION text NULL,
+	PROPERTY_TYPE varchar(30) NOT NULL,
+	IS_REQUIRED char(1) NOT NULL default 'N',
+	IS_MULTIPLE char(1) NOT NULL default 'N',
+	PROPERTY_OPTIONS text NULL,
+	PROPERTY_SETTINGS text NULL,
+	PROPERTY_VALUE text NULL,
+	primary key (ID)
 );

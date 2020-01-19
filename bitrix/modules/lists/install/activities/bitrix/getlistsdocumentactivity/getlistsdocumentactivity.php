@@ -33,11 +33,33 @@ class CBPGetListsDocumentActivity
 	public function Execute()
 	{
 		$documentType = $this->DocumentType;
-		$documentId = [$documentType[0], $documentType[1], $this->ElementId];
+		$elementId = $this->ElementId;
+
+		//check for Multiple values
+		if (is_array($elementId))
+		{
+			$elementId = array_shift($elementId);
+		}
+
+		$documentId = [$documentType[0], $documentType[1], $elementId];
 
 		$documentService = $this->workflow->GetService("DocumentService");
 
+		$realDocumentType = null;
 		$map = $this->FieldsMap;
+
+		try
+		{
+			$realDocumentType = $documentService->GetDocumentType($documentId);
+		}
+		catch (Exception $e) {}
+
+		if (!$realDocumentType || $realDocumentType !== $documentType)
+		{
+			$this->WriteToTrackingService(GetMessage('BPGLDA_ERROR_DT'), 0, CBPTrackingType::Error);
+			return CBPActivityExecutionStatus::Closed;
+		}
+
 		$document = $documentService->GetDocument($documentId, $documentType);
 
 		if (!$document || !is_array($map))

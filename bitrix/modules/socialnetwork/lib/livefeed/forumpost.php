@@ -143,7 +143,19 @@ final class ForumPost extends Provider
 				}
 				else
 				{
-					$result = $cache[$cacheKey] = $messageUF['UF_FORUM_MESSAGE_DOC']['VALUE'];
+					if (empty($messageUF['UF_FORUM_MESSAGE_DOC']['VALUE']))
+					{
+						$cache[$cacheKey] = array();
+					}
+					elseif (!is_array($messageUF['UF_FORUM_MESSAGE_DOC']['VALUE']))
+					{
+						$cache[$cacheKey] = array($messageUF['UF_FORUM_MESSAGE_DOC']['VALUE']);
+					}
+					else
+					{
+						$cache[$cacheKey] = $messageUF['UF_FORUM_MESSAGE_DOC']['VALUE'];
+					}
+					$result = $cache[$cacheKey];
 				}
 			}
 		}

@@ -6,13 +6,13 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
 
 return [
 	'js' =>[
-		'/bitrix/js/pull/components/status/pull.components.status.bundle.js',
+		'/bitrix/js/pull/components/status/dist/status.bundle.js',
 	],
 	'css' => [
-		'/bitrix/js/pull/components/status/pull.components.status.bundle.css',
+		'/bitrix/js/pull/components/status/dist/status.bundle.css',
 	],
 	'rel' => [
-		'main.polyfill.complex',
+		'main.polyfill.core',
 		'ui.vue',
 		'pull.client',
 	],

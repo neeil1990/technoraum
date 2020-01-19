@@ -72,7 +72,7 @@ $( function() {
                 var paymentAll = 0;
                 $.each(result.payments, function( index, value ) {
                     if(value){
-                        paymentAll += value.payment;
+                        paymentAll += Math.round(value.payment);
                     }
                 });
                 $('#getPaymentDcAll').html(paymentAll + "<span>руб/мес</span>");

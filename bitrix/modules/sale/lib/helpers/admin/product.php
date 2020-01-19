@@ -3,10 +3,8 @@ namespace Bitrix\Sale\Helpers\Admin;
 
 use Bitrix\Iblock\PropertyTable;
 use Bitrix\Main\ArgumentNullException;
-use Bitrix\Sale\Basket;
-use Bitrix\Sale\BasketItem;
 use Bitrix\Sale\Fuser;
-use Bitrix\Sale\Order;
+use Bitrix\Sale;
 use Bitrix\Sale\Provider;
 use Bitrix\Catalog;
 
@@ -85,7 +83,11 @@ class Product
 			'SITE_ID' => $siteId
 		);
 
-		$order = Order::create($siteId);
+		$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
+		/** @var Sale\Order $orderClass */
+		$orderClass = $registry->getOrderClassName();
+
+		$order = $orderClass::create($siteId);
 
 		if(intval($userId) > 0)
 		{
@@ -93,7 +95,9 @@ class Product
 			$context['USER_ID'] = $userId;
 		}
 
-		$basket = Basket::create($siteId);
+		/** @var Sale\Basket $orderClass */
+		$basketClass = $registry->getBasketClassName();
+		$basket = $basketClass::create($siteId);
 		$order->setBasket($basket);
 
 		if(intval($userId) > 0)
@@ -280,10 +284,18 @@ class Product
 
 	private function fillIblockData()
 	{
-		$select = array_merge(
-			array("ID", "NAME", "IBLOCK_ID", "IBLOCK_SECTION_ID", "DETAIL_PICTURE", "PREVIEW_PICTURE", "XML_ID", "IBLOCK_EXTERNAL_ID"),
-			$this->columnsList
+		$select = array("ID", "NAME", "IBLOCK_ID", "IBLOCK_SECTION_ID", "DETAIL_PICTURE", "PREVIEW_PICTURE", "XML_ID", "IBLOCK_EXTERNAL_ID");
+		$blockedFields = array(
+			'QUANTITY' => true,
+			'AVAILABLE' => true,
+			'PRICE' => true
 		);
+		foreach ($this->columnsList as $field)
+		{
+			if (isset($blockedFields[$field]))
+				continue;
+			$select[] = $field;
+		}
 
 		if (!empty($this->productsIds))
 		{

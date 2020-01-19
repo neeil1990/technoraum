@@ -41,11 +41,15 @@ $containerId = 'main-user-selector-' . $arParams['ID'];
 	<?
 	$APPLICATION->IncludeComponent('bitrix:ui.tile.selector', '', array(
 		'ID' => $arParams['ID'],
-		'LIST' => $arResult['LIST'],
+//		'LIST' => $arResult['LIST'],
 		'SHOW_BUTTON_ADD' => false,
+		'LOCK' => $arParams['LOCK'],
 		'READONLY' => $arParams['READONLY'],
 		'MULTIPLE' => $arResult['IS_INPUT_MULTIPLE'],
-		'BUTTON_SELECT_CAPTION' => Loc::getMessage('MAIN_USER_SELECTOR_SELECT')
+		'BUTTON_SELECT_CAPTION' => (!empty($arParams['BUTTON_SELECT_CAPTION']) ? $arParams['BUTTON_SELECT_CAPTION'] : Loc::getMessage('MAIN_USER_SELECTOR_SELECT')),
+		'BUTTON_SELECT_CAPTION_MORE' => (!empty($arParams['BUTTON_SELECT_CAPTION_MORE']) ? $arParams['BUTTON_SELECT_CAPTION_MORE'] : Loc::getMessage('MAIN_USER_SELECTOR_SELECT')),
+		'MANUAL_INPUT_END' => true,
+		'FIRE_CLICK_EVENT' => ($arResult['FIRE_CLICK_EVENT'] ? 'BX.Main.SelectorV2:onAfterAddData' : false),
 	));
 	?>
 
@@ -54,16 +58,20 @@ $containerId = 'main-user-selector-' . $arParams['ID'];
 		"bitrix:main.ui.selector",
 		".default",
 		array(
+			'API_VERSION' => (!empty($arParams['API_VERSION']) && intval($arParams['API_VERSION']) >= 2 ? $arParams['API_VERSION'] : 2),
 			'ID' => $arParams['ID'],
 			'BIND_ID' => $containerId,
-			'ITEMS_SELECTED' => [],
+			'ITEMS_SELECTED' => $arResult['ITEMS_SELECTED'],
+			'ITEMS_UNDELETABLE' => $arResult['ITEMS_UNDELETABLE'],
 			'CALLBACK' => array(
 				'select' => 'BX.Main.User.SelectorController.select',
 				'unSelect' => 'BX.Main.User.SelectorController.unSelect',
 				'openDialog' => "BX.Main.User.SelectorController.openDialog",
 				'closeDialog' => "BX.Main.User.SelectorController.closeDialog",
-				'openSearch' => "BX.Main.User.SelectorController.openSearch"
+				'openSearch' => "BX.Main.User.SelectorController.openSearch",
+				'closeSearch' => "BX.Main.User.SelectorController.closeSearch"
 			),
+			'CALLBACK_BEFORE' => (!empty($arParams["CALLBACK_BEFORE"]) && is_array($arParams["CALLBACK_BEFORE"]) ? $arParams["CALLBACK_BEFORE"] : []),
 			'OPTIONS' => [
 					'useNewCallback' => 'Y',
 					'eventInit' => 'BX.Main.User.SelectorController::init',
@@ -73,15 +81,29 @@ $containerId = 'main-user-selector-' . $arParams['ID'];
 				$arParams['SELECTOR_OPTIONS']
 				+
 				[
+					'lazyLoad' => (
+						(
+							$arParams["LAZYLOAD"] == 'Y'
+							|| (
+								!empty($arParams["SELECTOR_OPTIONS"])
+								&& !empty($arParams["SELECTOR_OPTIONS"]['lazyload'])
+								&& $arParams["SELECTOR_OPTIONS"]['lazyload'] == 'Y'
+							)
+						)
+						&& empty($arResult['ITEMS_SELECTED'])
+							? 'Y'
+							: 'N'
+					),
+					'multiple' => ($arResult["IS_INPUT_MULTIPLE"] ? 'Y' : 'N'),
 					'extranetContext' => false,
-					'context' => null,
+					'context' => $arParams['ID'],
 					'contextCode' => 'U',
 					'useSearch' => 'N',
 					'userNameTemplate' => CUtil::JSEscape($arParams["NAME_TEMPLATE"]),
 					'useClientDatabase' => 'Y',
 					'allowEmailInvitation' => 'N',
 					'enableAll' => 'N',
-					'enableDepartments' => 'N',
+					'enableDepartments' => 'Y',
 					'enableSonetgroups' => 'N',
 					'departmentSelectDisable' => 'Y',
 					'allowAddUser' => 'N',
@@ -89,8 +111,7 @@ $containerId = 'main-user-selector-' . $arParams['ID'];
 					'allowAddSocNetGroup' => 'N',
 					'allowSearchEmailUsers' => 'N',
 					'allowSearchCrmEmailUsers' => 'N',
-					'allowSearchNetworkUsers' => 'N',
-					'allowSonetGroupsAjaxSearchFeatures' => 'N'
+					'allowSearchNetworkUsers' => 'N'
 			]
 		),
 		false,
@@ -99,14 +120,23 @@ $containerId = 'main-user-selector-' . $arParams['ID'];
 
 	<script type="text/javascript">
 		BX.ready(function () {
-			new BX.Main.User.Selector(<?=Json::encode(array(
-				'containerId' => $containerId,
-				'id' => $arParams['ID'],
-				'duplicates' => false,
-				'inputName' => $arParams['INPUT_NAME'],
-				'isInputMultiple' => $arResult['IS_INPUT_MULTIPLE'],
-				'useSymbolicId' => $arParams['USE_SYMBOLIC_ID'],
-			))?>);
+			try
+			{
+				new BX.Main.User.Selector(<?=Json::encode(array(
+					'containerId' => $containerId,
+					'id' => $arParams['ID'],
+					'duplicates' => false,
+					'inputName' => $arParams['INPUT_NAME'],
+					'isInputMultiple' => $arResult['IS_INPUT_MULTIPLE'],
+					'useSymbolicId' => $arParams['USE_SYMBOLIC_ID'],
+					'openDialogWhenInit' => $arParams['OPEN_DIALOG_WHEN_INIT'],
+					'lazyload' => ($arParams['LAZYLOAD'] == 'Y' && empty($arResult['ITEMS_SELECTED']))
+				))?>);
+			}
+			catch (e)
+			{
+				console.log(e.name + ': ' + e.message);
+			}
 		});
 	</script>
 </span>

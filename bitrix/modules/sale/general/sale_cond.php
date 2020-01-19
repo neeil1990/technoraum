@@ -878,12 +878,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		}
 		unset($control);
 
-		if ($strControlID === false)
-			return $arControlList;
-		elseif (isset($arControlList[$strControlID]))
-			return $arControlList[$strControlID];
-		else
-			return false;
+		return static::searchControl($arControlList, $strControlID);
 	}
 
 	private function __GetVisual($boolExt = false)
@@ -2451,18 +2446,7 @@ class CSaleCondCtrlOrderFields extends CSaleCondCtrlComplex
 		}
 		unset($control);
 
-		if ($strControlID === false)
-		{
-			return $arControlList;
-		}
-		elseif (isset($arControlList[$strControlID]))
-		{
-			return $arControlList[$strControlID];
-		}
-		else
-		{
-			return false;
-		}
+		return static::searchControl($arControlList, $strControlID);
 	}
 
 	public static function GetShowIn($arControls)
@@ -2573,7 +2557,12 @@ class CSaleCondCtrlPastOrder extends CSaleCondCtrlOrderFields
 
 	private static function getPastOrder($userId)
 	{
-		$orderData = \Bitrix\Sale\Internals\OrderTable::getList(
+		$registry = \Bitrix\Sale\Registry::getInstance(\Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER);
+
+		/** @var \Bitrix\Sale\Order $orderClass */
+		$orderClass = $registry->getOrderClassName();
+
+		$orderData = $orderClass::getList(
 			array(
 				'select' => array('ID'),
 				'filter' => array(
@@ -2591,7 +2580,7 @@ class CSaleCondCtrlPastOrder extends CSaleCondCtrlOrderFields
 			return null;
 		}
 
-		return \Bitrix\Sale\Order::load($orderData['ID']);
+		return $orderClass::load($orderData['ID']);
 	}
 
 	public static function Generate($arOneCondition, $arParams, $arControl, $arSubs = false)
@@ -2627,12 +2616,7 @@ class CSaleCondCtrlPastOrder extends CSaleCondCtrlOrderFields
 			$controls[$control['ID']] = $control;
 		}
 
-		if(!$strControlID)
-		{
-			return $controls;
-		}
-
-		return isset($controls[$strControlID])? $controls[$strControlID] : false;
+		return static::searchControl($controls, $strControlID);
 	}
 }
 
@@ -2768,18 +2752,7 @@ class CSaleCondCtrlCommon extends CSaleCondCtrlComplex
 			)
 		);
 
-		if (false === $strControlID)
-		{
-			return $arControlList;
-		}
-		elseif (isset($arControlList[$strControlID]))
-		{
-			return $arControlList[$strControlID];
-		}
-		else
-		{
-			return false;
-		}
+		return static::searchControl($arControlList, $strControlID);
 	}
 
 	public static function GetShowIn($arControls)

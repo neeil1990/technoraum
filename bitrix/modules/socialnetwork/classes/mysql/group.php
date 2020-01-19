@@ -125,6 +125,28 @@ class CSocNetGroup extends CAllSocNetGroup
 
 				$USER_FIELD_MANAGER->Update("SONET_GROUP", $ID, $arFields);
 				CSocNetGroup::SearchIndex($ID, $arSiteID);
+				if (!empty($arFields["KEYWORDS"]))
+				{
+					$tagsList = explode(',', $arFields["KEYWORDS"]);
+					if (
+						!empty($tagsList)
+						&& is_array($tagsList)
+					)
+					{
+						$tagsList = array_map(function($a) { return trim($a, ' '); }, $tagsList);
+						$tagsList = array_filter($tagsList, function($a) { return (strlen($a) > 0); });
+					}
+					if (
+						!empty($tagsList)
+						&& is_array($tagsList)
+					)
+					{
+						\Bitrix\Socialnetwork\WorkgroupTagTable::set([
+							'groupId' => $ID,
+							'tags' => $tagsList
+						]);
+					}
+				}
 
 				Workgroup::setIndex(array(
 					'fields' => $arFields
@@ -330,6 +352,29 @@ class CSocNetGroup extends CAllSocNetGroup
 			}
 			CSocNetGroup::SearchIndex($ID, false, $arGroupOld, $bAutoSubscribe);
 
+			if (!empty($arFields["KEYWORDS"]))
+			{
+				$tagsList = explode(',', $arFields["KEYWORDS"]);
+				if (
+					!empty($tagsList)
+					&& is_array($tagsList)
+				)
+				{
+					$tagsList = array_map(function($a) { return trim($a, ' '); }, $tagsList);
+					$tagsList = array_filter($tagsList, function($a) { return (strlen($a) > 0); });
+				}
+				if (
+					!empty($tagsList)
+					&& is_array($tagsList)
+				)
+				{
+					\Bitrix\Socialnetwork\WorkgroupTagTable::set([
+						'groupId' => $ID,
+						'tags' => $tagsList
+					]);
+				}
+			}
+
 			Workgroup::setIndex(array(
 				'fields' => array_merge($arFields, array('ID' => $ID))
 			));
@@ -456,6 +501,7 @@ class CSocNetGroup extends CAllSocNetGroup
 			"PROJECT" => Array("FIELD" => "G.PROJECT", "TYPE" => "string"),
 			"PROJECT_DATE_START" => Array("FIELD" => "G.PROJECT_DATE_START", "TYPE" => "datetime"),
 			"PROJECT_DATE_FINISH" => Array("FIELD" => "G.PROJECT_DATE_FINISH", "TYPE" => "datetime"),
+			"LANDING" => Array("FIELD" => "G.LANDING", "TYPE" => "string"),
 		);
 
 		if (array_key_exists("SITE_ID", $arFilter))

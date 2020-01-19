@@ -8,12 +8,17 @@ use \Bitrix\Main\Entity;
 use \Bitrix\Landing\Hook;
 use \Bitrix\Landing\Manager;
 use \Bitrix\Landing\Landing;
+use \Bitrix\Landing\Domain;
 use \Bitrix\Landing\Site;
 use \Bitrix\Landing\Syspage;
 use \Bitrix\Landing\TemplateRef;
+use \Bitrix\Landing\Rights;
 use \Bitrix\Main\Localization\Loc;
 use \Bitrix\Main\EventManager;
 use \Bitrix\Main\Config\Option;
+use \Bitrix\Main\Application;
+use \Bitrix\Main\Event;
+use \Bitrix\Crm\UI\Webpack\CallTracker;
 
 Loc::loadMessages(__FILE__);
 
@@ -46,10 +51,28 @@ class LandingPubComponent extends LandingBaseComponent
 	protected $sefVariables = array();
 
 	/**
+	 * Dynamic filter id.
+	 * @var int
+	 */
+	protected $dynamicFilterId = 0;
+
+	/**
+	 * Dynamic element id.
+	 * @var int
+	 */
+	protected $dynamicElementId = 0;
+
+	/**
 	 * Current zone.
 	 * @var string
 	 */
 	protected $zone = '';
+
+	/**
+	 * Http status was send.
+	 * @var bool
+	 */
+	protected $httpStatusSend = false;
 
 	/**
 	 * Main instance of current page.
@@ -72,67 +95,168 @@ class LandingPubComponent extends LandingBaseComponent
 	 */
 	protected function getParentDomain()
 	{
-		$domains = array(
-			'ru' => 'bitrix24.ru',
-			'ua' => 'bitrix24.ua',
-			'by' => 'bitrix24.by',
-			'kz' => 'bitrix24.kz',
-			'pl' => 'bitrix24.pl',
-			'en' => 'bitrix24.com',
-			'de' => 'bitrix24.de',
-			'es' => 'bitrix24.es',
-			'la' => 'bitrix24.es',
-			'br' => 'bitrix24.com.br',
-			'fr' => 'bitrix24.fr',
-			'cn' => 'bitrix24.cn',
-			'in' => 'bitrix24.in',
-			'eu' => 'bitrix24.eu',
-			'tr' => 'bitrix24.com.tr'
-		);
+		static $domain = null;
+
+		if ($domain !== null)
+		{
+			return $domain;
+		}
+
+		$domains = \Bitrix\Landing\Help::getDomains();
 
 		if (isset($domains[$this->zone]))
 		{
-			return $domains[$this->zone];
+			$domain = $domains[$this->zone];
 		}
 		else
 		{
-			return $domains['en'];
+			$domain = $domains['en'];
+		}
+
+		return $domain;
+	}
+
+	/**
+	 * Gets path for copyright link.
+	 * @param string $section Code of section.
+	 * @return string
+	 */
+	protected function getCopyLinkPath($section = 'websites')
+	{
+		static $paths = [
+			'bitrix24_logo' => [
+				'en' => '/'
+			],
+			'create' => [
+				'en' => '/create.php?b24_type=sites'
+			],
+			'websites' => [
+				'ru' => '/features/sites.php',
+				'ua' => '/features/sites.php',
+				'by' => '/features/sites.php',
+				'kz' => '/features/sites.php',
+				'en' => '/tools/websites/'
+			],
+			'crm' => [
+				'ru' => '/features/',
+				'ua' => '/features/',
+				'by' => '/features/',
+				'kz' => '/features/',
+				'en' => '/tools/crm/'
+			]
+		];
+		if (isset($paths[$section][$this->zone]))
+		{
+			return $paths[$section][$this->zone];
+		}
+		else
+		{
+			return $paths[$section]['en'];
 		}
 	}
 
 	/**
 	 * Get adv campaign code.
+	 * @param string $type Type of the link.
 	 * @return string
 	 */
-	protected function getAdvCode()
+	protected function getAdvCode($type = 'bitrix24_logo')
 	{
-		$codes = array(
-			'ru' => 'utm_source=client_b24_site&utm_medium=referral&utm_campaign=b24_site',
-			'ua' => 'utm_source=client_b24_site&utm_medium=referral&utm_campaign=b24ua_site',
-			'pl' => 'utm_source=client_b24_site&utm_medium=referral&utm_campaign=b24pl_site',
-			'en' => 'utm_medium=referral&utm_source=bitrix24.com&utm_campaign=SitesCom',
-			'de' => 'utm_medium=referral&utm_source=bitrix24.de&utm_campaign=SitesDe',
-			'es' => 'utm_medium=referral&utm_source=bitrix24.es&utm_campaign=SitesEs',
-			'br' => 'utm_medium=referral&utm_source=bitrix24.com.br&utm_campaign=SitesBR',
-			'fr' => 'utm_medium=referral&utm_source=bitrix24.fr&utm_campaign=SitesFr'
-		);
+		static $domain = null;
+		static $domainPart = null;
+		static $partnerId = null;
 
-		if (isset($codes[$this->zone]))
+		if ($domain === null)
 		{
-			$return = $codes[$this->zone];
+			$domain = $this->getParentDomain();
+			$domainPart = array_pop(explode('.', $domain));
 		}
-		else
+		if ($partnerId === null)
 		{
-			$return = $codes['en'];
+			$partnerId = (int)Option::get('bitrix24', 'partner_id', 0);
 		}
 
-		$partnerId = Option::get('bitrix24', 'partner_id', 0);
+		// base part
+		$codes = [
+			'utm_medium' => 'referral',
+			'utm_source' => $domain,
+			'utm_campaign' => $domainPart . '_sites_' . $type
+		];
 		if ($partnerId)
 		{
-			$return .= '&p=' . $partnerId;
+			$codes['p'] = $partnerId;
 		}
 
-		return \htmlspecialcharsbx($return);
+		return http_build_query($codes, '', '&amp;');
+	}
+
+	/**
+	 * Build and gets link for different links in the copyright.
+	 * @param string $type Type of the link.
+	 * @param bool $addAdvCode Add or not adv code.
+	 * @return string
+	 */
+	public function getRefLink($type, $addAdvCode = true)
+	{
+		static $partnerId = null;
+
+		if ($partnerId === null)
+		{
+			$partnerId = (int)Option::get('bitrix24', 'partner_id', 0);
+		}
+
+		$link = 'https://' . $this->getParentDomain();
+		$link .= $this->getCopyLinkPath($type);
+
+		if ($addAdvCode)
+		{
+			$link .= (strpos($link, '?') === false) ? '?' : '&amp;';
+			$link .= $this->getAdvCode($type);
+		}
+		else if ($partnerId)
+		{
+			$link .= (strpos($link, '?') === false) ? '?' : '&amp;';
+			$link .= 'p=' . $partnerId;
+		}
+
+		return $link;
+	}
+
+	/**
+	 * Send only first http status.
+	 * @param string $code Http status code.
+	 * @return void
+	 */
+	protected function setHttpStatusOnce($code)
+	{
+		if (!$this->httpStatusSend)
+		{
+			$this->httpStatusSend = true;
+			$event = new Event('landing', 'onPubHttpStatus', array(
+				'code' => $code
+			));
+			$event->send();
+			foreach ($event->getResults() as $result)
+			{
+				if ($modified = $result->getModified())
+				{
+					if (isset($modified['code']))
+					{
+						$code = $modified['code'];
+					}
+				}
+			}
+			\CHTTP::setStatus($code);
+		}
+	}
+
+	/**
+	 * Clear status that http status was send.
+	 * @return void
+	 */
+	protected function clearHttpStatus()
+	{
+		$this->httpStatusSend = false;
 	}
 
 	/**
@@ -141,6 +265,8 @@ class LandingPubComponent extends LandingBaseComponent
 	 */
 	protected function detectPage()
 	{
+		$server = Application::getInstance()->getContext()->getServer();
+
 		// preview mode for templates only
 		$previewTemplate = $this->request('preview') == 'Y';
 
@@ -154,6 +280,23 @@ class LandingPubComponent extends LandingBaseComponent
 		}
 		$requestedPage = trim($requestedPage, '/');
 		$requestedPageParts = explode('/', $requestedPage);
+		// real path of current script
+		$realFilePath = $server->get('REAL_FILE_PATH');
+		if (!$realFilePath)
+		{
+			$realFilePath = $server->getScriptName();
+		}
+		// compatibility mode, before detect page we need to know
+		// is it siteman site (after transfer) or typical b24 site
+		if (
+			Manager::isExtendedSMN() &&
+			$this->arParams['DRAFT_MODE'] != 'Y' &&
+			strpos($realFilePath, Manager::getPublicationPath()) === 0 &&
+			strpos($realFilePath, Manager::getPublicationPathConst()) !== 0
+		)
+		{
+			Manager::forceB24disable(true);
+		}
 		if (Manager::isB24())
 		{
 			$siteUrl = array_shift($requestedPageParts);
@@ -167,10 +310,16 @@ class LandingPubComponent extends LandingBaseComponent
 				'select' => array(
 					'ID', 'CODE'
 				),
-				'filter' => array(
-					'=SMN_SITE_ID' => SITE_ID,
-					'=TYPE' => 'SMN'
-				),
+				'filter' => $this->arParams['SITE_ID']
+						? [
+							'ID' => $this->arParams['SITE_ID'],
+							'CHECK_PERMISSIONS' => $this->arParams['CHECK_PERMISSIONS']
+						]
+						: [
+							'=SMN_SITE_ID' => SITE_ID,
+							'=TYPE' => 'SMN',
+							'CHECK_PERMISSIONS' => $this->arParams['CHECK_PERMISSIONS']
+						],
 				'order' => array(
 					'ID' => 'desc'
 				)
@@ -183,7 +332,11 @@ class LandingPubComponent extends LandingBaseComponent
 		}
 
 		// detect preview mode
-		if (
+		if ($this->arParams['DRAFT_MODE'] == 'Y')
+		{
+			$this->isPreviewMode = true;
+		}
+		else if (
 			// for base work
 			(
 				$requestedPageParts[0] == 'preview' &&
@@ -207,7 +360,28 @@ class LandingPubComponent extends LandingBaseComponent
 
 		$landingUrl = array_shift($requestedPageParts);
 		$landingSubUrl = $requestedPageParts ? implode('/', $requestedPageParts) : '';
+		$landingCodeOriginal = null;
 
+		// check dynamic content
+		$parseDynamic = $landingSubUrl ? $landingSubUrl : $landingUrl;
+		if (preg_match('#^([\w]+)\_([\d]+)\_([\d]+)$#', $parseDynamic, $matches))
+		{
+			$this->dynamicFilterId = $matches[2];
+			$this->dynamicElementId = $matches[3];
+			if ($landingSubUrl)
+			{
+				$landingCodeOriginal = $landingSubUrl;
+				$landingSubUrl = $matches[1];
+			}
+			else
+			{
+				$landingCodeOriginal = $landingUrl;
+				$landingUrl = $matches[1];
+			}
+		}
+		unset($matches, $matches);
+
+		// if preview mode
 		if ($previewTemplate)
 		{
 			$site = $this->getSites(array(
@@ -252,24 +426,29 @@ class LandingPubComponent extends LandingBaseComponent
 					$fields['PICTURE']->getValue()
 				)
 				{
-					$path = \CFile::resizeImageGet(
-						$fields['PICTURE']->getValue(),
-						array(
-							'width' => 16,
-							'height' => 16
-						),
-						BX_RESIZE_IMAGE_EXACT
+					$path = \Bitrix\Landing\File::getFilePath(
+						$fields['PICTURE']->getValue()
 					);
-					if (isset($path['src']))
-					{
-						$path = $path['src'];
-					}
 				}
 			}
-			$path = Manager::getDocRoot() . $path;
+
 			Manager::getApplication()->restartBuffer();
 			header('Content-type: image/x-icon');
-			echo \Bitrix\Main\IO\File::getFileContents($path);
+
+			if (substr($path, 0, 1) == '/')
+			{
+				echo \Bitrix\Main\IO\File::getFileContents(
+					Manager::getDocRoot() . $path
+				);
+			}
+			else
+			{
+				$response = Application::getInstance()->getContext()->getResponse();
+				$client = new \Bitrix\Main\Web\HttpClient;
+				$contents = $client->get($path);
+				$response->addHeader('Content-Type', $client->getContentType());
+				$response->flush($contents);
+			}
 			die();
 		}
 
@@ -292,6 +471,10 @@ class LandingPubComponent extends LandingBaseComponent
 				'=DELETED' => ['Y', 'N']
 			);
 		}
+		if ($this->arParams['SITE_TYPE'])
+		{
+			$filter['=TYPE'] = $this->arParams['SITE_TYPE'];
+		}
 		if (
 			$serverHost &&
 			!$previewTemplate &&
@@ -302,17 +485,39 @@ class LandingPubComponent extends LandingBaseComponent
 			{
 				list($serverHost, ) = explode(':', $serverHost);
 			}
-			$filter['=DOMAIN.DOMAIN'] = $serverHost;
+			// set www alias
+			if (substr($serverHost, 0, 4) == 'www.')
+			{
+				$filter['=DOMAIN.DOMAIN'] = [
+					$serverHost,
+					substr($serverHost, 4)
+				];
+			}
+			else
+			{
+				$filter['=DOMAIN.DOMAIN'] = [
+					$serverHost,
+					'www.' . $serverHost
+				];
+			}
 		}
+		$filter['CHECK_PERMISSIONS'] = $this->arParams['CHECK_PERMISSIONS'];
 		$res = Site::getList(array(
 			'select' => array(
 				'ID', 'ACTIVE', 'DELETED',
 				'LANDING_ID_404', 'LANDING_ID_503',
-				'LANDING_ID_INDEX'
+				'LANDING_ID_INDEX', 'DOMAIN_ID'
 			),
 			'filter' => $filter
 		));
 		if (!($site = $res->fetch()))
+		{
+			return $landingIdExec;
+		}
+		if (
+			!$site['DOMAIN_ID'] &&
+			$this->arParams['NOT_CHECK_DOMAIN'] != 'Y'
+		)
 		{
 			return $landingIdExec;
 		}
@@ -379,6 +584,9 @@ class LandingPubComponent extends LandingBaseComponent
 		//'/' . $landingUrl . '/' . $landingSubUrl . '/'
 
 		// detect landing
+		$codeFilter = ($landingCodeOriginal === null)
+					? $landingUrl
+					: [$landingUrl, $landingCodeOriginal];
 		$res = Landing::getList(array(
 			'select' => array(
 				'ID', 'CODE', 'RULE',
@@ -388,9 +596,10 @@ class LandingPubComponent extends LandingBaseComponent
 				'SITE_ID' => $site['ID'],
 				'FOLDER_ID' => false,
 				'=DELETED' => ['Y', 'N'],
+				'CHECK_PERMISSIONS' => $this->arParams['CHECK_PERMISSIONS'],
 				array(
 					'LOGIC' => 'OR',
-					'=CODE' => $landingUrl,
+					'=CODE' => $codeFilter,
 					'!=RULE' => false,
 					array(
 						'ID' => $site['LANDING_ID_404']
@@ -411,6 +620,8 @@ class LandingPubComponent extends LandingBaseComponent
 				'ID' => 'asc'
 			)
 		));
+		$codeFilter = (array)$codeFilter;
+		$codeFilter = array_map('strtolower', $codeFilter);
 		while (($landing = $res->fetch()))
 		{
 			// if it's index and not active
@@ -424,13 +635,13 @@ class LandingPubComponent extends LandingBaseComponent
 				continue;
 			}
 			// another checking
-			if (strtolower($landing['CODE']) == strtolower($landingUrl))
+			if (in_array(strtolower($landing['CODE']), $codeFilter))
 			{
 				if ($landingSubUrl)
 				{
 					if (
 						$landing['FOLDER'] == 'Y' &&
-						$landing['ACTIVE'] == 'Y'
+						($landing['ACTIVE'] == 'Y' || $this->isPreviewMode)
 					)
 					{
 						// check landing in subfolder
@@ -441,6 +652,7 @@ class LandingPubComponent extends LandingBaseComponent
 							'filter' => array(
 								'SITE_ID' => $site['ID'],
 								'=DELETED' => ['Y', 'N'],
+								'CHECK_PERMISSIONS' => $this->arParams['CHECK_PERMISSIONS'],
 								array(
 									'LOGIC' => 'OR',
 									'ID' => $landing['ID'],
@@ -499,7 +711,7 @@ class LandingPubComponent extends LandingBaseComponent
 		}
 
 		// disable direct access to include areas
-		if ($landingIdExec)
+		if ($landingIdExec && $this->arParams['DRAFT_MODE'] != 'Y')
 		{
 			if (TemplateRef::landingIsArea($landingIdExec))
 			{
@@ -534,7 +746,8 @@ class LandingPubComponent extends LandingBaseComponent
 						'filter' => array(
 							'SITE_ID' => $site['ID'],
 							'=ACTIVE' => 'Y',
-							'!ID' => $landingId404
+							'!ID' => $landingId404,
+							'CHECK_PERMISSIONS' => $this->arParams['CHECK_PERMISSIONS']
 						),
 						'order' => array(
 							'ID' => 'asc'
@@ -549,6 +762,10 @@ class LandingPubComponent extends LandingBaseComponent
 			else
 			{
 				$landingIdExec = $landingId404;
+				if ($landingId404)
+				{
+					$this->clearHttpStatus();
+				}
 				$this->setHttpStatusOnce($this::ERROR_STATUS_NOT_FOUND);
 			}
 		}
@@ -571,7 +788,8 @@ class LandingPubComponent extends LandingBaseComponent
 			),
 			'filter' => array(
 				'SITE_ID' => $siteId,
-				'=SITEMAP' => 'Y'
+				'=SITEMAP' => 'Y',
+				'CHECK_PERMISSIONS' => $this->arParams['CHECK_PERMISSIONS']
 			),
 			'order' => array(
 				'DATE_PUBLIC' => 'DESC'
@@ -618,6 +836,7 @@ class LandingPubComponent extends LandingBaseComponent
 		$eventManager->addEventHandler('main', 'OnBeforeLocalRedirect',
 			function(&$url, $skipCheck, &$bExternal)
 			{
+				/* @var Landing $landing*/
 				$landing = $this->arResult['LANDING'];
 				if (
 					Manager::isB24() &&
@@ -716,7 +935,7 @@ class LandingPubComponent extends LandingBaseComponent
 	{
 		$eventManager = EventManager::getInstance();
 		$eventManager->addEventHandler('sale', 'onSaleBasketItemBeforeSaved',
-			function(\Bitrix\Main\Event $event)
+			function(Event $event)
 			{
 				$item = $event->getParameter('ENTITY');
 				$productId = $item->getField('PRODUCT_ID');
@@ -774,16 +993,176 @@ class LandingPubComponent extends LandingBaseComponent
 	}
 
 	/**
+	 * Register callback for replace url in all letter.
+	 * @param int $siteId Site id for get url.
+	 * @return void
+	 */
+	public static function replaceUrlInLetter($siteId)
+	{
+		$eventManager = EventManager::getInstance();
+		$eventManager->addEventHandler('main', 'OnBeforeMailSend',
+			function(\Bitrix\Main\Event $event) use($siteId)
+			{
+				/* @var Landing $landing*/
+				$params = $event->getParameters();
+				$params = array_shift($params);
+				$landing = Landing::createInstance(0);
+				$sysPages = Syspage::get($siteId);
+
+				// replace auth-link if personal section is exists
+				if (isset($sysPages['personal']['LANDING_ID']))
+				{
+					$personalLandingId = $sysPages['personal']['LANDING_ID'];
+					$params['BODY'] = preg_replace_callback(
+						'@(https|http)://([^/]+)/auth/index\.php\?' .
+						'change_password=yes&lang=([^&]+)&' .
+						'USER_CHECKWORD=([a-z0-9]+)@',
+						function ($matches) use($landing, $personalLandingId)
+						{
+							$url = $landing->getPublicUrl($personalLandingId);
+							if (substr($url, 0, 1) == '/')
+							{
+								$url = $matches[1] . '://' . $matches[2] . $url;
+							}
+							$url .= '?' . http_build_query([
+								'SECTION' => 'password_change',
+								'USER_CHECKWORD' => $matches[4]
+							]);
+							return $url;
+						},
+						$params['BODY']
+					);
+				}
+
+				return $params;
+			}
+		);
+	}
+
+	/**
+	 * For replace some fields in sending letters.
+	 * @return void
+	 */
+	protected function onBeforeEventSend()
+	{
+		/* @var Landing $landing*/
+		$eventManager = EventManager::getInstance();
+		$landing = $this->arResult['LANDING'];
+
+		// replace only in $need types
+		$eventManager->addEventHandler('main', 'OnBeforeEventSend',
+			function($fields, &$eventMessage) use($landing)
+			{
+				$need = ['USER_PASS_REQUEST'];
+				if (in_array($eventMessage['EVENT_NAME'], $need))
+				{
+					self::replaceUrlInLetter(
+						$landing->getSiteId()
+					);
+				}
+			}
+		);
+
+		// replace urls in user info letter
+		$eventManager->addEventHandler('main', 'OnSendUserInfo',
+			function(&$params) use($landing)
+			{
+				self::replaceUrlInLetter(
+					$landing->getSiteId()
+				);
+			}
+		);
+	}
+
+	/**
+	 * Handler on template epilog.
+	 * @return void
+	 */
+	protected function onEpilog()
+	{
+		$eventManager = EventManager::getInstance();
+		$eventManager->addEventHandler('main', 'OnEpilog',
+			function()
+			{
+				\Bitrix\Landing\Manager::initAssets();
+			}
+		);
+	}
+
+	/**
+	 * Fill params urls with landing data.
+	 * @param Landing $landing Landing instance.
+	 * @return void
+	 */
+	protected function replaceParamsUrls(Landing $landing)
+	{
+		if ($this->arParams['SHOW_EDIT_PANEL'] != 'Y')
+		{
+			return;
+		}
+
+		$codes = [
+			'PAGE_URL_LANDING_VIEW', 'PAGE_URL_SITES', 'PAGE_URL_SITE_SHOW'
+		];
+
+		foreach ($codes as $code)
+		{
+			if ($this->arParams[$code])
+			{
+				$this->arParams[$code] = str_replace(
+					['#site_edit#', '#landing_edit#'],
+					[$landing->getSiteId(), $landing->getId()],
+					$this->arParams[$code]
+				);
+			}
+		}
+	}
+
+	/**
+	 * Sets canonical url.
+	 * @param Landing $landing Landing instance.
+	 * @return void
+	 */
+	protected function setCanonical(Landing $landing)
+	{
+		// we need to know real domain name
+		$domainName = '';
+		$landingUrl = $landing->getPublicUrl();
+		if (substr($landingUrl, 0, 1) == '/')
+		{
+			$domainName = Domain::getHostUrl();
+		}
+		else
+		{
+			$landingUrlParts = parse_url($landingUrl);
+			if (
+				isset($landingUrlParts['scheme']) &&
+				isset($landingUrlParts['host'])
+			)
+			{
+				$domainName = $landingUrlParts['scheme'] . '://';
+				$domainName .= $landingUrlParts['host'];
+			}
+		}
+		$canonical = $domainName . Manager::getApplication()->getCurDir();
+		Manager::setPageView(
+			'MetaOG',
+			'<meta name="og:url" content="' . $canonical . '" />' . "\n" .
+			'<link rel="canonical" href="' . $canonical . '"/>'
+		);
+	}
+
+	/**
 	 * Base executable method.
 	 * @return void
 	 */
 	public function executeComponent()
 	{
 		$init = $this->init();
-		$this->zone = Manager::getZone();
 
 		if ($init)
 		{
+			$this->zone = Manager::getZone();
 			if (
 				!isset($this->arParams['PATH']) ||
 				!$this->arParams['PATH']
@@ -802,46 +1181,77 @@ class LandingPubComponent extends LandingBaseComponent
 			}
 
 			$this->checkParam('LID', 0);
+			$this->checkParam('SITE_ID', 0);
+			$this->checkParam('SITE_TYPE', '');
 			$this->checkParam('HTTP_HOST', '');
+			$this->checkParam('CHECK_PERMISSIONS', 'N');
+			$this->checkParam('NOT_CHECK_DOMAIN', 'N');
+			$this->checkParam('SHOW_EDIT_PANEL', 'N');
+			$this->checkParam('DRAFT_MODE', 'N');
+			$this->checkParam('PAGE_URL_LANDING_VIEW', '');
+			$this->checkParam('PAGE_URL_SITES', '');
+			$this->checkParam('PAGE_URL_SITE_SHOW', '');
+
+			$this->arParams['TYPE'] = $this->arParams['SITE_TYPE'];
+
+			\Bitrix\Landing\Site\Type::setScope(
+				$this->arParams['SITE_TYPE']
+			);
 
 			if (
 				($lid = $this->arParams['LID']) ||
 				($lid = $this->detectPage())
 			)
 			{
+				// for cloud some magic for optimization
 				if (Manager::isB24())
 				{
 					$asset = \Bitrix\Main\Page\Asset::getInstance();
-					if (
-						method_exists($asset, 'disableOptimizeCss') &&
-						method_exists($asset, 'disableOptimizeJs')
-					)
-					{
-						$asset->disableOptimizeCss();
-						$asset->disableOptimizeJs();
-					}
+					$asset->disableOptimizeCss();
+					$asset->disableOptimizeJs();
 				}
-
+				// set external variables
 				if (isset($this->sefVariables))
 				{
 					Landing::setVariables(array(
 						'sef' => $this->sefVariables
 					));
 				}
-
+				Landing::setDynamicParams(
+					$this->dynamicFilterId,
+					$this->dynamicElementId
+				);
+				// some other vars
 				if ($this->isPreviewMode)
 				{
 					Landing::setPreviewMode(true);
 				}
-
 				self::$landingMain['LANDING_ID'] = $lid;
-				$landing = Landing::createInstance($lid);
+				$landing = Landing::createInstance($lid, [
+					'check_permissions' => $this->arParams['CHECK_PERMISSIONS'] == 'Y',
+					'disable_link_preview' => $this->arParams['DRAFT_MODE'] == 'Y'
+				]);
 				$this->arResult['LANDING'] = $landing;
 				$this->arResult['DOMAIN'] = $this->getParentDomain();
+				$this->arResult['COPY_LINK'] = $this->getCopyLinkPath();
 				$this->arResult['ADV_CODE'] = $this->getAdvCode();
-
+				$this->arResult['CAN_EDIT'] = 'N';
+				// if landing found
 				if ($landing->exist())
 				{
+					$this->arParams['TYPE'] = $landing::getSiteType();
+					// if intranet, check rights for showing menu
+					if (!$landing->getDomainId())
+					{
+						$operations = Rights::getOperationsForSite(
+							$landing->getSiteId()
+						);
+						if (in_array(Rights::ACCESS_TYPES['edit'], $operations))
+						{
+							$this->arResult['CAN_EDIT'] = 'Y';
+						}
+					}
+					$this->replaceParamsUrls($landing);
 					// exec Hook Robots
 					if ($this->isRobotsTxt)
 					{
@@ -857,7 +1267,8 @@ class LandingPubComponent extends LandingBaseComponent
 								),
 								'filter' => array(
 									'SITE_ID' => $landing->getSiteId(),
-									'=SITEMAP' => 'Y'
+									'=SITEMAP' => 'Y',
+									'CHECK_PERMISSIONS' => $this->arParams['CHECK_PERMISSIONS']
 								),
 								'limit' => 1
 							));
@@ -880,8 +1291,13 @@ class LandingPubComponent extends LandingBaseComponent
 							}
 							die();
 						}
+						else
+						{
+							$this->setHttpStatusOnce($this::ERROR_STATUS_NOT_FOUND);
+							die();
+						}
 					}
-					// build sitemap
+					// build site map
 					elseif ($this->isSitemapXml)
 					{
 						Manager::getApplication()->restartBuffer();
@@ -897,49 +1313,44 @@ class LandingPubComponent extends LandingBaseComponent
 						}
 						die();
 					}
+					// set og url
+					$this->setCanonical($landing);
 				}
-
+				// else errors
 				$this->setErrors(
 					$landing->getError()->getErrors()
 				);
-
 				// events
 				$this->onBeforeLocalRedirect();
 				$this->onSearchGetURL();
 				$this->onSaleBasketItemBeforeSaved();
-
-				// change view
+				$this->onBeforeEventSend();
+				$this->onEpilog();
+				// change view for public mode
 				Manager::setPageView(
 					'MainClass',
 					'landing-public-mode'
 				);
+				// call tracker
 				if (
-					\Bitrix\Main\Loader::includeModule('crm') &&
-					method_exists(
-						'\Bitrix\Crm\UI\Webpack\CallTracker',
-						'getEmbeddedScript'
-					)
+					$this->arParams['DRAFT_MODE'] != 'Y' &&
+					\Bitrix\Main\Loader::includeModule('crm')
 				)
 				{
 					Manager::setPageView(
 						'FooterJS',
-						\Bitrix\Crm\UI\Webpack\CallTracker::instance()->getEmbeddedScript()
+						CallTracker::instance()->getEmbeddedScript()
 					);
 				}
-
-				// set og url
-				Manager::setPageView(
-					'MetaOG',
-					'<meta name="og:url" content="' . $landing->getPublicUrl() . '" />' . "\n" .
-					'<link rel="canonical" href="' . $landing->getPublicUrl() . '"/>'
-				);
+				// views
+				\Bitrix\Landing\Landing\View::inc($lid);
 			}
 			else
 			{
 				$this->setHttpStatusOnce($this::ERROR_STATUS_NOT_FOUND);
 				$this->addError(
 					'LANDING_CMP_SITE_NOT_FOUND',
-					Loc::getMessage('LANDING_CMP_SITE_NOT_FOUND')
+					$this->getMessageType('LANDING_CMP_SITE_NOT_FOUND')
 				);
 			}
 		}

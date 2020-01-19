@@ -247,18 +247,32 @@ if($request->isPost() && check_bitrix_sessid() && \Bitrix\Main\Loader::includeMo
 				$appInfo = $dbRes->fetch();
 				if($appInfo)
 				{
-					\Bitrix\Rest\AppTable::uninstall($appInfo['ID'], $clean == "true");
+					$checkResult = \Bitrix\Rest\AppTable::checkUninstallAvailability($appInfo['ID'], $clean == 'true');
+					if($checkResult->isEmpty())
+					{
+						\Bitrix\Rest\AppTable::uninstall($appInfo['ID'], $clean == "true");
 
-					$appFields = array(
-						'ACTIVE' => 'N',
-						'INSTALLED' => 'N',
-					);
+						$appFields = array(
+							'ACTIVE' => 'N',
+							'INSTALLED' => 'N',
+						);
 
-					\Bitrix\Rest\AppTable::update($appInfo['ID'], $appFields);
+						\Bitrix\Rest\AppTable::update($appInfo['ID'], $appFields);
 
-					\Bitrix\Rest\AppLogTable::log($appInfo['ID'], \Bitrix\Rest\AppLogTable::ACTION_TYPE_UNINSTALL);
+						\Bitrix\Rest\AppLogTable::log($appInfo['ID'], \Bitrix\Rest\AppLogTable::ACTION_TYPE_UNINSTALL);
 
-					$result = array('success' => 1);
+						$result = array('success' => 1);
+					}
+					else
+					{
+						$errorMessage = '';
+						foreach($checkResult as $error)
+						{
+							$errorMessage .= $error->getMessage()."\n";
+						}
+
+						$result = array('error' => $errorMessage);
+					}
 				}
 				else
 				{

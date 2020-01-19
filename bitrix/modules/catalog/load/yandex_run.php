@@ -413,7 +413,7 @@ if (!function_exists('yandexPrepareItems'))
 				{
 					if ($field == 'PREVIEW_TEXT' || $field == 'DETAIL_TEXT')
 						continue;
-					if (strncmp($field, 'CATALOG_', 8) == 0)
+					if (\CProductQueryBuilder::isValidField($field))
 						continue;
 					if (is_array($value))
 						continue;
@@ -565,6 +565,15 @@ $propertyFields = array(
 	'ID', 'PROPERTY_TYPE', 'MULTIPLE', 'USER_TYPE'
 );
 
+$itemUrlConfig = [
+	'USE_DOMAIN' => true,
+	'REFERRER_SEPARATOR' => '?'
+];
+$offerUrlConfig = [
+	'USE_DOMAIN' => true,
+	'REFERRER_SEPARATOR' => '?'
+];
+
 $IBLOCK_ID = (int)$IBLOCK_ID;
 $db_iblock = CIBlock::GetByID($IBLOCK_ID);
 if (!($ar_iblock = $db_iblock->Fetch()))
@@ -593,6 +602,10 @@ else
 		$ar_iblock['PROPERTY'][$arProp['ID']] = $arProp;
 	}
 	unset($arProp, $rsProps);
+
+	$ar_iblock['DETAIL_PAGE_URL'] = (string)$ar_iblock['DETAIL_PAGE_URL'];
+	$itemUrlConfig['USE_DOMAIN'] = !(preg_match("/^(http|https):\\/\\//i", $ar_iblock['DETAIL_PAGE_URL']));
+	$itemUrlConfig['REFERRER_SEPARATOR'] = (strpos($ar_iblock['DETAIL_PAGE_URL'], '?') === false ? '?' : '&amp;');
 }
 
 $SETUP_SERVER_NAME = (isset($SETUP_SERVER_NAME) ? trim($SETUP_SERVER_NAME) : '');
@@ -706,6 +719,17 @@ else
 			}
 			unset($arProp, $rsProps);
 			$arOfferIBlock['LID'] = $site['LID'];
+
+			$arOfferIBlock['DETAIL_PAGE_URL'] = (string)$arOfferIBlock['DETAIL_PAGE_URL'];
+			if ($arOfferIBlock['DETAIL_PAGE_URL'] == '#PRODUCT_URL#')
+			{
+				$offerUrlConfig = $itemUrlConfig;
+			}
+			else
+			{
+				$offerUrlConfig['USE_DOMAIN'] = !(preg_match("/^(http|https):\\/\\//i", $arOfferIBlock['DETAIL_PAGE_URL']));
+				$offerUrlConfig['REFERRER_SEPARATOR'] = (strpos($arOfferIBlock['DETAIL_PAGE_URL'], '?') === false ? '?' : '&amp;');
+			}
 		}
 		else
 		{
@@ -1194,11 +1218,12 @@ if (empty($arRunErrors))
 	$itemFields = array(
 		'ID', 'IBLOCK_ID', 'IBLOCK_SECTION_ID', 'NAME',
 		'PREVIEW_PICTURE', $descrField, $descrField.'_TYPE', 'DETAIL_PICTURE', 'DETAIL_PAGE_URL',
-		'CATALOG_AVAILABLE', 'CATALOG_TYPE'
+		'AVAILABLE', 'TYPE', 'VAT_ID', 'VAT_INCLUDED'
 	);
 	$offerFields = array(
 		'ID', 'IBLOCK_ID', 'IBLOCK_SECTION_ID', 'NAME',
-		'PREVIEW_PICTURE', $descrField, $descrField.'_TYPE', 'DETAIL_PICTURE', 'DETAIL_PAGE_URL'
+		'PREVIEW_PICTURE', $descrField, $descrField.'_TYPE', 'DETAIL_PICTURE', 'DETAIL_PAGE_URL',
+		'AVAILABLE', 'TYPE', 'VAT_ID', 'VAT_INCLUDED'
 	);
 
 	$allowedTypes = array();
@@ -1238,12 +1263,12 @@ if (empty($arRunErrors))
 	$filter['ACTIVE'] = 'Y';
 	$filter['ACTIVE_DATE'] = 'Y';
 	if ($filterAvailable)
-		$filter['CATALOG_AVAILABLE'] = 'Y';
+		$filter['AVAILABLE'] = 'Y';
 	$filter = array_merge($filter, $permissionFilter);
 
 	$offersFilter = array('ACTIVE' => 'Y', 'ACTIVE_DATE' => 'Y');
 	if ($filterAvailable)
-		$offersFilter['CATALOG_AVAILABLE'] = 'Y';
+		$offersFilter['AVAILABLE'] = 'Y';
 	$offersFilter = array_merge($offersFilter, $permissionFilter);
 
 	if (isset($allowedTypes[Catalog\ProductTable::TYPE_SKU]))
@@ -1289,8 +1314,8 @@ if (empty($arRunErrors))
 			$id = (int)$row['ID'];
 			$CUR_ELEMENT_ID = $id;
 
-			$row['CATALOG_TYPE'] = (int)$row['CATALOG_TYPE'];
-			$elementType = $row['CATALOG_TYPE'];
+			$row['TYPE'] = (int)$row['TYPE'];
+			$elementType = $row['TYPE'];
 			if (!isset($allowedTypes[$elementType]))
 				continue;
 
@@ -1416,6 +1441,9 @@ if (empty($arRunErrors))
 						foreach (array_keys($offers[$productId]) as $offerId)
 						{
 							$productOffer = $offers[$productId][$offerId];
+							$productOffer['VAT_ID'] = (int)$productOffer['VAT_ID'];
+							if ($productOffer['VAT_ID'] == 0)
+								$productOffer['VAT_ID'] = $offersCatalog['VAT_ID'];
 
 							$productOffer['PRICES'] = array();
 							if ($needDiscountCache)
@@ -1458,26 +1486,6 @@ if (empty($arRunErrors))
 									$pageIds,
 									array('IBLOCK_ID' => $arCatalog['IBLOCK_ID'], 'GET_BY_ID' => 'Y')
 								);
-							}
-
-							if (!$filterAvailable)
-							{
-								$iterator = Catalog\ProductTable::getList(array(
-									'select' => ($vatExport ? array('ID', 'AVAILABLE', 'VAT_ID', 'VAT_INCLUDED') : array('ID', 'AVAILABLE')),
-									'filter' => array('@ID' => $pageIds)
-								));
-								while ($row = $iterator->fetch())
-								{
-									$id = (int)$row['ID'];
-									$offerLinks[$id]['CATALOG_AVAILABLE'] = $row['AVAILABLE'];
-									if ($vatExport)
-									{
-										$row['VAT_ID'] = (int)$row['VAT_ID'];
-										$offerLinks[$id]['CATALOG_VAT_ID'] = ($row['VAT_ID'] > 0 ? $row['VAT_ID'] : $offersCatalog['VAT_ID']);
-										$offerLinks[$id]['CATALOG_VAT_INCLUDED'] = $row['VAT_INCLUDED'];
-									}
-								}
-								unset($id, $row, $iterator);
 							}
 
 							// load vat cache
@@ -1620,7 +1628,7 @@ if (empty($arRunErrors))
 				if (!isset($row['CATEGORY_ID']))
 					continue;
 
-				if ($row['CATALOG_TYPE'] == Catalog\ProductTable::TYPE_SKU && !empty($row['OFFERS']))
+				if ($row['TYPE'] == Catalog\ProductTable::TYPE_SKU && !empty($row['OFFERS']))
 				{
 					$minOfferId = null;
 					$minOfferPrice = null;
@@ -1684,15 +1692,15 @@ if (empty($arRunErrors))
 
 					foreach ($row['OFFERS'] as $offer)
 					{
-						$available = ' available="'.($offer['CATALOG_AVAILABLE'] == 'Y' ? 'true' : 'false').'"';
+						$available = ' available="'.($offer['AVAILABLE'] == 'Y' ? 'true' : 'false').'"';
 						$itemsContent .= '<offer id="'.$offer['ID'].'"'.$productFormat.$available.">\n";
 						unset($available);
 
 						$referer = '';
 						if (!$disableReferers)
-							$referer = (strpos($offer['DETAIL_PAGE_URL'], '?') === false ? '?' : '&amp;').'r1=<?=$strReferer1; ?>&amp;r2=<?=$strReferer2; ?>';
+							$referer = $offerUrlConfig['REFERRER_SEPARATOR'].'r1=<?=$strReferer1; ?>&amp;r2=<?=$strReferer2; ?>';
 
-						$itemsContent .= "<url>".$usedProtocol.$site['SERVER_NAME'].htmlspecialcharsbx($offer['DETAIL_PAGE_URL']).$referer."</url>\n";
+						$itemsContent .= "<url>".($offerUrlConfig['USE_DOMAIN'] ? $usedProtocol.$site['SERVER_NAME'] : '').htmlspecialcharsbx($offer['DETAIL_PAGE_URL']).$referer."</url>\n";
 						unset($referer);
 
 						$minPrice = $offer['RESULT_PRICE']['MIN_PRICE'];
@@ -1701,8 +1709,8 @@ if (empty($arRunErrors))
 						if ($minPrice < $fullPrice)
 							$itemsContent .= "<oldprice>".$fullPrice."</oldprice>\n";
 						$itemsContent .= "<currencyId>".$offer['RESULT_PRICE']['CURRENCY']."</currencyId>\n";
-						if ($vatExport && isset($vatList[$offer['CATALOG_VAT_ID']]))
-							$itemsContent .= "<vat>".$vatList[$offer['CATALOG_VAT_ID']]."</vat>\n";
+						if ($vatExport && isset($vatList[$offer['VAT_ID']]))
+							$itemsContent .= "<vat>".$vatList[$offer['VAT_ID']]."</vat>\n";
 
 						$itemsContent .= "<categoryId>".$row['CATEGORY_ID']."</categoryId>\n";
 
@@ -1845,9 +1853,9 @@ if (empty($arRunErrors))
 				}
 				elseif (isset($simpleIdsList[$id]) && !empty($row['PRICES']))
 				{
-					$row['CATALOG_VAT_ID'] = (int)$row['CATALOG_VAT_ID'];
-					if ($row['CATALOG_VAT_ID'] == 0)
-						$row['CATALOG_VAT_ID'] = $arCatalog['VAT_ID'];
+					$row['VAT_ID'] = (int)$row['VAT_ID'];
+					if ($row['VAT_ID'] == 0)
+						$row['VAT_ID'] = $arCatalog['VAT_ID'];
 
 					$fullPrice = 0;
 					$minPrice = 0;
@@ -1874,23 +1882,23 @@ if (empty($arRunErrors))
 					if ($minPrice <= 0)
 						continue;
 
-					$available = ' available="'.($row['CATALOG_AVAILABLE'] == 'Y' ? 'true' : 'false').'"';
+					$available = ' available="'.($row['AVAILABLE'] == 'Y' ? 'true' : 'false').'"';
 					$itemsContent .= '<offer id="'.$row['ID'].'"'.$productFormat.$available.">\n";
 					unset($available);
 
 					$referer = '';
 					if (!$disableReferers)
-						$referer = (strpos($row['DETAIL_PAGE_URL'], '?') === false ? '?' : '&amp;').'r1=<?=$strReferer1; ?>&amp;r2=<?=$strReferer2; ?>';
+						$referer = $itemUrlConfig['REFERRER_SEPARATOR'].'r1=<?=$strReferer1; ?>&amp;r2=<?=$strReferer2; ?>';
 
-					$itemsContent .= "<url>".$usedProtocol.$site['SERVER_NAME'].htmlspecialcharsbx($row['DETAIL_PAGE_URL']).$referer."</url>\n";
+					$itemsContent .= "<url>".($itemUrlConfig['USE_DOMAIN'] ? $usedProtocol.$site['SERVER_NAME'] : '').htmlspecialcharsbx($row['DETAIL_PAGE_URL']).$referer."</url>\n";
 					unset($referer);
 
 					$itemsContent .= "<price>".$minPrice."</price>\n";
 					if ($minPrice < $fullPrice)
 						$itemsContent .= "<oldprice>".$fullPrice."</oldprice>\n";
 					$itemsContent .= "<currencyId>".$minPriceCurrency."</currencyId>\n";
-					if ($vatExport && isset($vatList[$row['CATALOG_VAT_ID']]))
-						$itemsContent .= "<vat>".$vatList[$row['CATALOG_VAT_ID']]."</vat>\n";
+					if ($vatExport && isset($vatList[$row['VAT_ID']]))
+						$itemsContent .= "<vat>".$vatList[$row['VAT_ID']]."</vat>\n";
 
 					$itemsContent .= "<categoryId>".$row['CATEGORY_ID']."</categoryId>\n";
 

@@ -13,7 +13,6 @@ BX.UserContentView = {
 	pathToUserProfile: '',
 	inited: false,
 	viewAreaList: [],
-/*	fullContentNodeList: {},*/
 	lastViewAreaList: {},
 	viewAreaReadList: [],
 	viewAreaSentList: [],
@@ -27,7 +26,8 @@ BX.UserContentView = {
 	commentsFullContentClassName: 'feed-com-text-inner-inner',
 	currentPopupId: null,
 	popupList: {},
-	toSendList: []
+	toSendList: [],
+	ignoreCurrentUserLive: []
 };
 
 BX.UserContentView.clear = function()
@@ -197,7 +197,6 @@ BX.UserContentView.setRead = function(node)
 			{
 				BXMobileApp.onCustomEvent("BX.UserContentView.onSetRead", eventParams, true);
 			}
-/*BX.addClass(node, 'feed-post-contentview-read');*/
 		}
 	}
 };
@@ -471,6 +470,17 @@ BX.UserContentView.registerViewAreaList = function(params)
 
 BX.UserContentView.liveUpdate = function(params)
 {
+	if (
+		BX.type.isNotEmptyString(params.CONTENT_ID)
+		&& BX.util.in_array(params.CONTENT_ID, BX.UserContentView.ignoreCurrentUserLive)
+		&& typeof params.USER_ID != 'undefined'
+		&& parseInt(params.USER_ID) > 0
+		&& parseInt(params.USER_ID) == parseInt(BX.message('USER_ID'))
+	)
+	{
+		return;
+	}
+
 	var cntNode = BX('feed-post-contentview-cnt-' + params.CONTENT_ID);
 	var cntWrapNode = BX('feed-post-contentview-cnt-wrap-' + params.CONTENT_ID);
 
@@ -531,6 +541,15 @@ BX.UserContentView.Counter.prototype.init = function(params)
 	if (BX.type.isNotEmptyString(params.pathToUserProfile))
 	{
 		this.pathToUserProfile = params.pathToUserProfile;
+	}
+
+	if (
+		BX.type.isNotEmptyString(params.isSet)
+		&& params.isSet == 'Y'
+		&& !BX.util.in_array(this.contentId, BX.UserContentView.ignoreCurrentUserLive)
+	)
+	{
+		BX.UserContentView.ignoreCurrentUserLive.push(this.contentId);
 	}
 
 	if (typeof BX.PULL != 'undefined')
@@ -637,8 +656,11 @@ BX.UserContentView.Counter.prototype.list = function(params)
 		onsuccess: BX.delegate(function(data)
 		{
 			if (
-				parseInt(data.itemsCount) <= 0
-				&& parseInt(data.hiddenCount) <= 0
+				!data
+				|| (
+					parseInt(data.itemsCount) <= 0
+					&& parseInt(data.hiddenCount) <= 0
+				)
 			)
 			{
 				return false;

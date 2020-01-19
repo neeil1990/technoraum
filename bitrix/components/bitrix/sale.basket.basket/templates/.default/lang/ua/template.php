@@ -38,4 +38,5 @@ $MESS["SBB_GOOD_2"] = "товару";
 $MESS["SBB_GOODS"] = "Товарів";
 $MESS["SBB_DELETE"] = "Видалити";
 $MESS["SBB_IN_BASKET"] = "В кошику";
+$MESS["SBB_GIFTS_BLOCK_TITLE"] = "Виберіть один з подарунків";
 ?>

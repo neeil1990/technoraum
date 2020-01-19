@@ -1601,6 +1601,11 @@ class CIBlockDocument
 				$arResult[$t]["BaseType"] = "string";
 				$arResult[$t]['typeClass'] = '\Bitrix\Iblock\BizprocType\Money';
 			}
+			elseif($t == 'N:Sequence')
+			{
+				$arResult[$t]["BaseType"] = "int";
+				$arResult[$t]['typeClass'] = '\Bitrix\Iblock\BizprocType\Sequence';
+			}
 		}
 
 		return $arResult;
@@ -2364,7 +2369,7 @@ class CIBlockDocument
 
 		$arFieldsPropertyValues = array();
 
-		$arDocumentFields = self::GetDocumentFields("iblock_".$arFields["IBLOCK_ID"]);
+		$arDocumentFields = static::GetDocumentFields("iblock_".$arFields["IBLOCK_ID"]);
 
 		$arKeys = array_keys($arFields);
 		foreach ($arKeys as $key)
@@ -2453,6 +2458,20 @@ class CIBlockDocument
 				}
 				$arFields[$key] = array("VALUE" => $arFields[$key], "DESCRIPTION" => "workflow");
 			}
+			elseif ($arDocumentFields[$key]["Type"] == "N:Sequence")
+			{
+				$queryObject = \CIBlockProperty::getByID($realKey, $arFields["IBLOCK_ID"]);
+				if ($property = $queryObject->fetch())
+				{
+					$propertyId = $property["ID"];
+					$sequence = new \CIBlockSequence($arFields["IBLOCK_ID"], $propertyId);
+					foreach ($arFields[$key] as &$value)
+					{
+						$value = ["VALUE" => $value];
+					}
+					$value = ["VALUE" => $sequence->getNext()];
+				}
+			}
 			elseif ($arDocumentFields[$key]["Type"] == "S:HTML")
 			{
 				foreach ($arFields[$key] as &$value)
@@ -2485,6 +2504,11 @@ class CIBlockDocument
 
 		if (count($arFieldsPropertyValues) > 0)
 			$arFields["PROPERTY_VALUES"] = $arFieldsPropertyValues;
+
+		if (isset($arFields['SORT']))
+		{
+			$arFields['SORT'] = (int) $arFields['SORT'];
+		}
 
 		$iblockElement = new CIBlockElement();
 		$id = $iblockElement->Add($arFields, false, true, true);
@@ -2993,17 +3017,18 @@ class CIBlockDocument
 
 		$arResult = array();
 
-		$arFilter = array("ACTIVE" => "Y");
+		$arFilter = ['ACTIVE' => 'Y', 'IS_REAL_USER' => true];
 		if ($group != 2)
-			$arFilter["GROUPS_ID"] = $group;
-		else
 		{
-			$arFilter['EXTERNAL_AUTH_ID'] = '';
+			$arFilter["GROUPS_ID"] = $group;
 		}
 
-		$dbUsersList = CUser::GetList(($b = "ID"), ($o = "ASC"), $arFilter);
+		$dbUsersList = CUser::GetList(($b = "ID"), ($o = "ASC"), $arFilter, ['FIELDS' => ['ID']]);
 		while ($arUser = $dbUsersList->Fetch())
+		{
 			$arResult[] = $arUser["ID"];
+		}
+
 		return $arResult;
 	}
 

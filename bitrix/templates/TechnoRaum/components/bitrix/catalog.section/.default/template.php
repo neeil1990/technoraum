@@ -127,16 +127,14 @@ if(count($arResult["ITEMS"]) > 0):
 							>
 
                             <?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
-                                <span style="font-size: 16px;">По запросу</span>
+                                <a class="fancy request-a-price" data-name="<?=$item['NAME']?>" href="#request-a-price">Запросить цену</a>
                             <?else:?>
                                 <?=$item["PRICES"]["price"]["PRINT_VALUE"]?>
 							<?endif;?>
 						</p>
 					</div>
                     <a class="button to_cart_button" data-href="<?=$item["BUY_URL"]?>">В корзине</a>
-					<?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
-                        <a class="fancy request-a-price" data-name="<?=$item['NAME']?>" href="#request-a-price">Запросить</a>
-					<?endif;?>
+					
 				</div>
 			</div>
 			<?

@@ -15,6 +15,7 @@ return [
 		'subtype_params' =>[
 			'required' => 'google'
 		],
+		'type' => ['page', 'store'],
 	],
 	'cards' => [
 		'.landing-block-card-address' => [

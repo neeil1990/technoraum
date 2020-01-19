@@ -524,9 +524,11 @@ function __logChangeFavorites(log_id, node, newState, bFromMenu)
 		return;
 	}
 
+	var menuItem = null;
+
 	if (!!bFromMenu)
 	{
-		var menuItem = BX.proxy_context;
+		menuItem = BX.proxy_context;
 		if (!BX.hasClass(BX(menuItem), 'menu-popup-item-text'))
 		{
 			menuItem = BX.findChild(BX(menuItem), {'className': 'menu-popup-item-text'}, true);
@@ -549,7 +551,7 @@ function __logChangeFavorites(log_id, node, newState, bFromMenu)
 	{
 		BX.addClass(BX(nodeToAdjust), "feed-post-important-switch-active");
 		BX(nodeToAdjust).title = BX.message('sonetLMenuFavoritesTitleY');
-		if (typeof menuItem != 'undefined')
+		if (menuItem)
 		{
 			BX(menuItem).innerHTML = BX.message('sonetLMenuFavoritesTitleY');
 		}
@@ -558,56 +560,46 @@ function __logChangeFavorites(log_id, node, newState, bFromMenu)
 	{
 		BX.removeClass(BX(nodeToAdjust), "feed-post-important-switch-active");
 		BX(nodeToAdjust).title = BX.message('sonetLMenuFavoritesTitleN');
-		if (typeof menuItem != 'undefined')
+		if (menuItem)
 		{
 			BX(menuItem).innerHTML = BX.message('sonetLMenuFavoritesTitleN');
 		}
 	}
 
-	var actionUrl = BX.message('sonetLESetPath');
-	actionUrl = BX.util.add_url_param(actionUrl, {
-		b24statAction: (newState == 'Y' ? 'addFavorites' : 'removeFavorites')
-	});
-
-	BX.ajax({
-		url: actionUrl,
-		method: 'POST',
-		dataType: 'json',
+	BX.ajax.runAction('socialnetwork.api.livefeed.changeFavorites', {
 		data: {
-			sessid : BX.bitrix_sessid(),
-			site : BX.message('SITE_ID'),
-			log_id : log_id,
-			action : 'change_favorites'
+			logId: log_id,
+			value: newState
 		},
-		onsuccess: function(data)
+		analyticsLabel: {
+			b24statAction: (newState == 'Y' ? 'addFavorites' : 'removeFavorites')
+		}
+	}).then(function(response) {
+		if (
+			BX.type.isNotEmptyString(response.data.newValue)
+			&& BX.util.in_array(response.data.newValue, ['Y', 'N'])
+		)
 		{
-			if (
-				typeof data.bResult != 'undefined'
-				&& (BX.util.in_array(data.bResult, ['Y', 'N']))
-			)
+			if (response.data.newValue == "Y")
 			{
-				if (data.bResult == "Y")
+				BX.addClass(BX(nodeToAdjust), "feed-post-important-switch-active");
+				BX(nodeToAdjust).title = BX.message('sonetLMenuFavoritesTitleY');
+				if (menuItem)
 				{
-					BX.addClass(BX(nodeToAdjust), "feed-post-important-switch-active");
-					BX(nodeToAdjust).title = BX.message('sonetLMenuFavoritesTitleY');
-					if (typeof menuItem != 'undefined')
-					{
-						BX(menuItem).innerHTML = BX.message('sonetLMenuFavoritesTitleY');
-					}
-				}
-				else
-				{
-					BX.removeClass(BX(nodeToAdjust), "feed-post-important-switch-active");
-					BX(nodeToAdjust).title = BX.message('sonetLMenuFavoritesTitleN');
-					if (typeof menuItem != 'undefined')
-					{
-						BX(menuItem).innerHTML = BX.message('sonetLMenuFavoritesTitleN');
-					}
+					BX(menuItem).innerHTML = BX.message('sonetLMenuFavoritesTitleY');
 				}
 			}
-		},
-		onfailure: function(data) {
+			else
+			{
+				BX.removeClass(BX(nodeToAdjust), "feed-post-important-switch-active");
+				BX(nodeToAdjust).title = BX.message('sonetLMenuFavoritesTitleN');
+				if (menuItem)
+				{
+					BX(menuItem).innerHTML = BX.message('sonetLMenuFavoritesTitleN');
+				}
+			}
 		}
+	}, function(response) {
 	});
 }
 
@@ -1017,27 +1009,6 @@ BitrixLF.prototype.initOnce = function(params)
 		}
 	}, this));
 
-	BX.addCustomEvent(window, "OnUCCommentWasPulled", function(id, params) {
-		setTimeout(function() {
-			var outerBlock = BX('record-' + id[0] + '-' +  + id[1]);
-			if (outerBlock)
-			{
-				bodyBlock = BX.findChild(outerBlock, { className: 'feed-com-text-inner-inner'}, true);
-				if (bodyBlock)
-				{
-					oLF.recalcMoreButtonComment({
-						bodyBlock: bodyBlock,
-						moreButtonBlock: BX.findChild(outerBlock, { className: 'feed-post-text-more'}, true)
-					});
-				}
-			}
-		}, 1000);
-	});
-
-	BX.addCustomEvent(window, "OnUCListWasBuilt", function(obj, data, containter) {
-		oLF.recalcMoreButtonCommentsList();
-	});
-
 	if (
 		typeof params != 'undefined'
 		&& typeof params.crmEntityTypeName != 'undefined'
@@ -1213,7 +1184,6 @@ BitrixLF.prototype.getNextPage = function()
 
 	this.bLockCounterAnimate = true;
 
-	arCommentsMoreButtonID = [];
 	this.arMoreButtonID = [];
 
 	if (
@@ -1222,6 +1192,10 @@ BitrixLF.prototype.getNextPage = function()
 	)
 	{
 		oNode.style.display = 'block';
+	}
+	else if (this.nextPageFirst)
+	{
+		BX.addClass(BX('feed-new-message-inf-wrap-first'), 'feed-new-message-inf-wrap-first-visible');
 	}
 
 	var data = { method: "GET", url: this.nextURL };
@@ -1252,10 +1226,10 @@ BitrixLF.prototype.getNextPage = function()
 				&& typeof (data.PROPS) != 'undefined'
 				&& typeof (data.PROPS.CONTENT) != 'undefined'
 				&& data.PROPS.CONTENT.length > 0
+				&& typeof data.LAST_TS != 'undefined'
+				&& parseInt(data.LAST_TS) > 0
 				&& (
-					typeof data.LAST_TS == 'undefined'
-					|| parseInt(data.LAST_TS) <= 0
-					|| parseInt(oLF.firstPageLastTS) <= 0
+					parseInt(oLF.firstPageLastTS) <= 0
 					|| parseInt(data.LAST_TS) < parseInt(oLF.firstPageLastTS)
 					|| (
 						parseInt(data.LAST_TS) == parseInt(oLF.firstPageLastTS)
@@ -1265,6 +1239,8 @@ BitrixLF.prototype.getNextPage = function()
 				)
 			)
 			{
+				BX.onCustomEvent(window, 'OnUCMoreButtonListClear', []);
+
 				var contentBlockId = 'content_block_' + (Math.floor(Math.random() * 1000));
 
 				oLF.processAjaxBlock(data.PROPS, contentBlockId, oLF.nextPageFirst);
@@ -1272,7 +1248,10 @@ BitrixLF.prototype.getNextPage = function()
 
 				if (oLF.nextPageFirst)
 				{
-					BX('feed-new-message-inf-wrap-first').style.display = 'block';
+					BX('feed-new-message-inf-text-first').style.display = 'block';
+					BX('feed-new-message-inf-loader-first').style.display = 'none';
+					BX.addClass(BX('feed-new-message-inf-wrap-first'), 'feed-new-message-inf-wrap-first-active');
+
 					var f = function() {
 						oLF.bStopTrackNextPage = false;
 						if (BX(contentBlockId))
@@ -1283,6 +1262,7 @@ BitrixLF.prototype.getNextPage = function()
 						BX('feed-new-message-inf-wrap-first').style.display = 'none';
 						oLF.recalcMoreButton();
 						oLF.registerViewAreaList();
+						oLF.recalcMoreButtonCommentsList();
 					};
 					BX.bind(BX('sonet_log_more_container_first'), 'click', f);
 				}
@@ -1298,10 +1278,15 @@ BitrixLF.prototype.getNextPage = function()
 					setTimeout(function() {
 						oLF.recalcMoreButton();
 						oLF.registerViewAreaList();
+						oLF.recalcMoreButtonCommentsList();
 					}, 1000);
 				}
 
 				oLF.nextPageFirst = false;
+			}
+			else if (BX('feed-new-message-inf-wrap-first'))
+			{
+				BX('feed-new-message-inf-wrap-first').style.display = 'none';
 			}
 		},
 		onfailure: function(data)
@@ -1336,7 +1321,7 @@ BitrixLF.prototype.refresh = function(params, filterPromise)
 	this.bLoadStarted = true;
 	this.showRefreshFade();
 
-	arCommentsMoreButtonID = [];
+	BX.onCustomEvent(window, 'OnUCMoreButtonListClear', []);
 	this.arMoreButtonID = [];
 
 	if (
@@ -1435,15 +1420,15 @@ BitrixLF.prototype.refresh = function(params, filterPromise)
 				{
 					oLF.clearContainerExternal(false);
 					oLF.processAjaxBlock(data.PROPS);
-					setTimeout(BX.proxy(oLF.recalcMoreButton, oLF), 1);
+					setTimeout(BX.proxy(function() {
+						oLF.recalcMoreButton();
+						oLF.recalcMoreButtonCommentsList();
+					}), 1);
 					oLF.registerViewAreaList();
 
 					oLF.bStopTrackNextPage = false;
 
-					if (typeof arCommentsMoreButtonID != 'undefined')
-					{
-						arCommentsMoreButtonID = [];
-					}
+					BX.onCustomEvent(window, 'OnUCMoreButtonListClear', []);
 
 					if (
 						counterWrap
@@ -1567,6 +1552,13 @@ BitrixLF.prototype.recalcMoreButton = function()
 
 		for (i = 0; i < this.arMoreButtonID.length; i++)
 		{
+			if (
+				!this.arMoreButtonID.hasOwnProperty(i)
+				|| !BX.type.isNotEmptyObject(this.arMoreButtonID[i])
+			)
+			{
+				continue;
+			}
 
 			arPos = BX.pos(BX(this.arMoreButtonID[i].bodyBlockID));
 
@@ -1597,8 +1589,6 @@ BitrixLF.prototype.recalcMoreButton = function()
 		}
 	}
 
-	this.recalcMoreButtonCommentsList();
-
 	if (BX('log_internal_container'))
 	{
 		var onLoadImageList = BX.findChildren(
@@ -1620,18 +1610,7 @@ BitrixLF.prototype.recalcMoreButton = function()
 						bodyBlock = null,
 						outerBlock = BX.findParent(e.currentTarget, { className: 'feed-com-text' }, BX('log_internal_container'));
 
-					if (outerBlock) // comment
-					{
-						bodyBlock = BX.findChild(outerBlock, { className: 'feed-com-text-inner-inner'}, true);
-						if (bodyBlock)
-						{
-							this.recalcMoreButtonComment({
-								bodyBlock: bodyBlock,
-								moreButtonBlock: BX.findChild(outerBlock, { className: 'feed-post-text-more'}, true)
-							});
-						}
-					}
-					else // post
+					if (!outerBlock) // post
 					{
 						outerBlock = BX.findParent(e.currentTarget, { className: 'feed-post-block' }, BX('log_internal_container'));
 						if (outerBlock)
@@ -1669,45 +1648,15 @@ BitrixLF.prototype.recalcMoreButtonPost = function(params)
 		BX.addClass(postBlock, 'feed-post-block-short');
 		BX.addClass(postBlock, 'feed-post-block-separator');
 	}
+	else
+	{
+		BX.removeClass(postBlock, 'feed-post-block-short');
+	}
 };
 
 BitrixLF.prototype.recalcMoreButtonCommentsList = function()
 {
-	if (typeof arCommentsMoreButtonID != 'undefined')
-	{
-		for (i in arCommentsMoreButtonID)
-		{
-			arPos = BX.pos(BX(arCommentsMoreButtonID[i].bodyBlockID));
-			this.recalcMoreButtonComment({
-				arPos: arPos,
-				moreButtonBlock: (typeof arCommentsMoreButtonID[i].moreButtonBlockID != 'undefined' ? BX(arCommentsMoreButtonID[i].moreButtonBlockID) : null)
-			});
-			delete arCommentsMoreButtonID[i];
-		}
-	}
-};
-
-BitrixLF.prototype.recalcMoreButtonComment = function(params)
-{
-	var arPos = (typeof params.arPos != 'undefined' ? params.arPos : BX.pos(params.bodyBlock));
-
-	if (arPos.height < 200)
-	{
-		if (params.moreButtonBlock)
-		{
-			params.moreButtonBlock.style.display = "none";
-		}
-	}
-	else
-	{
-		if (
-			params.moreButtonBlock
-			&& params.moreButtonBlock.style.display == "none"
-		)
-		{
-			params.moreButtonBlock.style.display = "block";
-		}
-	}
+	BX.onCustomEvent(window, 'OnUCMoreButtonListRecalc', []);
 };
 
 BitrixLF.prototype.showRefreshError = function()

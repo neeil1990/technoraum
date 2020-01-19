@@ -1117,6 +1117,9 @@
 	 * @param {Element} [params.flagNode]
 	 * @param {int} [params.flagSize] 16, 24 or 32
 	 * @param {string} [params.defaultCountry]
+	 * @param {int} [params.countryPopupHeight] 180
+	 * @param {string} [params.countryPopupClassName] ''
+	 * @param {Array} [params.countryTopList]
 	 * @param {boolean} [params.forceLeadingPlus]
 	 * @param {Function} [params.onInitialize]
 	 * @param {Function} [params.onChange]
@@ -1136,6 +1139,9 @@
 		this.forceLeadingPlus = params.forceLeadingPlus === true;
 		this.flagNode = BX.type.isDomNode(params.flagNode) ? params.flagNode : null;
 		this.flagSize = ([16, 24, 32].indexOf(params.flagSize) !== -1) ? params.flagSize : 16;
+		this.countryPopupHeight = params.countryPopupHeight || 180;
+		this.countryPopupClassName = params.countryPopupClassName || '';
+		this.countryTopList = params.countryTopList || [];
 		this.flagNodeInitialClass = '';
 
 		this.countries = null;
@@ -1418,6 +1424,9 @@
 
 		this.selectCountry({
 			node: this.flagNode,
+			countryPopupHeight: this.countryPopupHeight,
+			countryPopupClassName: this.countryPopupClassName,
+			countryTopList: this.countryTopList,
 			onSelect: this._onCountrySelect.bind(this)
 		});
 	};
@@ -1482,9 +1491,33 @@
 
 	BX.PhoneNumber.Input.prototype.selectCountry = function (params)
 	{
-		var onSelect  = BX.type.isFunction(params.onSelect) ? params.onSelect : BX.DoNothing;
-		var popupContent = BX.create("span", {});
 		var self = this;
+		var onSelect  = BX.type.isFunction(params.onSelect) ? params.onSelect : BX.DoNothing;
+		var popupContent = BX.create("span", {
+			events: {
+				click: BX.delegateEvent(
+					{
+						attribute: 'data-country',
+					},
+					function()
+					{
+						self.countrySelectPopup.close();
+						onSelect({
+							country: this.getAttribute('data-country')
+						});
+					}
+				)
+			}
+		});
+
+		var separator = null;
+		var topList = {};
+		if(params.countryTopList && params.countryTopList.length > 0)
+		{
+			separator = popupContent.appendChild(
+				BX.create('span', {props: {className: 'main-phonenumber-country-separator'}})
+			);
+		}
 
 		this.loadCountries().then(function()
 		{
@@ -1497,17 +1530,9 @@
 					return;
 
 
-				popupContent.appendChild(BX.create("div", {
+				var countryNode = popupContent.appendChild(BX.create("div", {
 					props: {className: "main-phonenumber-country"},
-					events: {
-						click: function()
-						{
-							self.countrySelectPopup.close();
-							onSelect({
-								country: countryDescriptor.CODE
-							})
-						}
-					},
+					attrs: {'data-country': countryDescriptor.CODE},
 					children: [
 						BX.create("span", {
 							props: {className: "main-phonenumber-country-flag bx-flag-16 " + country.toLowerCase()}
@@ -1518,19 +1543,41 @@
 						})
 					]
 				}));
+
+				if(params.countryTopList.indexOf(countryDescriptor.CODE) >= 0)
+				{
+					topList[countryDescriptor.CODE] = countryNode.cloneNode(true);
+				}
 			});
+
+			if(params.countryTopList && params.countryTopList.length > 0)
+			{
+				params.countryTopList.forEach(function(countryCode)
+				{
+					if(typeof topList[countryCode] !== 'undefined')
+					{
+						popupContent.insertBefore(topList[countryCode], separator);
+					}
+				});
+
+				if (popupContent.firstChild === separator)
+				{
+					popupContent.removeChild(separator);
+				}
+			}
 
 			self.countrySelectPopup = new BX.PopupWindow(
 				'phoneNumberInputSelectCountry',
 				params.node,
 				{
+					className: params.countryPopupClassName || '',
 					autoHide: true,
-					zIndex: 100,
+					zIndex: (BX.WindowManager ? BX.WindowManager.GetZIndex() + 100 : 100),
 					closeByEsc: true,
 					bindOptions: {
 						position: 'top'
 					},
-					height: 180,
+					height: params.countryPopupHeight,
 					offsetRight: 35,
 					angle: {
 						offset: 33
@@ -1745,7 +1792,8 @@
 			// Check leading digits first
 			if(countryMetadata.hasOwnProperty('leadingDigits'))
 			{
-				if(localNumber.match(new RegExp(countryMetadata['leadingDigits'])))
+				var leadingDigitsRegex = '^(' + countryMetadata['leadingDigits'] + ')';
+				if(localNumber.match(new RegExp(leadingDigitsRegex)))
 				{
 					return possibleCountry;
 				}
@@ -2048,7 +2096,7 @@
 		{
 			for (var i = 0; i < leadingDigits.length; i++)
 			{
-				re = new RegExp('^' + leadingDigits[i]);
+				re = new RegExp('^(' + leadingDigits[i] + ')');
 				matches = phoneNumber.match(re);
 				if(matches)
 				{
@@ -2058,7 +2106,7 @@
 		}
 		else
 		{
-			re = new RegExp('^' + leadingDigits);
+			re = new RegExp('^(' + leadingDigits + ')');
 			matches = phoneNumber.match(re);
 			if(matches)
 			{

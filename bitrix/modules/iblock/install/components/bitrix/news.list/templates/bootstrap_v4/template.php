@@ -197,8 +197,10 @@ $themeClass = isset($arParams['TEMPLATE_THEME']) ? ' bx-'.$arParams['TEMPLATE_TH
 
 							<?foreach($arItem["FIELDS"] as $code=>$value):?>
 								<?if($code == "SHOW_COUNTER"):?>
-									<div class="news-list-view"><i class="fa fa-eye"></i> <?=GetMessage("IBLOCK_FIELD_".$code)?>:
-										<?=intval($value);?>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon news-list-icon-eye"></span>
+										<span class="news-list-param"><?=GetMessage("IBLOCK_FIELD_".$code)?>: </span>
+										<span class="news-list-value"><?=intval($value);?></span>
 									</div>
 								<?elseif(
 									$value
@@ -215,12 +217,16 @@ $themeClass = isset($arParams['TEMPLATE_THEME']) ? ' bx-'.$arParams['TEMPLATE_TH
 									<?
 									$value = CIBlockFormatProperties::DateFormat($arParams["ACTIVE_DATE_FORMAT"], MakeTimeStamp($value, CSite::GetDateFormat()));
 									?>
-									<div class="news-list-date"><i class="fa fa-calendar-o"></i> <?=GetMessage("IBLOCK_FIELD_".$code)?>:
-										<?=$value;?>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon news-list-icon-calendar"></span>
+										<span class="news-list-param"><?=GetMessage("IBLOCK_FIELD_".$code)?>: </span>
+										<span class="news-list-value"><?=$value;?></span>
 									</div>
 								<?elseif($code == "TAGS" && $value):?>
-									<div class="news-list-tags"><i class="fa fa-tag"></i> <?=GetMessage("IBLOCK_FIELD_".$code)?>:
-										<?=$value;?>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon news-list-icon-tag"></span>
+										<span class="news-list-param"><?=GetMessage("IBLOCK_FIELD_".$code)?>:</span>
+										<span class="news-list-value"><?=$value;?></span>
 									</div>
 								<?elseif(
 									$value
@@ -229,12 +235,16 @@ $themeClass = isset($arParams['TEMPLATE_THEME']) ? ' bx-'.$arParams['TEMPLATE_TH
 										|| $code == "USER_NAME"
 									)
 								):?>
-									<div class="news-list-author"><i class="fa fa-user"></i> <?=GetMessage("IBLOCK_FIELD_".$code)?>:
-										<?=$value;?>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon news-list-icon-user"></span>
+										<span class="news-list-param"><?=GetMessage("IBLOCK_FIELD_".$code)?>:</span>
+										<span class="news-list-value"><?=$value;?></span>
 									</div>
 								<?elseif ($value != ""):?>
-									<div class="news-list-other"><i class="fa"></i> <?=GetMessage("IBLOCK_FIELD_".$code)?>:
-										<?=$value;?>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon"></span>
+										<span class="news-list-param"><?=GetMessage("IBLOCK_FIELD_".$code)?>:</span>
+										<span class="news-list-value"><?=$value;?></span>
 									</div>
 								<?endif;?>
 							<?endforeach;?>
@@ -247,20 +257,25 @@ $themeClass = isset($arParams['TEMPLATE_THEME']) ? ' bx-'.$arParams['TEMPLATE_TH
 									$value = $arProperty["DISPLAY_VALUE"];
 								?>
 								<?if($arProperty["CODE"] == "FORUM_MESSAGE_CNT"):?>
-									<div class="news-list-comments"><i class="fa fa-comments"></i> <?=$arProperty["NAME"]?>:
-										<?=$value;?>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon news-list-icon-comments"></span>
+										<span class="news-list-param"><?=$arProperty["NAME"]?>:<?=$value;?></span>
+										<span class="news-list-value"><?=$value;?></span>
 									</div>
 								<?elseif ($value != ""):?>
-									<div class="news-list-other"><i class="fa"></i> <?=$arProperty["NAME"]?>:
-										<?=$value;?>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon"></span>
+										<span class="news-list-param"><?=$arProperty["NAME"]?>:</span>
+										<span class="news-list-value"><?=$value;?></span>
 									</div>
 								<?endif;?>
 							<?endforeach;?>
 							<div class="d-flex justify-content-between">
 
 								<?if($arParams["DISPLAY_DATE"]!="N" && $arItem["DISPLAY_ACTIVE_FROM"]):?>
-									<div>
-										<div class="news-list-date"><i class="fa fa-calendar-o"></i> <?echo $arItem["DISPLAY_ACTIVE_FROM"]?></div>
+									<div class="news-list-view news-list-post-params">
+										<span class="news-list-icon news-list-icon-calendar"></span>
+										<span class="news-list-param"><?echo $arItem["DISPLAY_ACTIVE_FROM"]?></span>
 									</div>
 								<?endif?>
 

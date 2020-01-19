@@ -15,7 +15,7 @@ $formParams = Array(
 		(($arResult["allowVideo"] == "Y") ? "InputVideo" : ""),
 		"Table", "Justify", "InsertOrderedList",
 		"InsertUnorderedList",
-		"MentionUser", "SmileList", "Source"),
+		"MentionUser", "Spoiler", "SmileList", "Source"),
 	"BUTTONS" => Array(
 		(
 			in_array("UF_BLOG_COMMENT_FILE", $arParams["COMMENT_PROPERTY"])
@@ -82,7 +82,9 @@ $formParams = Array(
 			array('ELEMENT_ID' => 'url_preview_'.$rand)
 		)
 	),
-	"DISABLE_LOCAL_EDIT" => $arParams["bPublicPage"]
+	"DISABLE_LOCAL_EDIT" => $arParams["bPublicPage"],
+	"SELECTOR_VERSION" => $arResult["SELECTOR_VERSION"],
+	"DISABLE_CREATING_FILE_BY_CLOUD" => $arParams["bPublicPage"]
 );
 //===WebDav===
 if(!array_key_exists("USER", $GLOBALS) || !$GLOBALS["USER"]->IsAuthorized())

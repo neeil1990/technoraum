@@ -108,7 +108,18 @@ if ($arOrder)
 		$guestStatuses = \Bitrix\Main\Config\Option::get("sale", "allow_guest_order_view_status", "");
 		$guestStatuses = (strlen($guestStatuses) > 0) ?  unserialize($guestStatuses) : array();
 
-		if (!empty($hash) && ($order->getHash() !== $hash || !\Bitrix\Sale\Helpers\Order::isAllowGuestView($order)))
+		if (
+			!\Bitrix\Sale\OrderStatus::isAllowPay($order->getField('STATUS_ID'))
+			||
+			(
+				!empty($hash)
+				&& (
+					$order->getHash() !== $hash
+					||
+					!\Bitrix\Sale\Helpers\Order::isAllowGuestView($order)
+				)
+			)
+		)
 		{
 			LocalRedirect('/');
 			return;

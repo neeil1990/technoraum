@@ -18,6 +18,8 @@ BX.Iblock.IblockElementSelector = (function ()
 		this.lastElements = parameters.lastElements;
 		this.inputName = parameters.inputName;
 		this.onlyRead = parameters.onlyRead === 'Y';
+		this.adminSection = (parameters.admin === 'Y' ? 'Y' : 'N');
+		this.templateUrl = parameters.templateUrl;
 
 		this.init();
 	};
@@ -44,9 +46,15 @@ BX.Iblock.IblockElementSelector = (function ()
 				if (this.currentElements.hasOwnProperty(k))
 				{
 					this.selectedElements[this.currentElements[k].ID] = {
-						id: this.currentElements[k].ID, name: this.currentElements[k].NAME
+						id: this.currentElements[k].ID,
+						name: this.currentElements[k].NAME,
+						url: this.currentElements[k].URL,
 					};
-					selectedElements.push({id: this.currentElements[k].ID, name: this.currentElements[k].NAME});
+					selectedElements.push({
+						id: this.currentElements[k].ID,
+						name: this.currentElements[k].NAME,
+						url: this.currentElements[k].URL
+					});
 				}
 			}
 			this.setSelected(selectedElements);
@@ -60,7 +68,8 @@ BX.Iblock.IblockElementSelector = (function ()
 				{
 					this.listElementsData[this.lastElements[k].ID] = {
 						id: this.lastElements[k].ID,
-						name: this.lastElements[k].NAME
+						name: this.lastElements[k].NAME,
+						url: this.lastElements[k].URL
 					};
 				}
 			}
@@ -111,7 +120,8 @@ BX.Iblock.IblockElementSelector = (function ()
 			this.displayTab('search');
 			BX.addClass(BX(this.selectorId+'_search'), 'ies-content-find-content-selected');
 
-			this.url = this.ajaxUrl + '?sessid='+BX.bitrix_sessid()+'&mode=search&iblockId='+this.iblockId+'&string='+
+			this.url = this.ajaxUrl + '?sessid='+BX.bitrix_sessid()
+				+'&mode=search&iblockId='+this.iblockId+'&admin='+this.adminSection+'&string='+
 				encodeURIComponent(this.searchInput.value);
 			this.requestTimeout = setTimeout(BX.proxy(this.request, this), 400);
 		}
@@ -169,7 +179,8 @@ BX.Iblock.IblockElementSelector = (function ()
 				var selected = false;
 				this.listElementsData[elements[i].ID] = {
 					id : elements[i].ID,
-					name : elements[i].NAME
+					name : elements[i].NAME,
+					url : elements[i].URL
 				};
 				var inputObject = BX.create('input', {
 					props : {
@@ -261,7 +272,8 @@ BX.Iblock.IblockElementSelector = (function ()
 			this.selectedElements = [];
 			this.selectedElements[inputObject.value] = {
 				id : inputObject.value,
-				name : this.listElementsData[inputObject.value].name
+				name : this.listElementsData[inputObject.value].name,
+				url : this.listElementsData[inputObject.value].url
 			};
 			if(BX(this.selectorId+'_hidden_values'))
 			{
@@ -321,7 +333,8 @@ BX.Iblock.IblockElementSelector = (function ()
 
 					this.selectedElements[inputObject.value] = {
 						id : inputObject.value,
-						name : this.listElementsData[inputObject.value].name
+						name : this.listElementsData[inputObject.value].name,
+						url : this.listElementsData[inputObject.value].url
 					};
 				}
 			}
@@ -495,7 +508,8 @@ BX.Iblock.IblockElementSelector = (function ()
 	{
 		var startTime = (new Date()).getTime();
 		this.lastSearchTime = startTime;
-		this.searchRequest = BX.ajax.loadJSON(this.url, BX.proxy(function(data) {
+		this.searchRequest = BX.ajax.loadJSON(this.url, {
+			'template_url': this.templateUrl}, BX.proxy(function(data) {
 			if(this.lastSearchTime === startTime)
 			{
 				this.showResult(data);
@@ -552,7 +566,17 @@ BX.Iblock.IblockElementSelector = (function ()
 						})
 					);
 				}
-				listSelectedElements += '['+parseInt(selectedElement.id)+']'+BX.util.htmlspecialchars(selectedElement.name);
+
+				if (selectedElement.url)
+				{
+					listSelectedElements += '<a href="'+BX.util.htmlspecialchars(selectedElement.url)+
+						'" target="_blank">'+BX.util.htmlspecialchars(selectedElement.name)+'</a>';
+				}
+				else
+				{
+					listSelectedElements += BX.util.htmlspecialchars(selectedElement.name);
+				}
+
 				if(!this.multiple && !this.onlyRead)
 				{
 					listSelectedElements += '<span class="ies-content-delete-icon" onclick="BX.Iblock[\''+this.jsObject+

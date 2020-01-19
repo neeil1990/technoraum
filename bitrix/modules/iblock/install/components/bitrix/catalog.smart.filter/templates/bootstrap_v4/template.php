@@ -66,10 +66,8 @@ if (isset($templateData['TEMPLATE_THEME']))
 							<span class="smart-filter-container-modef"></span>
 
 							<div class="smart-filter-parameters-box-title" onclick="smartFilter.hideFilterProps(this)">
-								<span class="smart-filter-parameters-box-title-text">
-									<?=$arItem["NAME"]?>
-								</span>
-								<span data-role="prop_angle" class="smart-filter-angle smart-filter-angle-<?if ($arItem["DISPLAY_EXPANDED"]== "Y"):?>up<?else:?>down<?endif?>">
+								<span class="smart-filter-parameters-box-title-text"><?=$arItem["NAME"]?></span>
+								<span data-role="prop_angle" class="smart-filter-angle smart-filter-angle-up">
 									<span  class="smart-filter-angles"></span>
 								</span>
 							</div>

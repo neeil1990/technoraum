@@ -6,6 +6,7 @@ CJSCore::Init(array('report.js.dashboard'));
 CJSCore::Init(array('report.js.activitywidget')); //TODO remove here when can move it to ajax handler
 CJSCore::Init(array('report_visual_constructor'));
 CJSCore::Init(array('sidepanel'));
+
 $APPLICATION->IncludeComponent(
 	'bitrix:report.visualconstructor.board.header',
 	$arResult['HEADER_TEMPLATE_NAME'],
@@ -19,8 +20,14 @@ $APPLICATION->IncludeComponent(
 	$component,
 	array()
 );
-$rows = $arResult['ROWS'];
 ?>
+
+<?if($arResult['IS_ENABLED_STEPPER']):?>
+	<div class="report-analytics-stepper-wrapper">
+		<?=\Bitrix\Main\Update\Stepper::getHtml($arResult['STEPPER_IDS'])?>
+	</div>
+<?endif;?>
+
 <div id="report-visualconstructor-board"></div>
 <script>
 	BX.ready(function ()
@@ -32,10 +39,10 @@ $rows = $arResult['ROWS'];
 		new BX.VisualConstructor.BoardBase({
 			renderTo: BX('report-visualconstructor-board'),
 			boardId: <?=CUtil::PhpToJSObject($arResult['BOARD_ID'])?>,
-			rows: <?=CUtil::PhpToJSObject($rows, false, false, true)?>,
+			rows: <?=CUtil::PhpToJSObject($arResult['ROWS'], false, false, true)?>,
 			demoMode: "<?=$arResult['IS_BOARD_DEMO'];?>",
 			defaultBoard: "<?=$arResult['IS_BOARD_DEFAULT'];?>",
-			filterId: "<?=CUtil::JSEscape($arResult['FILTER']->getFilterParameters()['FILTER_ID'])?>"
+			filterId: "<?=CUtil::JSEscape($arResult['FILTER_ID'])?>"
 
 		});
 	});

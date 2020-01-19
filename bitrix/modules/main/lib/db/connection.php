@@ -512,7 +512,7 @@ abstract class Connection extends Data\Connection
 		}
 
 		$sql = "INSERT INTO {$this->getSqlHelper()->quote($tableName)} (".join(', ', array_keys($uniqueColumns)).") ".
-				"VALUES (".join(', ', $sqlValues).")";
+				"VALUES ".join(', ', $sqlValues);
 
 		$this->queryExecute($sql);
 

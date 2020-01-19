@@ -1,8 +1,7 @@
-<?
-global $MESS;
-$strPath2Lang = str_replace("\\", "/", __FILE__);
-$strPath2Lang = substr($strPath2Lang, 0, strlen($strPath2Lang)-strlen("/install/index.php"));
-include(GetLangFileName($strPath2Lang."/lang/", "/install/index.php"));
+<?php
+
+use Bitrix\Main\Localization\Loc;
+Loc::loadMessages(__FILE__);
 
 Class socialnetwork extends CModule
 {
@@ -14,7 +13,7 @@ Class socialnetwork extends CModule
 	var $MODULE_CSS;
 	var $MODULE_GROUP_RIGHTS = "Y";
 
-	function socialnetwork()
+	function __construct()
 	{
 		$arModuleVersion = array();
 
@@ -33,8 +32,8 @@ Class socialnetwork extends CModule
 			$this->MODULE_VERSION_DATE = SONET_VERSION_DATE;
 		}
 
-		$this->MODULE_NAME = GetMessage("SONET_INSTALL_NAME");
-		$this->MODULE_DESCRIPTION = GetMessage("SONET_INSTALL_DESCRIPTION");
+		$this->MODULE_NAME = Loc::getMessage("SONET_INSTALL_NAME");
+		$this->MODULE_DESCRIPTION = Loc::getMessage("SONET_INSTALL_DESCRIPTION");
 	}
 
 	function __SetLogFilter($site_id = false)
@@ -184,6 +183,7 @@ Class socialnetwork extends CModule
 		$eventManager->registerEventHandler('mail', 'onReplyReceivedLOG_ENTRY', 'socialnetwork', '\Bitrix\Socialnetwork\Internals\MailHandler', 'handleReplyReceivedLogEntry');
 		$eventManager->registerEventHandler('main', 'OnUISelectorActionProcessAjax', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\UISelector\Handler', 'OnUISelectorActionProcessAjax');
 		$eventManager->registerEventHandler('main', 'OnUISelectorEntitiesGetList', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\UISelector\Handler', 'OnUISelectorEntitiesGetList');
+		$eventManager->registerEventHandler('main', 'OnUISelectorGetProviderByEntityType', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\UISelector\Handler', 'OnUISelectorGetProviderByEntityType');
 		$eventManager->registerEventHandler('tasks', 'onTaskUpdateViewed', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Tasks\Task', 'onTaskUpdateViewed');
 		$eventManager->registerEventHandler('calendar', 'onViewEvent', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Calendar\CalendarEvent', 'onViewEvent');
 		$eventManager->registerEventHandler('main', 'onRatingListViewed', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\RatingVoteList', 'onViewed');
@@ -194,6 +194,8 @@ Class socialnetwork extends CModule
 		$eventManager->registerEventHandler('intranet', 'onEmployeeDepartmentsChanged', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Intranet\Structure\Employee', 'onEmployeeDepartmentsChanged');
 		$eventManager->registerEventHandler('socialnetwork', '\Bitrix\Socialnetwork\Log::'.\Bitrix\Main\Entity\DataManager::EVENT_ON_AFTER_UPDATE, 'socialnetwork', '\Bitrix\Socialnetwork\Item\LogRight', 'OnAfterLogUpdate');
 		$eventManager->registerEventHandler('socialnetwork', '\Bitrix\Socialnetwork\Log::'.\Bitrix\Main\Entity\DataManager::EVENT_ON_AFTER_UPDATE, 'socialnetwork', '\Bitrix\Socialnetwork\Item\LogIndex', 'OnAfterLogUpdate');
+		$eventManager->registerEventHandler('bitrix24', 'OnManualModuleAddDelete', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Bitrix24\Bitrix24Event', 'OnManualModuleAddDelete');
+		$eventManager->registerEventHandler('landing', 'OnBuildSourceList', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Landing\Livefeed', 'onBuildSourceListHandler');
 
 		CAgent::AddAgent("CSocNetMessages::SendEventAgent();", "socialnetwork", "N", 600);
 
@@ -312,7 +314,7 @@ Class socialnetwork extends CModule
 
 					foreach($arSmile as $key => $val)
 					{
-						$arSmile[$key]["LANG"][] = Array("LID" => $arLangs["LID"], "NAME" => GetMessage($val["FICON_SMILE"]));
+						$arSmile[$key]["LANG"][] = Array("LID" => $arLangs["LID"], "NAME" => Loc::getMessage($val["FICON_SMILE"]));
 					}
 				}
 
@@ -414,6 +416,7 @@ Class socialnetwork extends CModule
 		$eventManager->unregisterEventHandler('mail', 'onReplyReceivedLOG_ENTRY', 'socialnetwork', '\Bitrix\Socialnetwork\Internals\MailHandler', 'handleReplyReceivedLogEntry');
 		$eventManager->unregisterEventHandler('main', 'OnUISelectorActionProcessAjax', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\UISelector\Handler', 'OnUISelectorActionProcessAjax');
 		$eventManager->unregisterEventHandler('main', 'OnUISelectorEntitiesGetList', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\UISelector\Handler', 'OnUISelectorEntitiesGetList');
+		$eventManager->unregisterEventHandler('main', 'OnUISelectorGetProviderByEntityType', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\UISelector\Handler', 'OnUISelectorGetProviderByEntityType');
 		$eventManager->unregisterEventHandler('tasks', 'onTaskUpdateViewed', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Tasks\Task', 'onTaskUpdateViewed');
 		$eventManager->unregisterEventHandler('calendar', 'onViewEvent', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Calendar\CalendarEvent', 'onViewEvent');
 		$eventManager->unregisterEventHandler('main', 'onRatingListViewed', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Main\RatingVoteList', 'onViewed');
@@ -424,6 +427,8 @@ Class socialnetwork extends CModule
 		$eventManager->unregisterEventHandler('intranet', 'onEmployeeDepartmentsChanged', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Intranet\Structure\Employee', 'onEmployeeDepartmentsChanged');
 		$eventManager->unregisterEventHandler('socialnetwork', '\Bitrix\Socialnetwork\Log::'.\Bitrix\Main\Entity\DataManager::EVENT_ON_AFTER_UPDATE, 'socialnetwork', '\Bitrix\Socialnetwork\Item\LogRight', 'OnAfterLogUpdate');
 		$eventManager->unregisterEventHandler('socialnetwork', '\Bitrix\Socialnetwork\Log::'.\Bitrix\Main\Entity\DataManager::EVENT_ON_AFTER_UPDATE, 'socialnetwork', '\Bitrix\Socialnetwork\Item\LogIndex', 'OnAfterLogUpdate');
+		$eventManager->unregisterEventHandler('bitrix24', 'OnManualModuleAddDelete', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Bitrix24\Bitrix24Event', 'OnManualModuleAddDelete');
+		$eventManager->unregisterEventHandler('landing', 'OnBuildSourceList', 'socialnetwork', '\Bitrix\Socialnetwork\Integration\Landing\Livefeed', 'onBuildSourceListHandler');
 
 		UnRegisterModule("socialnetwork");
 		return true;
@@ -963,6 +968,7 @@ Class socialnetwork extends CModule
 		DeleteDirFilesEx("/bitrix/themes/.default/icons/socialnetwork/");//icons
 		DeleteDirFilesEx("/bitrix/images/socialnetwork/");//images
 		DeleteDirFilesEx("/bitrix/sounds/socialnetwork/");//sounds
+		DeleteDirFilesEx("/bitrix/js/socialnetwork/");//javascript
 
 		return true;
 	}
@@ -972,7 +978,7 @@ Class socialnetwork extends CModule
 		global $APPLICATION, $step;
 		$step = IntVal($step);
 		if ($step < 2)
-			$APPLICATION->IncludeAdminFile(GetMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/step1.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/step1.php");
 		elseif($step==2)
 		{
 			$this->InstallFiles();
@@ -981,7 +987,7 @@ Class socialnetwork extends CModule
 			$this->InstallPublic();
 			$GLOBALS["errors"] = $this->errors;
 
-			$APPLICATION->IncludeAdminFile(GetMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/step2.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/step2.php");
 		}
 	}
 
@@ -990,7 +996,7 @@ Class socialnetwork extends CModule
 		global $APPLICATION, $step;
 		$step = IntVal($step);
 		if($step<2)
-			$APPLICATION->IncludeAdminFile(GetMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/unstep1.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/unstep1.php");
 		elseif($step==2)
 		{
 			$this->UnInstallDB(array(
@@ -1003,7 +1009,7 @@ Class socialnetwork extends CModule
 
 			$GLOBALS["errors"] = $this->errors;
 
-			$APPLICATION->IncludeAdminFile(GetMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/unstep2.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SONET_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/socialnetwork/install/unstep2.php");
 		}
 	}
 
@@ -1012,14 +1018,24 @@ Class socialnetwork extends CModule
 		$arr = array(
 			"reference_id" => array("D", "K", "R", "W"),
 			"reference" => array(
-					"[D] ".GetMessage("SONETP_PERM_D"),
-					"[K] ".GetMessage("SONETP_PERM_K"),
-					"[R] ".GetMessage("SONETP_PERM_R"),
-					"[W] ".GetMessage("SONETP_PERM_W")
+					"[D] ".Loc::getMessage("SONETP_PERM_D"),
+					"[K] ".Loc::getMessage("SONETP_PERM_K"),
+					"[R] ".Loc::getMessage("SONETP_PERM_R"),
+					"[W] ".Loc::getMessage("SONETP_PERM_W")
 				),
 			"use_site" => array("K", "W")
 			);
 		return $arr;
 	}
+
+	public function migrateToBox()
+	{
+		global $DB;
+
+		$DB->Query('UPDATE b_sonet_log SET EVENT_ID="intranet_new_user" WHERE EVENT_ID="bitrix24_new_user"');
+		$DB->Query('UPDATE b_sonet_log_comment SET EVENT_ID="intranet_new_user_comment" WHERE EVENT_ID="bitrix24_new_user_comment"');
+		$DB->Query('UPDATE b_sonet_log SET ENTITY_TYPE="IN" WHERE ENTITY_TYPE="BN"');
+		$DB->Query('UPDATE b_sonet_log SET RATING_TYPE_ID="INTRANET_NEW_USER" WHERE RATING_TYPE_ID="BITRIX24_NEW_USER"');
+		$DB->Query('UPDATE b_sonet_log SET MODULE_ID="intranet" WHERE EVENT_ID="intranet_new_user"');
+	}
 }
-?>

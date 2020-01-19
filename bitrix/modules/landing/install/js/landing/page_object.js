@@ -30,12 +30,12 @@
 	 */
 	BX.Landing.PageObject.getInstance = function()
 	{
-		if (!window.top.BX.Landing.PageObject.instance && !BX.Landing.PageObject.instance)
+		if (!BX.Landing.PageObject.instance && !BX.Landing.PageObject.instance)
 		{
-			window.top.BX.Landing.PageObject.instance = new BX.Landing.PageObject();
+			BX.Landing.PageObject.instance = new BX.Landing.PageObject();
 		}
 
-		return (window.top.BX.Landing.PageObject.instance || BX.Landing.PageObject.instance);
+		return (BX.Landing.PageObject.instance || BX.Landing.PageObject.instance);
 	};
 
 
@@ -54,14 +54,20 @@
 		top: function()
 		{
 			return new Promise(function(resolve, reject) {
+				if (!this.store.topPanel && window.parent)
+				{
+					this.store.topPanel = window.parent.document.querySelector(".landing-ui-panel-top");
+				}
+
 				if (!this.store.topPanel)
 				{
-					this.store.topPanel = window.top.document.querySelector(".landing-ui-panel-top");
+					this.store.topPanel = window.document.querySelector(".landing-ui-panel-top");
 				}
 
 				if (this.store.topPanel)
 				{
 					resolve(this.store.topPanel);
+					this.store.topPanel = null;
 				}
 				else
 				{
@@ -79,20 +85,7 @@
 		design: function()
 		{
 			return new Promise(function(resolve, reject) {
-				if (!this.store.designPanel)
-				{
-					this.store.designPanel = BX.Landing.UI.Panel.StylePanel.getInstance();
-				}
-
-				if (this.store.designPanel)
-				{
-					resolve(this.store.designPanel);
-				}
-				else
-				{
-					reject("BX.Landing.UI.Panel.StylePanel unavailable");
-					console.warn("BX.Landing.UI.Panel.StylePanel unavailable");
-				}
+				resolve(BX.Landing.UI.Panel.StylePanel.getInstance());
 			}.bind(this));
 		},
 
@@ -104,20 +97,7 @@
 		content: function()
 		{
 			return new Promise(function(resolve, reject) {
-				if (!this.store.contentPanel)
-				{
-					this.store.contentPanel = BX.Landing.UI.Panel.ContentEdit.getInstance();
-				}
-
-				if (this.store.contentPanel)
-				{
-					resolve(this.store.contentPanel);
-				}
-				else
-				{
-					reject("BX.Landing.UI.Panel.ContentEdit unavailable");
-					console.warn("BX.Landing.UI.Panel.ContentEdit unavailable");
-				}
+				resolve(BX.Landing.UI.Panel.ContentEdit.getInstance());
 			}.bind(this));
 		},
 
@@ -129,34 +109,27 @@
 		inlineEditor: function()
 		{
 			return new Promise(function(resolve, reject) {
-				if (!this.store.inlineEditor)
-				{
-					this.store.inlineEditor = BX.Landing.UI.Panel.EditorPanel.getInstance();
-				}
-
-				if (this.store.inlineEditor)
-				{
-					resolve(this.store.inlineEditor);
-				}
-				else
-				{
-					reject("BX.Landing.UI.Panel.EditorPanel unavailable");
-					console.warn("BX.Landing.UI.Panel.EditorPanel unavailable");
-				}
+				resolve(BX.Landing.UI.Panel.EditorPanel.getInstance());
 			}.bind(this));
 		},
 
 		view: function()
 		{
 			return new Promise(function(resolve, reject) {
+				if (!this.store.view && window.parent)
+				{
+					this.store.view = window.parent.document.querySelector(".landing-ui-view");
+				}
+
 				if (!this.store.view)
 				{
-					this.store.view = window.top.document.querySelector(".landing-ui-view");
+					this.store.view = window.document.querySelector(".landing-ui-view");
 				}
 
 				if (this.store.view)
 				{
 					resolve(this.store.view);
+					this.store.view = null;
 				}
 				else
 				{
@@ -169,14 +142,15 @@
 		blocks: function()
 		{
 			return new Promise(function(resolve) {
-				if (!this.store.blocks)
+				if (!this.store.blocks && window.parent)
 				{
-					this.store.blocks = top.BX.Landing.Block.storage;
+					this.store.blocks = window.parent.BX.Landing.Block.storage;
 				}
 
 				if (this.store.blocks)
 				{
 					resolve(this.store.blocks);
+					this.store.blocks = null;
 				}
 				else
 				{

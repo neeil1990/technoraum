@@ -31,6 +31,8 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lib/loader.php");
 	)
 );
 
+\Bitrix\Main\Loader::registerHandler([\Bitrix\Main\ORM\Loader::class, 'autoLoad']);
+
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/compatibility.php");
 
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/wizard.php"); //Wizard API
@@ -463,7 +465,7 @@ class RequirementStep extends CWizardStep
 	var $memoryRecommend = 256;
 	var $diskSizeMin = 500;
 
-	var $phpMinVersion = "5.6.0";
+	var $phpMinVersion = "7.1.0";
 	var $apacheMinVersion = "1.3";
 	var $iisMinVersion = "5.0.0";
 
@@ -1531,7 +1533,7 @@ class CreateDBStep extends CWizardStep
 		if ($arVersion = $dbResult->fetch())
 		{
 			$mysqlVersion = trim($arVersion["ver"]);
-			if (!BXInstallServices::VersionCompare($mysqlVersion, "5.0.0"))
+			if (!BXInstallServices::VersionCompare($mysqlVersion, "5.6.0"))
 			{
 				$this->SetError(InstallGetMessage("SC_DB_VERS_MYSQL_ER"));
 				return false;
@@ -1550,7 +1552,7 @@ class CreateDBStep extends CWizardStep
 		$dbResult = $conn->query("SELECT @@sql_mode");
 		if ($arResult = $dbResult->fetch())
 		{
-			$sqlMode = trim($arResult[0]);
+			$sqlMode = trim($arResult["@@sql_mode"]);
 			if ($sqlMode <> "")
 			{
 				$this->sqlMode = "";
@@ -2635,6 +2637,7 @@ class CreateModulesStep extends CWizardStep
 			require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/".$DBType."/option.php");
 			require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/".$DBType."/event.php");
 			require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/".$DBType."/agent.php");
+			require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/".$DBType."/sqlwhere.php");
 		}
 		else
 		{
@@ -2966,29 +2969,33 @@ class CreateAdminStep extends CWizardStep
 			}
 		}
 
-		$arWizardsList = BXInstallServices::GetWizardsList();
-		if (count($arWizardsList) <= 0)
+		$wizardName = BXInstallServices::GetConfigWizard();
+		if($wizardName === false)
 		{
-			$wizardName = BXInstallServices::GetDemoWizard();
-			if ($wizardName)
+			$arWizardsList = BXInstallServices::GetWizardsList();
+			if (empty($arWizardsList))
 			{
-				if (BXInstallServices::CreateWizardIndex($wizardName, $errorMessageTmp))
-				{
-					BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/license.php");
-					BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/readme.php");
-					BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/license.html");
-					BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/readme.html");
-					BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/install.config");
+				$wizardName = BXInstallServices::GetDemoWizard();
+			}
+		}
+		if ($wizardName !== false)
+		{
+			if (BXInstallServices::CreateWizardIndex($wizardName, $errorMessageTmp))
+			{
+				BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/license.php");
+				BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/readme.php");
+				BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/license.html");
+				BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/readme.html");
+				BXInstallServices::DeleteDirRec($_SERVER["DOCUMENT_ROOT"]."/install.config");
 
-					if (defined("BX_UTF"))
-						BXInstallServices::EncodeFile($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lang/".LANGUAGE_ID."/install.php", INSTALL_CHARSET);
+				if (defined("BX_UTF"))
+					BXInstallServices::EncodeFile($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lang/".LANGUAGE_ID."/install.php", INSTALL_CHARSET);
 
-					BXInstallServices::LocalRedirect("/index.php");
-				}
-				else
-				{
-					$this->SetError($errorMessageTmp);
-				}
+				BXInstallServices::LocalRedirect("/index.php");
+			}
+			else
+			{
+				$this->SetError($errorMessageTmp);
 			}
 		}
 

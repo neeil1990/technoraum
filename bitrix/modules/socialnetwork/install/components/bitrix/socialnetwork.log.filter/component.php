@@ -446,6 +446,7 @@ $arResult["Filter"] = array(
 		'default' => true,
 		'type' => 'dest_selector',
 		'params' => array (
+			'apiVersion' => '3',
 			'context' => 'FEED_FILTER_CREATED_BY',
 			'multiple' => 'N',
 			'contextCode' => 'U',
@@ -469,6 +470,7 @@ if (
 		'default' => true,
 		'type' => 'dest_selector',
 		'params' => array (
+			'apiVersion' => '3',
 			'context' => 'FEED_FILTER_TO',
 			'multiple' => 'N',
 			'enableAll' => 'Y',

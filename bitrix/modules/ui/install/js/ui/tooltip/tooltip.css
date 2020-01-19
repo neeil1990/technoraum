@@ -121,22 +121,22 @@
 	color: #828B95;
 }
 
-.field-row {
+.bx-ui-tooltip-field-row {
 	display: block;
 	margin: 0 0 6px 0;
 }
 
-.bx-ui-tooltip-info-data .bx-ui-tooltip-info-data-info .field-name {
+.bx-ui-tooltip-info-data .bx-ui-tooltip-info-data-info .bx-ui-tooltip-field-name {
 	font-weight: normal;
 }
 
-.bx-ui-tooltip-info-data .bx-ui-tooltip-info-data-info .field-value,
-.bx-ui-tooltip-info-data .bx-ui-tooltip-info-data-info .field-value a {
+.bx-ui-tooltip-info-data .bx-ui-tooltip-info-data-info .bx-ui-tooltip-field-value,
+.bx-ui-tooltip-info-data .bx-ui-tooltip-info-data-info .bx-ui-tooltip-field-value a {
 	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
 	color: #333;
 }
 
-.bx-ui-tooltip-info-data-info .field-row .field-value .fields.string {
+.bx-ui-tooltip-info-data-info .bx-ui-tooltip-field-row .bx-ui-tooltip-field-value .fields.string {
 	display: inline-block;
 }
 
@@ -322,7 +322,7 @@
 .bx-ui-tooltip-info-bottomarea {
 	position: relative;
 	overflow: auto;
-	height: 35px;
+	height: 12px;
 	width: 370px;
 }
 

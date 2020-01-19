@@ -12,10 +12,12 @@
 		this.items = null;
 		this.currentIndex = null;
 		this.handlers = {};
+		this.baseContainer = options.baseContainer || document.body;
 
 		this.setItems(options.items || []);
 
 		this.zIndex = options.zIndex || 999999;
+		this.isBodyPaddingAdded = null;
 		this.cycleMode = options.hasOwnProperty('cycleMode')? options.cycleMode : true;
 		this.preload = options.hasOwnProperty('preload')? options.preload : 3;
 		this.cachedData = {};
@@ -116,12 +118,43 @@
 			return extensions;
 		},
 
-		handleDocumentClick: function (event)
+		/**
+		 * @param {MouseEvent} event
+		 * @return {HTMLElement|null}
+		 */
+		extractTargetFromEvent: function (event)
 		{
 			var target = BX.getEventTarget(event);
-			if (!this.shouldRunViewer(target))
+
+			var shouldRunViewer = false;
+			var maxDepth = 8;
+			do
+			{
+				if (this.shouldRunViewer(target))
+				{
+					shouldRunViewer = true;
+					break;
+				}
+
+				target = target.parentNode;
+				maxDepth--;
+			}
+			while (maxDepth > 0 && target);
+
+			return shouldRunViewer? target : null;
+		},
+
+		handleDocumentClick: function (event)
+		{
+			var target = this.extractTargetFromEvent(event);
+			if (!target)
 			{
 				return;
+			}
+
+			if (target.tagName !== 'A' && target.closest('a[target="_blank"]'))
+			{
+				return false;
 			}
 
 			event.preventDefault();
@@ -176,19 +209,23 @@
 
 		handleVisibleControls: function(ev)
 		{
-			if(this._timerIdReadingMode)
+			if (BX.browser.IsMobile() || BX.hasClass(document.documentElement, 'bx-touch'))
+			{
+				return;
+			}
+
+			if (this._timerIdReadingMode)
 			{
 				clearTimeout(this._timerIdReadingMode);
 			}
 
-			if(!this.cursorInPerimeter(ev) || BX.findParent(ev.target, { className: 'ui-viewer-next' }) || BX.findParent(ev.target, { className: 'ui-viewer-prev' }))
+			if (!this.cursorInPerimeter(ev) || BX.findParent(ev.target, {className: 'ui-viewer-next'}) || BX.findParent(ev.target, {className: 'ui-viewer-prev'}))
 			{
 				this.disableReadingMode();
 			}
 			else
 			{
-				this._timerIdReadingMode = setTimeout(function()
-				{
+				this._timerIdReadingMode = setTimeout(function () {
 					this.enableReadingMode();
 				}.bind(this), 2800);
 			}
@@ -196,6 +233,11 @@
 
 		enableReadingMode: function(withTimer)
 		{
+			if (BX.browser.IsMobile() || !this.isOnTop())
+			{
+				return;
+			}
+
 			if(withTimer)
 			{
 				this._timerIdReadingMode = setTimeout(function()
@@ -255,8 +297,8 @@
 			var slider = BX.SidePanel.Instance.getTopSlider();
 			if (slider)
 			{
-				console.log('grab zIndex from closed slider', slider.getZindex());
-				this.setZindex(slider.getZindex() - 1);
+				console.log('set zIndex above top slider after closing another slider', slider.getZindex());
+				this.setZindex(slider.getZindex() + 1);
 			}
 			else
 			{
@@ -278,6 +320,28 @@
 			console.log('SidePanel.Slider:onOpen', this.originalZIndex, event.getSlider().getZindex() - 1);
 
 			this.setZindex(event.getSlider().getZindex() - 1);
+		},
+
+		adjustViewport: function ()
+		{
+			var viewportNode = document.querySelector('[name="viewport"]');
+			if (!viewportNode)
+			{
+				return;
+			}
+			this._viewportContent = viewportNode.getAttribute('content');
+			viewportNode.setAttribute('content', 'width=device-width, user-scalable=no');
+		},
+
+		restoreViewport: function ()
+		{
+			var viewportNode = document.querySelector('[name="viewport"]');
+			if (!this._viewportContent || !viewportNode)
+			{
+				return;
+			}
+
+			viewportNode.setAttribute('content', this._viewportContent);
 		},
 
 		adjustZindex: function ()
@@ -376,6 +440,15 @@
 			console.log('setZindex', zIndex);
 			this.zIndex = zIndex;
 			this.getViewerContainer().style.zIndex = zIndex;
+			this.setActionPanelZindex(zIndex);
+		},
+
+		setActionPanelZindex: function (zIndex)
+		{
+			if (this.actionPanel)
+			{
+				this.actionPanel.layout.container.style.zIndex = zIndex;
+			}
 		},
 
 		/**
@@ -493,8 +566,9 @@
 			this.items[index] = newItem;
 		},
 
-		show: function (index)
+		show: function (index, options)
 		{
+			options = options || {};
 			if (typeof index === 'undefined')
 			{
 				index = 0;
@@ -515,16 +589,16 @@
 
 			this.currentIndex = index;
 
-			this.actionPanel.removeItems();
-			this.actionPanel.addItems(
-				this.convertItemActionsToPanelItems(this.getCurrentItem())
-			);
-
+			this.resetActionsInPanelByItem(this.getCurrentItem());
 			item.load().then(function (loadedItem) {
 				if (this.getCurrentItem() === loadedItem)
 				{
 					console.log('show item');
 					this.processShowItem(loadedItem);
+					if (options.asFirstToShow)
+					{
+						loadedItem.asFirstToShow();
+					}
 				}
 			}.bind(this))
 			.catch(function (reason) {
@@ -845,6 +919,12 @@
 					text: BX.message('JS_UI_VIEWER_ITEM_ACTION_SHARE'),
 					buttonIconClass: 'ui-btn-icon-share'
 				},
+				print: {
+					id: 'print',
+					type: 'print',
+					text: '',
+					buttonIconClass: 'ui-btn-icon-print ui-btn-disabled'
+				},
 				info: {
 					id: 'info',
 					type: 'info',
@@ -1014,77 +1094,63 @@
 			return this._isOpen;
 		},
 
-		getScrollWidth: function()
-		{
-			var div = BX.create('div', {
-				style: {
-					overflow: 'scroll',
-					width: '50px',
-					height: '50px',
-					visibility: 'hidden'
-				}
-			});
-
-			document.body.appendChild(div);
-			var scrollWidth = div.offsetWidth - div.clientWidth;
-			document.body.removeChild(div);
-
-			return scrollWidth;
-		},
-
 		addBodyPadding: function()
 		{
-			if (BX.getClass('BXIM.messenger.popupMessenger'))
+			var padding = window.innerWidth - document.documentElement.clientWidth;
+
+			if (BX.getClass('BXIM.messenger.popupMessenger') ||
+				padding === 0)
 			{
 				return;
 			}
 
-			var padding = this.getScrollWidth() + 'px';
+			document.body.style.paddingRight = padding + 'px';
+
 			var imBar = document.getElementById('bx-im-bar');
-			var helpBlock = document.getElementById('bx-help-block');
-
-			document.body.style.paddingRight = padding;
-
 			if(imBar)
 			{
-				imBar.style.borderRight = padding + ' solid rgb(238, 242, 244)';
+				var borderColor = 'rgb(238, 242, 244)';
+
+				if(document.body.classList.contains('bitrix24-light-theme'))
+				{
+					borderColor = 'rgba(255, 255, 255, .1)';
+				}
+
+				if(document.body.classList.contains('bitrix24-dark-theme'))
+				{
+					borderColor = 'rgba(82, 92, 105, .1)';
+				}
+
+				imBar.style.borderRight = padding + 'px solid ' + borderColor;
 			}
 
-			if(helpBlock)
-			{
-				helpBlock.style.borderRight  = padding + ' solid rgb(238, 242, 244)';
-				helpBlock.style.right = '-' + padding;
-			}
+			this.isBodyPaddingAdded = true;
 		},
 
 		removeBodyPadding: function()
 		{
-			var padding = '';
+			document.body.style.removeProperty('padding-right');
+
 			var imBar = document.getElementById('bx-im-bar');
-			var helpBlock = document.getElementById('bx-help-block');
-
-			document.body.style.paddingRight = padding;
-
-			if(imBar)
+			if (imBar)
 			{
-				imBar.style.borderRight = padding;
+				imBar.style.removeProperty('border-right');
 			}
 
-			if(helpBlock)
-			{
-				helpBlock.style.borderRight  = padding;
-				helpBlock.style.right = padding;
-			}
+			this.isBodyPaddingAdded = false;
 		},
 
 		open: function(index)
 		{
-			this.addBodyPadding();
+			this.adjustViewport();
 			this.adjustZindex();
+			this.addBodyPadding();
+			this.baseContainer.appendChild(this.getViewerContainer());
+			BX.focus(this.getViewerContainer());
 
-			document.body.appendChild(this.getViewerContainer());
-
-			this.show(index);
+			this.show(index, {
+				asFirstToShow: true
+			});
 			this.showPanel();
 
 			this.bindEvents();
@@ -1108,11 +1174,19 @@
 
 		showPanel: function()
 		{
-			this.actionPanel.layout.container.style.zIndex = '9999999';
+			this.setActionPanelZindex(this.getZindex());
 			this.actionPanel.layout.container.style.background = 'none';
 
 			this.actionPanel.draw();
 			this.actionPanel.showPanel();
+		},
+
+		resetActionsInPanelByItem: function (item)
+		{
+			this.actionPanel.removeItems();
+			this.actionPanel.addItems(
+				this.convertItemActionsToPanelItems(item)
+			);
 		},
 
 		hideCurrentItem: function()
@@ -1246,6 +1320,7 @@
 			BX.onCustomEvent('BX.UI.Viewer.Controller:onClose', [this]);
 
 			BX.addClass(this.layout.container, 'ui-viewer-hide');
+			this.restoreViewport();
 			this.hideCurrentItem();
 
 			BX.bind(this.layout.container, 'transitionend', function()
@@ -1256,8 +1331,11 @@
 				this.actionPanel.hidePanel();
 				this.unLockScroll();
 				this.unbindEvents();
-				this.removeBodyPadding();
 				this.disableReadingMode();
+				if(this.isBodyPaddingAdded)
+				{
+					this.removeBodyPadding();
+				}
 			}.bind(this));
 
 			// this.items = null;
@@ -1269,9 +1347,11 @@
 		showLoading: function (options)
 		{
 			options = options || {};
+			options.zIndex = BX.type.isNumber(options.zIndex)? options.zIndex : -1;
 
 			this.layout.inner.appendChild(this.getLoader());
 			this.setTextOnLoading(options.text || '');
+			this.layout.loader.style.zIndex = options.zIndex;
 		},
 
 		setTextOnLoading: function (text)
@@ -1296,7 +1376,7 @@
 
 		adjustViewerHeight: function()
 		{
-			if(!this.layout.container)
+			if(!this.layout.container || BX.browser.IsMobile())
 				return;
 
 			this.layout.container.style.height = document.documentElement.clientHeight + 'px';
@@ -1308,7 +1388,8 @@
 			{
 				this.layout.container = BX.create('div', {
 					props: {
-						className: 'ui-viewer'
+						className: 'ui-viewer',
+						tabIndex: 22081990
 					},
 					style: {
 						zIndex: this.zIndex,
@@ -1355,7 +1436,7 @@
 			this.startX = touchObject.pageX;
 			this.startY = touchObject.pageY;
 			this.startTime = (new Date()).getTime();
-			event.preventDefault();
+			// event.preventDefault();
 
 		},
 
@@ -1375,25 +1456,23 @@
 				{
 					this.swipeDirection = (distanceX < 0) ? 'left' : 'right';
 				}
-				else if (Math.abs(distanceY) >= threshold && Math.abs(distanceX) <= restraint)
-				{
-					this.swipeDirection = (distanceY < 0) ? 'up' : 'down';
-				}
+				// else if (Math.abs(distanceY) >= threshold && Math.abs(distanceX) <= restraint)
+				// {
+				// 	this.swipeDirection = (distanceY < 0) ? 'up' : 'down';
+				// }
 			}
 
 			switch (this.swipeDirection)
 			{
-				case 'up':
 				case 'left':
 					this.showPrev();
 					break;
-				case 'down':
 				case 'right':
 					this.showNext();
 					break;
 			}
 
-			event.preventDefault();
+			// event.preventDefault();
 		},
 
 		isOnTop: function ()
@@ -1486,6 +1565,73 @@
 		}
 	};
 
+	/**
+	 * @extends {BX.UI.Viewer.Controller}
+	 * @param options
+	 * @constructor
+	 */
+	BX.UI.Viewer.InlineController = function (options)
+	{
+		options = options || {};
+
+		BX.UI.Viewer.Controller.apply(this, arguments);
+	};
+
+	BX.UI.Viewer.InlineController.prototype =
+	{
+		__proto__: BX.UI.Viewer.Controller.prototype,
+		constructor: BX.UI.Viewer.Controller,
+
+		adjustViewport: function(){},
+		addBodyPadding: function(){},
+		adjustZindex: function(){},
+		showPanel: function(){},
+		adjustViewerHeight: function(){},
+		// showLoading: function(){},
+
+		/**
+		 * @param {HTMLElement} node
+		 */
+		renderItemByNode: function (node)
+		{
+			if (!node)
+			{
+				return;
+			}
+
+			this.buildItemListByNode(node).then(function(items){
+				if (items.length === 0)
+				{
+					return;
+				}
+
+				this.setItems(items).then(function(){
+					this.open(0);
+				}.bind(this));
+			}.bind(this));
+		},
+
+		getViewerContainer: function()
+		{
+			if (!this.layout.container)
+			{
+				//this.layout.inner? for showLoading
+				this.layout.container = this.layout.inner = BX.create('div', {
+					props: {
+						className: 'ui-viewer-inner'
+					},
+					children: [
+						this.getItemContainer()
+					]
+				});
+			}
+
+			return this.layout.container;
+		},
+
+		handleClickOnItemContainer: function(){},
+		handleKeyPress: function(){},
+	};
 	/**
 	 * @param type
 	 * @param {HTMLElement} node
@@ -1638,6 +1784,11 @@
 	});
 
 	window.document.addEventListener('click', function(event) {
+		if (event.button !== 0)
+		{
+			return;
+		}
+
 		if (window.top !== window && !BX.getClass('window.top.BX.UI.Viewer.Instance'))
 		{
 			top.BX.loadExt('ui.viewer').then(function () {

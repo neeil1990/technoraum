@@ -10,6 +10,7 @@ return array(
 	'block' => array(
 		'name' => Loc::getMessage('LANDING_BLOCK_49_3_TWO_COLS_TEXT_VIDEO_FIX--NAME'),
 		'section' => array('video'),
+		'dynamic' => false,
 		'version' => '18.5.0',
 	),
 	'cards' => array(),
@@ -30,7 +31,7 @@ return array(
 	'style' => array(
 		'.landing-block-node-text-container' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_49_3_TWO_COLS_TEXT_VIDEO_FIX--LANDINGBLOCKNODETEXT'),
-			'type' => array('animation'),
+			'type' => array('animation', 'align-items'),
 		),
 		'.landing-block-node-title' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_49_3_TWO_COLS_TEXT_VIDEO_FIX--LANDINGBLOCKNODETITLE'),

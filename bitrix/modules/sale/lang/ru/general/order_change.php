@@ -51,6 +51,14 @@ $MESS["SOC_ORDER_PRICE_DELIVERY_CHANGED_INFO"] = "Стоимость доставки #AMOUNT#";
 $MESS["SOC_ORDER_PRICE_CHANGED"] = "Изменение стоимости заказа";
 $MESS["SOC_ORDER_PRICE_CHANGED_INFO"] = "Стоимость заказа изменилась с #OLD_AMOUNT# на #AMOUNT#";
 $MESS["SOC_ORDER_1C_IMPORT"] = "Импорт сведений о заказе из 1C";
+
+$MESS["SOC_ORDER_SYNCHRONIZATION_IMPORT_TITLE"] = "Импорт заказа из внешней сиcтемы";
+$MESS["SOC_ORDER_SYNCHRONIZATION_IMPORT_INFO"] = "Импорт внешнего заказа  \"#EXTERNAL_ORDER_ID#\"";
+
+$MESS["SOC_ORDER_SYNCHRONIZATION_EXPORT_TITLE"] = "Экспорт заказа во внешую сиcтему";
+$MESS["SOC_ORDER_SYNCHRONIZATION_EXPORT_ERROR_TITLE"] = "Ошибка экспорта заказа во внешую сиcтему";
+$MESS["SOC_ORDER_SYNCHRONIZATION_EXPORT_ERROR_INFO"] = "При экспорте возникла ошибка \"#ERROR#\"";
+
 $MESS["SOC_ORDER_ADDED"] = "Создание заказа";
 $MESS["SOC_ORDER_DELIVERY_REQUEST_SENT"] = "Заявка в ТК";
 $MESS["SOC_ORDER_DELIVERY_REQUEST_SENT_ERROR"] = "Ошибка";

@@ -145,13 +145,13 @@ while ($arItems = $dbBasketItems->Fetch())
 			   profit="<?=$arResult["PRICES"]["price"]["PRINT_DISCOUNT_DIFF"]?>"
 			   old_price="<?=$arResult["PRICES"]["price"]["PRINT_VALUE"];?>"
 				>
-				<span>
+				
 					<?if(checkPrice($arResult['IBLOCK_ID'], $arResult['ID'])):?>
-                        По запросу
+						<a class="fancy button request-a-price" data-name="<?=$arResult['NAME']?>" href="#request-a-price" style="width:250px;">Запросить цену</a>				
 					<?else:?>
-                        <?=$arResult["PRICES"]["price"]["PRINT_VALUE"]?>
+                        <span><?=$arResult["PRICES"]["price"]["PRINT_VALUE"]?></span>
 					<?endif;?>
-				</span>
+				
 			</p>
 		</div>
 
@@ -168,10 +168,6 @@ while ($arItems = $dbBasketItems->Fetch())
 
             <a class="button add_to_cart_button" href="<?=$url?>">Добавить в корзину</a>
             <a class="fancy button one_click_button" href="#click_one_buy">Купить в один клик</a>
-
-            <?if(checkPrice($arResult['IBLOCK_ID'], $arResult['ID'])):?>
-                <a class="fancy button request-a-price" data-name="<?=$arResult['NAME']?>" href="#request-a-price">Запросить цену</a>
-            <?endif;?>
         </div>
 
 		<script type="text/javascript">

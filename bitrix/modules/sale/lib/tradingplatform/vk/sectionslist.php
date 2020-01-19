@@ -67,7 +67,7 @@ class SectionsList
 	 * @return string
 	 * Create name for cache
 	 */
-	private function createCacheId($cacheName = NULL)
+	private function createCacheId($cacheName = null)
 	{
 		$cacheId = self::CACHE_ID_PREFIX . '__' . $this->exportId;
 		
@@ -78,9 +78,11 @@ class SectionsList
 	 * Create cache ID for iblock sections
 	 * @return string
 	 */
-	public function createCacheIdSections()
+	public function createCacheIdSections($onlyMapped = true)
 	{
-		return $this->createCacheId(self::CACHE_ID_SECTIONS);
+		$cacheName = self::CACHE_ID_SECTIONS .
+			($onlyMapped ? '_mapped' : '_all');
+		return $this->createCacheId($cacheName);
 	}
 	
 	/**
@@ -108,7 +110,8 @@ class SectionsList
 	public function clearCaches()
 	{
 		$cacheManager = Application::getInstance()->getManagedCache();
-		$cacheManager->clean($this->createCacheIdSections());
+		$cacheManager->clean($this->createCacheIdSections(true));
+		$cacheManager->clean($this->createCacheIdSections(false));
 		$cacheManager->clean($this->createCacheIdMappedSections());
 		$cacheManager->clean($this->createCacheIdMappedSectionsList());
 	}
@@ -121,20 +124,20 @@ class SectionsList
 	 * @return array
 	 * @throws \Bitrix\Main\SystemException
 	 */
-	public function getSections($tree = false)
+	public function getSections($tree = false, $onlyMapped = true)
 	{
 //		We can save data in cache.Cache must be reload only if sections settings will be changed.
 		$cacheManager = Application::getInstance()->getManagedCache();
 		$sections = array();
 		
-		if ($cacheManager->read(self::CACHE_TTL, $this->createCacheIdSections()))
+		if ($cacheManager->read(self::CACHE_TTL, $this->createCacheIdSections($onlyMapped)))
 		{
-			$sections = $cacheManager->get($this->createCacheIdSections());
+			$sections = $cacheManager->get($this->createCacheIdSections($onlyMapped));
 		}
 		else
 		{
-//			IBLOCK IDS for getting catalog sections
-			$iblockIds = $this->getMappedIblocks();
+//			get IBLOCK IDS only for mapped sections or for all catalogs
+			$iblockIds = $this->getIblockIds($onlyMapped);
 			$filter = array("IBLOCK_ID" => $iblockIds, "ELEMENT_SUBSECTIONS" => "N");
 
 //			calculate all products or just active
@@ -154,7 +157,10 @@ class SectionsList
 				array("LEFT_MARGIN" => "asc"),
 				$filter,
 				true,
-				array("IBLOCK_ID", "IBLOCK_SECTION_ID", "ID", "DEPTH_LEVEL", "NAME", "LEFT_MARGIN", "RIGHT_MARGIN", "ELEMENT_CNT")
+				array(
+					"IBLOCK_ID", "IBLOCK_SECTION_ID", "ID", "DEPTH_LEVEL", "NAME", "LEFT_MARGIN", "RIGHT_MARGIN",
+					"ELEMENT_CNT",
+				)
 			);
 			
 			while ($currSection = $resSections->Fetch())
@@ -163,21 +169,50 @@ class SectionsList
 				$sections[$currSection["IBLOCK_ID"]][$currSection["ID"]] = $currSection;
 			}
 			
-			$cacheManager->set($this->createCacheIdSections(), $sections);
+			$cacheManager->set($this->createCacheIdSections($onlyMapped), $sections);
 		}
 
 //		if not a tree - formatted to list
 		if (!$tree)
 		{
-			$sectionsList = array();
+			$sectionsList = [];
 			foreach ($sections as $iblock)
+			{
 				$sectionsList += $iblock;
+			}
 			
-			return $sectionsList;
+			$sections = $sectionsList;
 		}
 		
 		return $sections;
 	}
+	
+	
+	protected function getIblockIds($onlyMapped)
+	{
+		$iblockIds = [];
+		
+		if ($onlyMapped)
+		{
+			$iblockIds = $this->getMappedIblocks();
+		}
+		else
+		{
+			if (Loader::includeModule('catalog'))
+			{
+				$iterator = \Bitrix\Catalog\CatalogIblockTable::getList([
+					'select' => ['IBLOCK_ID'],
+					'filter' => ['=PRODUCT_IBLOCK_ID' => 0],
+				]);
+				while ($row = $iterator->fetch())
+				{
+					$iblockIds[$row['IBLOCK_ID']] = $row['IBLOCK_ID'];
+				}
+			}
+		}
+
+return $iblockIds;
+}
 	
 	
 	/**
@@ -232,8 +267,6 @@ class SectionsList
 	
 	private function getListMappedSections()
 	{
-		$sectionsToExport = array();
-		$sectionsAliases = array();
 		$result = array();
 		
 		foreach ($this->mappedSections as $mappedSection)
@@ -266,10 +299,6 @@ class SectionsList
 					"VK_CATEGORY" => $parentParams["VK_CATEGORY"],
 					"IBLOCK" => $params["IBLOCK"],
 				);
-//				alias get from settings. If not set - do nothing (will be used default name)
-//				not get aliases from parent settings - it should take place in category itself
-//				if ($parentParams["TO_ALBUM_ALIAS"])
-//					$sectionsAliases[$parentParams["TO_ALBUM"]] = $parentParams["TO_ALBUM_ALIAS"];
 			}
 
 //			if INHERIT and parent section included childs - put section to parent to_album
@@ -353,7 +382,7 @@ class SectionsList
 		$sections = SectionElementTable::getList(array(
 			"filter" => array(
 				"IBLOCK_ELEMENT_ID" => $pdoructsIds,
-				"ADDITIONAL_PROPERTY_ID" => NULL,
+				"ADDITIONAL_PROPERTY_ID" => null,
 			),
 		));
 		
@@ -473,9 +502,9 @@ class SectionsList
 					$sectionsFormatted[$sectionUnformatted["TO_ALBUM"]]["ALBUM_VK_URL"] = $this->createVkAlbumLink($albumVkId);
 				}
 			}
-			
+
 //			create toAlbum name only from section, then root for this album. Take alias if exist, or just name
-			if($sectionUnformatted["TO_ALBUM"] == $sectionUnformatted["BX_ID"])
+			if ($sectionUnformatted["TO_ALBUM"] == $sectionUnformatted["BX_ID"])
 			{
 				$sectionsFormatted[$sectionUnformatted["TO_ALBUM"]]["TO_ALBUM_NAME"] = $sectionUnformatted["TO_ALBUM_ALIAS"] ?
 					$sectionUnformatted["TO_ALBUM_ALIAS"] :
@@ -529,7 +558,7 @@ class SectionsList
 					if (!$prevDepthLevel)
 					{
 						$prevDepthLevel = $item["DEPTH_LEVEL"];
-					}	//first item
+					}    //first item
 					if ($item["DEPTH_LEVEL"] > $prevDepthLevel)
 					{
 						$tabsCount++;
@@ -583,7 +612,7 @@ class SectionsList
 		$sectionTabControlName = 'form_section_' . $iblockId . '_active_tab';
 		
 		return \CAllIBlock::GetAdminSectionEditLink($iblockId, $sectionId, array(
-			$sectionTabControlName => "SALE_TRADING_PLATFORM_edit_trading_platforms"
+			$sectionTabControlName => "SALE_TRADING_PLATFORM_edit_trading_platforms",
 		));
 	}
 	
@@ -639,10 +668,14 @@ class SectionsList
 	 * @return string
 	 * @throws \Bitrix\Main\SystemException
 	 */
-	public function getSectionsSelector($checkedSection = NULL)
+	public function getSectionsSelector($checkedSection = null, $onlyMapped = true)
 	{
-		$iblockIds = $this->getMappedIblocks();
-		$sectionsTree = $this->getSections(true);
+//		old variant - get iblocks from map. Will work only when we check at least one section
+//		new variant - show ALL iblock in list
+		$iblockIds = $this->getIblockIds($onlyMapped);
+
+//		get mapped sections for checking activity
+		$sectionsTree = $this->getSections(true, $onlyMapped);
 		
 		$result = '';
 		$result .= '<option value="0">' . Loc::getMessage("SALE_CATALOG_VK_MAIN_ALBUM") . '</option>';
@@ -710,7 +743,7 @@ class SectionsList
 	 */
 	public function prepareSectionToShow($sectionId)
 	{
-		$sections = $this->getSections();
+		$sections = $this->getSections(false, false);
 		$section = $sections[$sectionId];
 		
 		$currParams = $this->mappedSections[$sectionId]['PARAMS'];
@@ -749,7 +782,9 @@ class SectionsList
 			$this->prepareParentSettingToShow($parentParams, $section) :
 			$hiddenParentParams = $this->getDefaultExportParams($sectionId);
 		foreach ($hiddenParentParams as $key => $param)
+		{
 			$currParams[$key . '__PARENT'] = $param;
+		}
 		
 		return $currParams;
 	}
@@ -763,7 +798,7 @@ class SectionsList
 	 */
 	public function prepareSettingsVisibility($params, $sectionId)
 	{
-		$sections = $this->getSections();
+		$sections = $this->getSections(false, false);
 		$section = $sections[$sectionId];
 //		always hide inherit for root sections
 		$params["INHERIT__DISPLAY"] = $section["IBLOCK_SECTION_ID"] ? '' : ' disabled ';
@@ -771,7 +806,7 @@ class SectionsList
 //		default
 		$params["ENABLE__DISPLAY"] = ' disabled ';
 		$params["TO_ALBUM__DISPLAY"] = ' disabled ';
-		$params["TO_ALBUM_ALIAS__DISPLAY"] = ' disabled ';
+		$params["TO_ALBUM_ALIAS__DISPLAY"] = ' display:none; ';
 		$params["INCLUDE_CHILDS__DISPLAY"] = " disabled ";
 		$params["VK_CATEGORY__DISPLAY"] = " disabled ";
 
@@ -789,7 +824,7 @@ class SectionsList
 //				ALIAS can be showed only if checked TO ALBUM selector
 				if (isset($params["TO_ALBUM"]) && $params["TO_ALBUM"] > 0 && $params["TO_ALBUM"] == $sectionId)
 				{
-					$params["TO_ALBUM_ALIAS__DISPLAY"] = '';
+					$params["TO_ALBUM_ALIAS__DISPLAY"] = 'display: block';
 				}
 				
 				$params["INCLUDE_CHILDS__DISPLAY"] = $params["TO_ALBUM"] > 0 ? "" : " disabled ";
@@ -801,11 +836,11 @@ class SectionsList
 		{
 			if ($param === true)
 			{
-				$params[$key] = ' checked ';
+				$params[$key] = 'checked';
 			}
 			if ($param === false)
 			{
-				$params[$key] = ' ';
+				$params[$key] = '';
 			}
 		}
 		
@@ -843,14 +878,14 @@ class SectionsList
 	
 	
 	/**
-	 * Default params for current section - need if have not cirrent and parent params
+	 * Default params for current section - need if have not current and parent params
 	 *
 	 * @param $sectionId
 	 * @return array
 	 */
 	private function getDefaultExportParams($sectionId)
 	{
-		$sections = $this->getSections();
+		$sections = $this->getSections(false, false);
 		
 		$vk = Vk::getInstance();
 		$vkSettings = $vk->getSettings($this->exportId);
@@ -959,7 +994,7 @@ class SectionsList
 				else
 				{
 					$settingsToSave["TO_ALBUM"] = 0;
-					$settingsToSave["TO_ALBUM_ALIAS"] = NULL;
+					$settingsToSave["TO_ALBUM_ALIAS"] = null;
 				}
 			}
 		}

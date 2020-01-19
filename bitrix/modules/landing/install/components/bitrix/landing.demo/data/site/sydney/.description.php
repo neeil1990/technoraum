@@ -12,6 +12,7 @@ $buttons = \Bitrix\Landing\Hook\Page\B24button::getButtons();
 $buttons = array_keys($buttons);
 
 return array(
+	'active' => false,	// dbg: not actual, remove if all OK
 	'code' => 'sydney',
 	'version' => 2,
 	'name' => Loc::getMessage('LANDING_DEMO_B24SYD_TITLE'),

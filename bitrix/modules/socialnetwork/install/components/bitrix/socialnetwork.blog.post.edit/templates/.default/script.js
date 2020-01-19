@@ -31,6 +31,19 @@
 
 	window.SBPEFullForm.prototype = {
 
+		onSliderClose: function() {
+
+			var sliderInstance = BX.SidePanel.Instance.getTopSlider();
+			if (!sliderInstance)
+			{
+				return;
+			}
+
+			BX.SidePanel.Instance.postMessageAll(window, "SidePanel.Wrapper:onClose", {
+				sliderData: sliderInstance.getData()
+			});
+		},
+
 		init : function(params)
 		{
 			if (this.inited !== true)
@@ -41,6 +54,16 @@
 				this.container = typeof params.container != 'undefined' ? params.container : null;
 				this.containerMicro = typeof params.containerMicro != 'undefined' ? params.containerMicro : null;
 				this.containerMicroInner = typeof params.containerMicroInner != 'undefined' ? params.containerMicroInner : null;
+			}
+
+			var sliderInstance = BX.SidePanel.Instance.getTopSlider();
+			if (
+				sliderInstance
+				&& !sliderInstance.getData().get('initialized')
+			)
+			{
+				top.BX.addCustomEvent(sliderInstance, 'SidePanel.Slider:onClose', this.onSliderClose);
+				sliderInstance.getData().set('initialized', true);
 			}
 		},
 
@@ -61,8 +84,18 @@
 				_this.clickDisabled = true;
 				_this.animationStartHeight = this.containerMicro.offsetHeight;
 
-				_this.containerMicroInner.style.display = 'none';
-				_this.showWait(_this.containerMicro);
+				if (
+					BX.type.isNotEmptyString(params.loaderType)
+					&& params.loaderType == 'tab'
+				)
+				{
+					_this.showWaitTab();
+				}
+				else
+				{
+					_this.containerMicroInner.style.display = 'none';
+					_this.showWait(_this.containerMicro);
+				}
 
 				BX.ajax({
 					method: 'POST',
@@ -187,6 +220,20 @@
 			return obMsg;
 		},
 
+		showWaitTab : function()
+		{
+			if (
+				!BX('feed-add-post-more-icon')
+				|| !BX('feed-add-post-more-icon-waiter')
+			)
+			{
+				return;
+			}
+
+			BX('feed-add-post-more-icon').style.display = 'none';
+			BX('feed-add-post-more-icon-waiter').style.display = 'block';
+		},
+
 		adjustWait : function()
 		{
 			if (!this.bxmsg) return;
@@ -229,6 +276,17 @@
 				if (node)
 					node.bxmsg = null;
 				BX.cleanNode(obMsg, true);
+			}
+
+			if (
+				BX('feed-add-post-more-icon')
+				&& BX('feed-add-post-more-icon-waiter')
+				&& BX('feed-add-post-more-icon').style.display == 'none'
+			)
+			{
+				BX('feed-add-post-more-icon').style.display = 'block';
+				BX('feed-add-post-more-icon-waiter').style.display = 'none';
+
 			}
 		},
 
@@ -414,23 +472,26 @@
 			this.arrow = BX('feed-add-post-form-tab-arrow');
 			this.tabs = {}; this.bodies = {};
 
-			for (var i = 0; i < arTabs.length; i++)
+			if (arTabs)
 			{
-				var id = arTabs[i].getAttribute("id").replace("feed-add-post-form-tab-", "");
-				this.tabs[id] = arTabs[i];
-				if (this.tabs[id].style.display == "none")
+				for (var i = 0; i < arTabs.length; i++)
 				{
-					this.menuItems.push({
-						tabId : id,
-						text : arTabs[i].getAttribute("data-name"),
-						className : "menu-popup-no-icon feed-add-post-form-" + id + " feed-add-post-form-" + id + "-more",
-						onclick : this._createOnclick(id, arTabs[i].getAttribute("data-name"), arTabs[i].getAttribute("data-onclick"))
-					});
+					var id = arTabs[i].getAttribute("id").replace("feed-add-post-form-tab-", "");
+					this.tabs[id] = arTabs[i];
+					if (this.tabs[id].style.display == "none")
+					{
+						this.menuItems.push({
+							tabId : id,
+							text : arTabs[i].getAttribute("data-name"),
+							className : "menu-popup-no-icon feed-add-post-form-" + id + " feed-add-post-form-" + id + "-more",
+							onclick : this._createOnclick(id, arTabs[i].getAttribute("data-name"), arTabs[i].getAttribute("data-onclick"))
+						});
 
-					this.tabs[id] = this.tabs[id].parentNode;
+						this.tabs[id] = this.tabs[id].parentNode;
+					}
+
+					this.bodies[id] = BX('feed-add-post-content-' + id);
 				}
-
-				this.bodies[id] = BX('feed-add-post-content-' + id);
 			}
 
 			if (!!this.tabs['file'])
@@ -593,6 +654,7 @@
 							else if(
 								BX.type.isElementNode(messageBody.childNodes[ii])
 								&& !BX.hasClass(messageBody.childNodes[ii], 'urlpreview')
+								&& !BX.hasClass(messageBody.childNodes[ii], 'feed-add-post-strings-blocks')
 							)
 							{
 								BX.adjust(messageBody.childNodes[ii], {style : {display : (type == 'file' ? "none" : "")}});
@@ -736,17 +798,45 @@
 
 		collapse : function()
 		{
-			window.SBPETabs.changePostFormTab("message");
-			if (window.SBPEFullForm.getInstance().containerMicroInner)
+			this.active = null;
+
+			var postEditSlider = false;
+			if (window !== top.window) // slider
 			{
-				window.SBPEFullForm.getInstance().containerMicroInner.style.display = 'block';
+				var currentSlider = BX.SidePanel.Instance.getSliderByWindow(window);
+				if (
+					currentSlider
+					&& currentSlider.url.match(/\/user\/(\d+)\/blog\/edit\//)
+				)
+				{
+					postEditSlider = true;
+				}
 			}
-			this.startAnimation();
+
+			if (!postEditSlider)
+			{
+				window.SBPETabs.changePostFormTab("message");
+				if (window.SBPEFullForm.getInstance().containerMicroInner)
+				{
+					window.SBPEFullForm.getInstance().containerMicroInner.style.display = 'block';
+				}
+				this.startAnimation();
+			}
 			BX.onCustomEvent(BX("divoPostFormLHE_blogPostForm"), "OnShowLHE", [false]);
 			BX.onCustomEvent(window, 'onExtAutoSaveReset_blogPostForm', []);
-			this.endAnimation();
+			if (!postEditSlider)
+			{
+				this.endAnimation();
+			}
+			else
+			{
+				window.top.BX.onCustomEvent(
+					"SidePanel.Slider:onClose",
+					[ currentSlider.getEvent('onClose') ]
+				);
 
-			this.active = null;
+				BX.SidePanel.Instance.close();
+			}
 		},
 
 		showMoreMenu : function()
@@ -1139,65 +1229,6 @@
 		}
 	};
 
-
-	window.BXfpGratSelectCallback = function(item/*, type_user, name*/)
-	{
-		BXfpGratMedalSelectCallback(item, 'grat');
-	};
-
-	window.BXfpMedalSelectCallback = function(item/*, type_user, name*/)
-	{
-		BXfpGratMedalSelectCallback(item, 'medal');
-	};
-
-	window.BXfpGratMedalSelectCallback = function(item, type)
-	{
-		if (type != 'grat')
-			type = 'medal';
-
-		var prefix = 'U';
-
-		BX('feed-add-post-'+type+'-item').appendChild(
-			BX.create("span", {
-				attrs : { 'data-id' : item.id },
-				props : { className : "feed-add-post-"+type+" feed-add-post-destination-users" },
-				children: [
-					BX.create("input", {
-						attrs : { 'type' : 'hidden', 'name' : (type == 'grat' ? 'GRAT' : 'MEDAL')+'['+prefix+'][]', 'value' : item.id }
-					}),
-					BX.create("span", {
-						props : { 'className' : "feed-add-post-"+type+"-text" },
-						html : item.name
-					}),
-					BX.create("span", {
-						props : { 'className' : "feed-add-post-del-but"},
-						events : {
-							'click' : function(e){
-								BX.SocNetLogDestination.deleteItem(item.id, 'users', window["BXSocNetLogGratFormName"]);
-								BX.PreventDefault(e)
-							},
-							'mouseover' : function(){
-								BX.addClass(this.parentNode, 'feed-add-post-'+type+'-hover')
-							},
-							'mouseout' : function(){
-								BX.removeClass(this.parentNode, 'feed-add-post-'+type+'-hover')
-							}
-						}
-					})
-				]
-			})
-		);
-
-		BX('feed-add-post-'+type+'-input').value = '';
-
-		BX.SocNetLogDestination.BXfpSetLinkName({
-			formName: (type == 'grat' ? window["BXSocNetLogGratFormName"] : window["BXSocNetLogMedalFormName"]),
-			tagInputName: 'bx-' + type + '-tag',
-			tagLink1: BX.message('BX_FPGRATMEDAL_LINK_1'),
-			tagLink2: BX.message('BX_FPGRATMEDAL_LINK_2')
-		});
-	};
-
 	if (!!BX.SocNetGratSelector)
 		return;
 
@@ -1585,11 +1616,18 @@
 					if(data[titleID].length > 0 && data[titleID] != BX(titleID).getAttribute("placeholder"))
 					{
 						if(BX('divoPostFormLHE_blogPostForm').style.display != "none")
+						{
 							window['showPanelTitle_' + formId](true);
+						}
 						else
+						{
 							window["bShowTitle"] = true;
+						}
+
 						if (!!BX(titleID).__onchange)
+						{
 							BX(titleID).__onchange();
+						}
 					}
 
 					var formTags = window["BXPostFormTags_" + formId];
@@ -1602,50 +1640,10 @@
 						}
 					}
 
-					if(BX.SocNetLogDestination)
-					{
-						var i, key;
-						if(data['SPERM[DR][]'])
-						{
-							for (i = 0; i < data['SPERM[DR][]'].length; i++ )
-							{
-								BX.SocNetLogDestination.selectItem(BXSocNetLogDestinationFormName, '', 3, data['SPERM[DR][]'][i], 'department', false);
-							}
-						}
-						if(data['SPERM[SG][]'])
-						{
-							for (i = 0; i < data['SPERM[SG][]'].length; i++ )
-							{
-								BX.SocNetLogDestination.selectItem(BXSocNetLogDestinationFormName, '', 3, data['SPERM[SG][]'][i], 'sonetgroups', false);
-							}
-						}
-						if(data['SPERM[U][]'])
-						{
-							for (i = 0; i < data['SPERM[U][]'].length; i++ )
-							{
-								BX.SocNetLogDestination.selectItem(BXSocNetLogDestinationFormName, '', 3, data['SPERM[U][]'][i], 'users', false);
-							}
-						}
-						if(!data['SPERM[UA][]'])
-						{
-							BX.SocNetLogDestination.deleteItem('UA', 'groups', BXSocNetLogDestinationFormName);
-						}
-						if(data['SPERM[UE][]'])
-						{
-
-							for (i = 0; i < data['SPERM[UE][]'].length; i++ )
-							{
-								key = data['SPERM[UE][]'][i];
-
-								BX.SocNetLogDestination.inviteEmailAddUser(BXSocNetLogDestinationFormName, {
-									email: data['SPERM[UE][]'][i],
-									name: (BX.type.isNotEmptyString(data['INVITED_USER_NAME[' + key + ']']) ? data['INVITED_USER_NAME[' + key + ']'] : ''),
-									lastName: (BX.type.isNotEmptyString(data['INVITED_USER_LAST_NAME[' + key + ']']) ? data['INVITED_USER_LAST_NAME[' + key + ']'] : ''),
-									createCrmContact: (BX.type.isNotEmptyString(data['INVITED_USER_CREATE_CRM_CONTACT[' + key + ']']) ? data['INVITED_USER_CREATE_CRM_CONTACT[' + key + ']']  == 'Y' : false)
-								});
-							}
-						}
-					}
+					BX.onCustomEvent('onAutoSaveRestoreDestination', [{
+						formId: formId,
+						data: data
+					}]);
 
 					bindLHEEvents(ob);
 				});
@@ -1862,7 +1860,7 @@
 											display: "block",
 											height: "0",
 											opacity: 0,
-											padding: 0
+											// padding: 0
 										}
 									});
 								}

@@ -559,18 +559,19 @@ else
 
 	if (CModule::IncludeModule('mail'))
 	{
-		$dbMailbox = CMailbox::getList(
-			array(
-				'TIMESTAMP_X' => 'DESC'
+		$dbMailbox = \Bitrix\Mail\MailboxTable::getList(array(
+			'filter' => array(
+				'=LID' => SITE_ID,
+				'=ACTIVE' => 'Y',
+				'=USER_ID' => $arParams['ID'],
+				'=SERVER_TYPE' => 'imap',
 			),
-			array(
-				'LID'     => SITE_ID,
-				'ACTIVE'  => 'Y',
-				'USER_ID' => intval($arParams['ID']),
-				'SERVER_TYPE' => 'imap|controller|domain'
-			)
-		);
+			'order' => array(
+				'TIMESTAMP_X' => 'DESC',
+			),
+		));
 		$mailbox = $dbMailbox->fetch();
+		\Bitrix\Mail\MailboxTable::normalizeEmail($mailbox);
 		if (strpos($mailbox['LOGIN'], '@') !== false)
 			$arResult['User']['MAILBOX'] = $mailbox['LOGIN'];
 	}

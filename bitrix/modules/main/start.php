@@ -6,6 +6,8 @@
  * @copyright 2001-2013 Bitrix
  */
 
+use Bitrix\Main\Loader;
+
 error_reporting(E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR|E_PARSE);
 
 require_once(substr(__FILE__, 0, strlen(__FILE__) - strlen("/start.php"))."/bx_root.php");
@@ -29,6 +31,7 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lib/loader.php");
 		"bitrix\\main\\objectexception" => "lib/exception.php",
 		"bitrix\\main\\systemexception" => "lib/exception.php",
 		"bitrix\\main\\accessdeniedexception" => "lib/exception.php",
+		"bitrix\\main\\decodingexception" => "lib/exception.php",
 		"bitrix\\main\\io\\invalidpathexception" => "lib/io/ioexception.php",
 		"bitrix\\main\\io\\filenotfoundexception" => "lib/io/ioexception.php",
 		"bitrix\\main\\io\\filedeleteexception" => "lib/io/ioexception.php",
@@ -128,8 +131,11 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lib/loader.php");
 		"bitrix\\main\\composite\\abstractresponse" => "lib/composite/responder.php",
 		"bitrix\\main\\composite\\fileresponse" => "lib/composite/responder.php",
 		"bitrix\\main\\composite\\memcachedresponse" => "lib/composite/responder.php",
+		"bitrix\\main\\security\\otpexception" => "lib/security/securityexception.php",
 	)
 );
+
+Loader::registerHandler([\Bitrix\Main\ORM\Loader::class, 'autoLoad']);
 
 // old class names compatibility
 require_once $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/compatibility.php";
@@ -257,6 +263,7 @@ require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/".$DBType.
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/".$DBType."/option.php");	//options and settings class
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/cache.php");	//various cache classes
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/module.php");
+require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/".$DBType."/sqlwhere.php");
 
 error_reporting(E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR|E_PARSE);
 

@@ -34,7 +34,7 @@ class ItemAttributes
 	/**
 	 * @var array
 	 */
-	protected static $viewerTypeByContentType = [];
+	protected static $renderClassByContentType = [];
 
 	/**
 	 * ItemAttributes constructor.
@@ -73,7 +73,7 @@ class ItemAttributes
 		$fileData = \CFile::getByID($fileId)->fetch();
 		if (!$fileData)
 		{
-			throw new ArgumentException('Invalid fileId');
+			throw new ArgumentException('Invalid fileId', 'fileId');
 		}
 
 		return new static($fileData, $sourceUri);
@@ -90,10 +90,27 @@ class ItemAttributes
 	{
 		if (empty($fileData['ID']))
 		{
-			throw new ArgumentException('Invalid file data');
+			throw new ArgumentException('Invalid file data', 'fileData');
 		}
 
 		return new static($fileData, $sourceUri);
+	}
+
+	public static function tryBuildByFileData(array $fileData, $sourceUri)
+	{
+		try
+		{
+			return static::buildByFileData($fileData, $sourceUri);
+		}
+		catch (ArgumentException $exception)
+		{
+			if ($exception->getParameter() == 'fileData')
+			{
+				return static::buildAsUnknownType($sourceUri);
+			}
+
+			throw $exception;
+		}
 	}
 
 	/**
@@ -109,6 +126,23 @@ class ItemAttributes
 		];
 
 		return new static($fakeFileData, $sourceUri);
+	}
+
+	public static function tryBuildByFileId($fileId, $sourceUri)
+	{
+		try
+		{
+			return static::buildByFileId($fileId, $sourceUri);
+		}
+		catch (ArgumentException $exception)
+		{
+			if ($exception->getParameter() == 'fileId')
+			{
+				return static::buildAsUnknownType($sourceUri);
+			}
+
+			throw $exception;
+		}
 	}
 
 	/**
@@ -263,19 +297,25 @@ class ItemAttributes
 	 */
 	protected static function getViewerTypeByFile(array $fileArray)
 	{
-		if (isset(static::$viewerTypeByContentType[$fileArray['CONTENT_TYPE']]))
-		{
-			return static::$viewerTypeByContentType[$fileArray['CONTENT_TYPE']];
-		}
-
 		$contentType = $fileArray['CONTENT_TYPE'];
 		$originalName = $fileArray['ORIGINAL_NAME'];
+
+		if (isset(static::$renderClassByContentType[$contentType]))
+		{
+			$renderClass = static::$renderClassByContentType[$contentType];
+			if ($renderClass::getSizeRestriction() === null)
+			{
+				return $renderClass::getJsType();
+			}
+		}
 
 		$previewManager = new PreviewManager();
 		$renderClass = $previewManager->getRenderClassByFile([
 			'contentType' => $contentType,
 			'originalName' => $originalName,
+			'size' => isset($fileArray['FILE_SIZE'])? $fileArray['FILE_SIZE'] : null,
 		]);
+
 		if ($renderClass === Renderer\Stub::class)
 		{
 			$transformerManager = new TransformerManager();
@@ -294,7 +334,10 @@ class ItemAttributes
 			}
 		}
 
-		static::$viewerTypeByContentType[$fileArray['CONTENT_TYPE']] = $renderClass::getJsType();
+		if ($renderClass !== Renderer\RestrictedBySize::class)
+		{
+			static::$renderClassByContentType[$fileArray['CONTENT_TYPE']] = $renderClass;
+		}
 
 		return $renderClass::getJsType();
 	}

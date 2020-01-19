@@ -228,6 +228,44 @@
 	  },
 
 	  /**
+	   * The method compares versions, and returns - 0 if they are the same, 1 if version1 is greater, -1 if version1 is less
+	   *
+	   * @param version1
+	   * @param version2
+	   * @returns {number|NaN}
+	   */
+	  versionCompare: function versionCompare(version1, version2) {
+	    var isNumberRegExp = /^([\d+\.]+)$/;
+
+	    if (!isNumberRegExp.test(version1) || !isNumberRegExp.test(version2)) {
+	      return NaN;
+	    }
+
+	    version1 = version1.toString().split('.');
+	    version2 = version2.toString().split('.');
+
+	    if (version1.length < version2.length) {
+	      while (version1.length < version2.length) {
+	        version1.push(0);
+	      }
+	    } else if (version2.length < version1.length) {
+	      while (version2.length < version1.length) {
+	        version2.push(0);
+	      }
+	    }
+
+	    for (var i = 0; i < version1.length; i++) {
+	      if (version1[i] > version2[i]) {
+	        return 1;
+	      } else if (version1[i] < version2[i]) {
+	        return -1;
+	      }
+	    }
+
+	    return 0;
+	  },
+
+	  /**
 	   * Throttle function. Callback will be executed no more than 'wait' period (in ms).
 	   *
 	   * @param callback

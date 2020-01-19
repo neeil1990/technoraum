@@ -405,7 +405,9 @@ class CRatings extends CAllRatings
 			";
 		}
 
-		$DB->Query("TRUNCATE TABLE b_rating_prepare", false, $err_mess.__LINE__);
+//		$DB->Query("TRUNCATE TABLE b_rating_prepare", false, $err_mess.__LINE__);
+		$DB->Query("DELETE FROM b_rating_prepare", false, $err_mess.__LINE__);
+
 		if ($bAllGroups || empty($arGroups))
 		{
 			$strSql .= "
@@ -504,7 +506,13 @@ class CRatings extends CAllRatings
 
 				$authorityRatingId	 = CRatings::GetAuthorityRating();
 				$arAuthorityUserProp = CRatings::GetRatingUserPropEx($authorityRatingId, $userId);
-				if ($arAuthorityUserProp['VOTE_WEIGHT'] <= 0)
+				if (
+					$arAuthorityUserProp['VOTE_WEIGHT'] < 0
+					|| (
+						$arAuthorityUserProp['VOTE_WEIGHT'] == 0
+						&& !IsModuleInstalled('intranet')
+					)
+				)
 				{
 					$arInfo = $cacheAllowVote[$userId] = array(
 						'RESULT' => false,
@@ -671,7 +679,7 @@ class CRatings extends CAllRatings
 	{
 		global $DB, $USER;
 
-		$externalAuthTypes = array_diff(\Bitrix\Main\UserTable::getExternalUserTypes(), array('email'));
+		$externalAuthTypes = array_diff(\Bitrix\Main\UserTable::getExternalUserTypes(), array('email', 'replica'));
 
 		return "
 			SELECT
@@ -702,7 +710,7 @@ class CRatings extends CAllRatings
 	{
 		global $DB, $USER;
 
-		$externalAuthTypes = array_diff(\Bitrix\Main\UserTable::getExternalUserTypes(), array('email'));
+		$externalAuthTypes = array_diff(\Bitrix\Main\UserTable::getExternalUserTypes(), array('email', 'replica'));
 
 		return "
 			SELECT

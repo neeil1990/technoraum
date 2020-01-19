@@ -702,19 +702,19 @@
 
 			if (this.params.PRODUCT && typeof this.params.PRODUCT === 'object')
 			{
+				if (this.config.showPrice)
+				{
+					this.currentPriceMode = this.params.PRODUCT.ITEM_PRICE_MODE;
+					this.currentPrices = this.params.PRODUCT.ITEM_PRICES;
+					this.currentPriceSelected = this.params.PRODUCT.ITEM_PRICE_SELECTED;
+					this.currentQuantityRanges = this.params.PRODUCT.ITEM_QUANTITY_RANGES;
+					this.currentQuantityRangeSelected = this.params.PRODUCT.ITEM_QUANTITY_RANGE_SELECTED;
+				}
+
 				if (this.config.showQuantity)
 				{
 					this.product.checkQuantity = this.params.PRODUCT.CHECK_QUANTITY;
 					this.product.isDblQuantity = this.params.PRODUCT.QUANTITY_FLOAT;
-
-					if (this.config.showPrice)
-					{
-						this.currentPriceMode = this.params.PRODUCT.ITEM_PRICE_MODE;
-						this.currentPrices = this.params.PRODUCT.ITEM_PRICES;
-						this.currentPriceSelected = this.params.PRODUCT.ITEM_PRICE_SELECTED;
-						this.currentQuantityRanges = this.params.PRODUCT.ITEM_QUANTITY_RANGES;
-						this.currentQuantityRangeSelected = this.params.PRODUCT.ITEM_QUANTITY_RANGE_SELECTED;
-					}
 
 					if (this.product.checkQuantity)
 					{
@@ -1899,17 +1899,15 @@
 
 						this.checkPriceRange(curValue);
 
+						intCount = Math.floor(
+							Math.round(curValue * this.precisionFactor / this.stepQuantity) / this.precisionFactor
+						) || 1;
+						curValue = (intCount <= 1 ? this.stepQuantity : intCount * this.stepQuantity);
+						curValue = Math.round(curValue * this.precisionFactor) / this.precisionFactor;
+
 						if (curValue < this.minQuantity)
 						{
 							curValue = this.minQuantity;
-						}
-						else
-						{
-							intCount = Math.round(
-									Math.round(curValue * this.precisionFactor / this.stepQuantity) / this.precisionFactor
-								) || 1;
-							curValue = (intCount <= 1 ? this.stepQuantity : intCount * this.stepQuantity);
-							curValue = Math.round(curValue * this.precisionFactor) / this.precisionFactor;
 						}
 
 						this.obQuantity.value = curValue;

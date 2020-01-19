@@ -15,4 +15,6 @@ $MESS["F_TID_IS_LOST_IN_FORUM"] = "Тема не найдена в указанном форуме.";
 $MESS["F_TID_IS_LOST_IN_OBJECT"] = "Тема #SOCNET_OBJECT# не найдена.";
 $MESS["F_TID_IS_NOT_APPROVED"] = "Тема станет доступной после одобрения модератором.";
 $MESS["F_MID_IS_NOT_APPROVED"] = "Сообщение станет доступным после одобрения модератором.";
+$MESS["SFTR_ERROR_NO_USER"] = "Пользователь не найден.";
+$MESS["SFTR_ERROR_NO_GROUP"] = "Группа не найдена.";
 ?>

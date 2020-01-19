@@ -12,7 +12,6 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/start.php");
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/virtual_io.php");
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/virtual_file.php");
 
-
 $application = \Bitrix\Main\Application::getInstance();
 $application->initializeExtendedKernel(array(
 	"get" => $_GET,
@@ -49,6 +48,11 @@ else
 	define("LANG", $arLang["LID"]);
 }
 
+if($arLang["CULTURE_ID"] == '')
+{
+	throw new \Bitrix\Main\SystemException("Culture not found, or there are no active sites or languages.");
+}
+
 $lang = $arLang["LID"];
 if (!defined("SITE_ID"))
 	define("SITE_ID", $arLang["LID"]);
@@ -62,9 +66,11 @@ define("LANG_CHARSET", $arLang["CHARSET"]);
 define("LANG_ADMIN_LID", $arLang["LANGUAGE_ID"]);
 define("LANGUAGE_ID", $arLang["LANGUAGE_ID"]);
 
+$culture = \Bitrix\Main\Localization\CultureTable::getByPrimary($arLang["CULTURE_ID"], ["cache" => ["ttl" => CACHED_b_lang]])->fetchObject();
+
 $context = $application->getContext();
 $context->setLanguage(LANGUAGE_ID);
-$context->setCulture(new \Bitrix\Main\Context\Culture($arLang));
+$context->setCulture($culture);
 
 $request = $context->getRequest();
 if (!$request->isAdminSection())
@@ -98,7 +104,7 @@ if(!defined("BX_COMP_MANAGED_CACHE") && COption::GetOptionString("main", "compon
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/filter_tools.php");
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/ajax_tools.php");
 
-/*ZDUyZmZODY2ZWJjMDRmN2MyM2NlMzhhOWFiOTQ3NzJlNGQ2OTg=*/$GLOBALS['____699063379']= array(base64_decode('ZG'.'Vm'.'aW5'.'l'));if(!function_exists(__NAMESPACE__.'\\___477461487')){function ___477461487($_1605075054){static $_1667875701= false; if($_1667875701 == false) $_1667875701=array('RU5DT0RF','WQ==');return base64_decode($_1667875701[$_1605075054]);}};class CBXFeatures{ public static function IsFeatureEnabled($_1297551885){ return true;} public static function IsFeatureEditable($_1297551885){ return true;} public static function SetFeatureEnabled($_1297551885, $_842872177= true){} public static function SaveFeaturesSettings($_728780240, $_2069704184){} public static function GetFeaturesList(){ return array();} public static function InitiateEditionsSettings($_545272100){} public static function ModifyFeaturesSettings($_545272100, $_1267917911){} public static function IsFeatureInstalled($_1297551885){ return true;}} $GLOBALS['____699063379'][0](___477461487(0), ___477461487(1));/**/			//Do not remove this
+/*ZDUyZmZYjI5ODZkMjkzMTlkOTQzMTRkMTdlNDI3NGEwYzI1YzM=*/$GLOBALS['____1765289024']= array(base64_decode('ZGVmaW5l'));if(!function_exists(__NAMESPACE__.'\\___395332899')){function ___395332899($_621734338){static $_1971406860= false; if($_1971406860 == false) $_1971406860=array('R'.'U5'.'DT0'.'RF',''.'W'.'Q'.'==');return base64_decode($_1971406860[$_621734338]);}};class CBXFeatures{ public static function IsFeatureEnabled($_481673922){ return true;} public static function IsFeatureEditable($_481673922){ return true;} public static function SetFeatureEnabled($_481673922, $_1816021500= true){} public static function SaveFeaturesSettings($_473313387, $_959573738){} public static function GetFeaturesList(){ return array();} public static function InitiateEditionsSettings($_1206012680){} public static function ModifyFeaturesSettings($_1206012680, $_774094876){} public static function IsFeatureInstalled($_481673922){ return true;}} $GLOBALS['____1765289024'][0](___395332899(0), ___395332899(1));/**/			//Do not remove this
 
 //component 2.0 template engines
 $GLOBALS["arCustomTemplateEngines"] = array();
@@ -183,6 +189,7 @@ require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/ur
 		"CAdminUiList" => "interface/admin_ui_list.php",
 		"CAdminUiResult" => "interface/admin_ui_list.php",
 		"CAdminUiContextMenu" => "interface/admin_ui_list.php",
+		"CAdminUiSorting" => "interface/admin_ui_list.php",
 		"CAdminListRow" => "interface/admin_list.php",
 		"CAdminTabControl" => "interface/admin_tabcontrol.php",
 		"CAdminForm" => "interface/admin_form.php",
@@ -303,7 +310,8 @@ if(
 	||
 	(
 		//session timeout
-		$arPolicy["SESSION_TIMEOUT"]>0
+		(!defined("BX_SKIP_SESSION_EXPAND") || BX_SKIP_SESSION_EXPAND === false)
+		&& $arPolicy["SESSION_TIMEOUT"]>0
 		&& $_SESSION['SESS_TIME']>0
 		&& $currTime-$arPolicy["SESSION_TIMEOUT"]*60 > $_SESSION['SESS_TIME']
 	)
@@ -427,7 +435,7 @@ if(!defined("NOT_CHECK_PERMISSIONS") || NOT_CHECK_PERMISSIONS!==true)
 		if($bRsaError == false)
 		{
 			if(!defined("ADMIN_SECTION") || ADMIN_SECTION !== true)
-				$USER_LID = LANG;
+				$USER_LID = SITE_ID;
 			else
 				$USER_LID = false;
 
@@ -441,15 +449,15 @@ if(!defined("NOT_CHECK_PERMISSIONS") || NOT_CHECK_PERMISSIONS!==true)
 			}
 			elseif($_REQUEST["TYPE"] == "SEND_PWD")
 			{
-				$arAuthResult = CUser::SendPassword($_REQUEST["USER_LOGIN"], $_REQUEST["USER_EMAIL"], $USER_LID, $_REQUEST["captcha_word"], $_REQUEST["captcha_sid"]);
+				$arAuthResult = CUser::SendPassword($_REQUEST["USER_LOGIN"], $_REQUEST["USER_EMAIL"], $USER_LID, $_REQUEST["captcha_word"], $_REQUEST["captcha_sid"], $_REQUEST["USER_PHONE_NUMBER"]);
 			}
 			elseif($_SERVER['REQUEST_METHOD'] == 'POST' && $_REQUEST["TYPE"] == "CHANGE_PWD")
 			{
-				$arAuthResult = $GLOBALS["USER"]->ChangePassword($_REQUEST["USER_LOGIN"], $_REQUEST["USER_CHECKWORD"], $_REQUEST["USER_PASSWORD"], $_REQUEST["USER_CONFIRM_PASSWORD"], $USER_LID, $_REQUEST["captcha_word"], $_REQUEST["captcha_sid"]);
+				$arAuthResult = $GLOBALS["USER"]->ChangePassword($_REQUEST["USER_LOGIN"], $_REQUEST["USER_CHECKWORD"], $_REQUEST["USER_PASSWORD"], $_REQUEST["USER_CONFIRM_PASSWORD"], $USER_LID, $_REQUEST["captcha_word"], $_REQUEST["captcha_sid"], true, $_REQUEST["USER_PHONE_NUMBER"]);
 			}
 			elseif(COption::GetOptionString("main", "new_user_registration", "N") == "Y" && $_SERVER['REQUEST_METHOD'] == 'POST' && $_REQUEST["TYPE"] == "REGISTRATION" && (!defined("ADMIN_SECTION") || ADMIN_SECTION!==true))
 			{
-				$arAuthResult = $GLOBALS["USER"]->Register($_REQUEST["USER_LOGIN"], $_REQUEST["USER_NAME"], $_REQUEST["USER_LAST_NAME"], $_REQUEST["USER_PASSWORD"], $_REQUEST["USER_CONFIRM_PASSWORD"], $_REQUEST["USER_EMAIL"], $USER_LID, $_REQUEST["captcha_word"], $_REQUEST["captcha_sid"]);
+				$arAuthResult = $GLOBALS["USER"]->Register($_REQUEST["USER_LOGIN"], $_REQUEST["USER_NAME"], $_REQUEST["USER_LAST_NAME"], $_REQUEST["USER_PASSWORD"], $_REQUEST["USER_CONFIRM_PASSWORD"], $_REQUEST["USER_EMAIL"], $USER_LID, $_REQUEST["captcha_word"], $_REQUEST["captcha_sid"], false, $_REQUEST["USER_PHONE_NUMBER"]);
 			}
 
 			if($_REQUEST["TYPE"] == "AUTH" || $_REQUEST["TYPE"] == "OTP")
@@ -460,9 +468,6 @@ if(!defined("NOT_CHECK_PERMISSIONS") || NOT_CHECK_PERMISSIONS!==true)
 					//store cookies for next hit (see CMain::GetSpreadCookieHTML())
 					$GLOBALS["APPLICATION"]->StoreCookies();
 					$_SESSION['BX_ADMIN_LOAD_AUTH'] = true;
-
-					//logout or re-authorize the user if something importand has changed
-					$GLOBALS["USER"]->CheckAuthActions();
 
 					CMain::FinalActions('<script type="text/javascript">window.onload=function(){top.BX.AUTHAGENT.setAuthResult(false);};</script>');
 					die();
@@ -610,8 +615,3 @@ if((!defined("NOT_CHECK_PERMISSIONS") || NOT_CHECK_PERMISSIONS!==true) && (!defi
 
        //Do not remove this
 
-if(isset($REDIRECT_STATUS) && $REDIRECT_STATUS==404)
-{
-	if(COption::GetOptionString("main", "header_200", "N")=="Y")
-		CHTTP::SetStatus("200 OK");
-}

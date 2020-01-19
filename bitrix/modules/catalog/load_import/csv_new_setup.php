@@ -508,7 +508,7 @@ if ($STEP == 3)
 	if (isset($arOneCatalogAvailProdFields_tmp))
 		unset($arOneCatalogAvailProdFields_tmp);
 
-	$properties = CIBlockProperty::GetList(array("SORT"=>"ASC", "ID"=>"ASC"), array("IBLOCK_ID"=>$IBLOCK_ID, "ACTIVE"=>"Y", 'CHECK_PERMISSIONS' => 'N'));
+	$properties = CIBlockProperty::GetList(array("SORT"=>"ASC", "NAME" => "ASC", "ID"=>"ASC"), array("IBLOCK_ID"=>$IBLOCK_ID, "ACTIVE"=>"Y", 'CHECK_PERMISSIONS' => 'N'));
 	while ($prop_fields = $properties->Fetch())
 	{
 		$arAvailFields[$intCount] = array(

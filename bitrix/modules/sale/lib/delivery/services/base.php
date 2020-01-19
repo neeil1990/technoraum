@@ -57,7 +57,6 @@ abstract class Base
 	/**
 	 * Constructor
 	 * @param array $initParams Delivery service params
-	 * @throws \Bitrix\Main\ArgumentNullException
 	 * @throws \Bitrix\Main\ArgumentTypeException
 	 * @throws \Bitrix\Main\SystemException
 	 */
@@ -241,12 +240,16 @@ abstract class Base
 
 	/**
 	 * @param \Bitrix\Sale\Shipment $shipment.
-	 * @return \Bitrix\Sale\Delivery\CalculationResult
-	 * @throws SystemException
+	 * @return Delivery\CalculationResult
 	 */
 	protected function calculateConcrete(\Bitrix\Sale\Shipment $shipment)
 	{
-		throw new SystemException('Not implemented');
+		return (new Delivery\CalculationResult())
+			->addError(
+				new Error(
+					Loc::getMessage('SALE_DLVR_BASE_DELIVERY_PRICE_CALC_ERROR'),
+					'DELIVERY_CALCULATION'
+			));
 	}
 
 	/**
@@ -266,7 +269,12 @@ abstract class Base
 				if($iParams["TYPE"] == "DELIVERY_SECTION")
 					continue;
 
-				$errors = \Bitrix\Sale\Internals\Input\Manager::getError($iParams, $fields["CONFIG"][$key1][$key2]);
+				$errors = \Bitrix\Sale\Internals\Input\Manager::getRequiredError($iParams, $fields["CONFIG"][$key1][$key2]);
+
+				if(empty($errors))
+				{
+					$errors = \Bitrix\Sale\Internals\Input\Manager::getError($iParams, $fields["CONFIG"][$key1][$key2]);
+				}
 
 				if(!empty($errors))
 				{
@@ -665,7 +673,7 @@ abstract class Base
 	}
 
 	/**
-	 * @return array
+	 * @return bool
 	 */
 	public function isAllowEditShipment()
 	{

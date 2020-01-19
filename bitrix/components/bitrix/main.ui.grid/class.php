@@ -420,6 +420,10 @@ class CMainUIGrid extends CBitrixComponent
 		$this->arResult["MESSAGES"] = $this->prepareMessages($this->arParams["MESSAGES"]);
 		$this->arResult["LAZY_LOAD"] = $this->arParams["LAZY_LOAD"];
 		$this->arResult["HAS_STICKED_COLUMNS"] = !empty($this->getGridOptions()->getStickedColumns());
+		$this->arResult["HANDLE_RESPONSE_ERRORS"] = (
+			isset($this->arParams["HANDLE_RESPONSE_ERRORS"])
+			&& $this->arParams["HANDLE_RESPONSE_ERRORS"] === true
+		);
 
 		return $this;
 	}
@@ -1040,7 +1044,10 @@ class CMainUIGrid extends CBitrixComponent
 
 			foreach ($this->prepareRows() as $key => $item)
 			{
-				$this->arResult["ALLOW_INLINE_EDIT"] = ($item["editable"] !== false);
+				if ($this->arResult["ALLOW_INLINE_EDIT"] === $this->allowInlineEdit)
+				{
+					$this->arResult["ALLOW_INLINE_EDIT"] = ($item["editable"] !== false);
+				}
 			}
 		}
 
@@ -1286,6 +1293,11 @@ class CMainUIGrid extends CBitrixComponent
 				}
 			}
 			$this->arParams["ROWS"][$key] = $actualRow;
+
+			if (!isset($this->arParams["ROWS"][$key]["editableColumns"]))
+			{
+				$this->arParams["ROWS"][$key]["editableColumns"] = [];
+			}
 		}
 
 		return $this->arParams["ROWS"];

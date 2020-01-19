@@ -2,6 +2,7 @@
 
 use Bitrix\Main;
 use Bitrix\Main\Localization\Loc;
+
 \Bitrix\Main\UI\Extension::load("ui.fonts.ruble");
 
 /**
@@ -14,28 +15,6 @@ use Bitrix\Main\Localization\Loc;
  * @var CBitrixComponentTemplate $this
  * @var array $giftParameters
  */
-
-$documentRoot = Main\Application::getDocumentRoot();
-
-//if (empty($arParams['TEMPLATE_THEME']))
-//{
-//	$arParams['TEMPLATE_THEME'] = Main\ModuleManager::isModuleInstalled('bitrix.eshop') ? 'site' : 'blue';
-//}
-
-//if ($arParams['TEMPLATE_THEME'] === 'site')
-//{
-//	$templateId = Main\Config\Option::get('main', 'wizard_template_id', 'eshop_bootstrap', $component->getSiteId());
-//	$templateId = preg_match('/^eshop_adapt/', $templateId) ? 'eshop_adapt' : $templateId;
-//	$arParams['TEMPLATE_THEME'] = Main\Config\Option::get('main', 'wizard_'.$templateId.'_theme_id', 'blue', $component->getSiteId());
-//}
-
-//if (!empty($arParams['TEMPLATE_THEME']))
-//{
-//	if (!is_file($documentRoot.'/bitrix/css/main/themes/'.$arParams['TEMPLATE_THEME'].'/style.css'))
-//	{
-//		$arParams['TEMPLATE_THEME'] = 'blue';
-//	}
-//}
 
 if (!isset($arParams['DISPLAY_MODE']) || !in_array($arParams['DISPLAY_MODE'], array('extended', 'compact')))
 {
@@ -70,6 +49,8 @@ $arParams['BRAND_PROPERTY'] = isset($arParams['BRAND_PROPERTY']) ? trim($arParam
 
 if ($arParams['USE_GIFTS'] === 'Y')
 {
+	$arParams['GIFTS_BLOCK_TITLE'] = isset($arParams['GIFTS_BLOCK_TITLE']) ? trim((string)$arParams['GIFTS_BLOCK_TITLE']) : Loc::getMessage('SBB_GIFTS_BLOCK_TITLE');
+
 	CBitrixComponent::includeComponentClass('bitrix:sale.products.gift.basket');
 
 	$giftParameters = array(
@@ -142,7 +123,7 @@ $mobileColumns = isset($arParams['COLUMNS_LIST_MOBILE'])
 	: $arParams['COLUMNS_LIST'];
 $mobileColumns = array_fill_keys($mobileColumns, true);
 
-$jsTemplates = new Main\IO\Directory($documentRoot.$templateFolder.'/js-templates');
+$jsTemplates = new Main\IO\Directory(Main\Application::getDocumentRoot().$templateFolder.'/js-templates');
 /** @var Main\IO\File $jsTemplate */
 foreach ($jsTemplates->getChildren() as $jsTemplate)
 {
@@ -155,12 +136,24 @@ if (empty($arResult['ERROR_MESSAGE']))
 {
 	if ($arParams['USE_GIFTS'] === 'Y' && $arParams['GIFTS_PLACE'] === 'TOP')
 	{
-		$APPLICATION->IncludeComponent(
-			'bitrix:sale.products.gift.basket',
-			'bootstrap_v4',
-			$giftParameters,
-			$component
-		);
+		?>
+		<div data-entity="parent-container">
+			<div class="catalog-block-header"
+					data-entity="header"
+					data-showed="false"
+					style="display: none; opacity: 0;">
+				<?=$arParams['GIFTS_BLOCK_TITLE']?>
+			</div>
+			<?
+			$APPLICATION->IncludeComponent(
+				'bitrix:sale.products.gift.basket',
+				'bootstrap_v4',
+				$giftParameters,
+				$component
+			);
+			?>
+		</div>
+		<?
 	}
 
 	if ($arResult['BASKET_ITEM_MAX_COUNT_EXCEEDED'])
@@ -271,18 +264,31 @@ if (empty($arResult['ERROR_MESSAGE']))
 			template: '<?=CUtil::JSEscape($signedTemplate)?>',
 			signedParamsString: '<?=CUtil::JSEscape($signedParams)?>',
 			siteId: '<?=CUtil::JSEscape($component->getSiteId())?>',
+			siteTemplateId: '<?=CUtil::JSEscape($component->getSiteTemplateId())?>',
 			templateFolder: '<?=CUtil::JSEscape($templateFolder)?>'
 		});
 	</script>
 	<?
 	if ($arParams['USE_GIFTS'] === 'Y' && $arParams['GIFTS_PLACE'] === 'BOTTOM')
 	{
-		$APPLICATION->IncludeComponent(
-			'bitrix:sale.products.gift.basket',
-			'bootstrap_v4',
-			$giftParameters,
-			$component
-		);
+		?>
+		<div data-entity="parent-container">
+			<div class="catalog-block-header"
+					data-entity="header"
+					data-showed="false"
+					style="display: none; opacity: 0;">
+				<?=$arParams['GIFTS_BLOCK_TITLE']?>
+			</div>
+			<?
+			$APPLICATION->IncludeComponent(
+				'bitrix:sale.products.gift.basket',
+				'bootstrap_v4',
+				$giftParameters,
+				$component
+			);
+			?>
+		</div>
+		<?
 	}
 }
 elseif ($arResult['EMPTY_BASKET'])

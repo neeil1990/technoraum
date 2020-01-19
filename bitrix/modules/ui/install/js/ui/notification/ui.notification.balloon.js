@@ -877,6 +877,7 @@ BX.UI.Notification.Action = function(balloon, options)
 	this.container = null;
 	this.href = BX.type.isNotEmptyString(options.href) ? options.href : null;
 	this.title = BX.type.isNotEmptyString(options.title) ? options.title : null;
+	this.window = window;
 
 	this.events = {};
 	if (BX.type.isPlainObject(options.events))
@@ -955,6 +956,11 @@ BX.UI.Notification.Action.prototype =
 		}
 
 		return this.container;
+	},
+
+	getWindow: function()
+	{
+		return this.window;
 	}
 };
 

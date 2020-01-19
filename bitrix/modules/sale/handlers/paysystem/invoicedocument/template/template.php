@@ -24,9 +24,10 @@
 			{
 				$APPLICATION->IncludeComponent('bitrix:pdf.viewer', '', [
 					'PATH' => $params['pdfUrl'],
-					'IFRAME' => 'N',
+					'IFRAME' => 'Y',
 					'WIDTH' => 1000,
 					'HEIGHT' => 1200,
+					'PRINT' => 'Y'
 				]);
 			}
 		}

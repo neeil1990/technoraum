@@ -10,6 +10,18 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 
 $sectionId = $classBlock->get('SECTION_ID');
 $sectionCode = $classBlock->get('SECTION_CODE');
+$sectionUrl = $classBlock->get('SECTION_URL');
+$detailUrl = $classBlock->get('DETAIL_URL');
+
+// for replace in public mode
+if ($sectionUrl)
+{
+	$sectionUrl = '#system_catalog#SECTION_CODE_PATH#/';
+}
+if ($detailUrl)
+{
+	$detailUrl = '#system_catalogitem/#ELEMENT_CODE#/';
+}
 ?>
 
 <?$APPLICATION->IncludeComponent(
@@ -41,9 +53,10 @@ $sectionCode = $classBlock->get('SECTION_CODE');
 			'PATH_TO_ORDER' => '#system_order',
 			'SHOW_EMPTY_VALUES' => 'N',
 			'PATH_TO_AUTHORIZE' => '#system_personal?SECTION=private',
-			'POSITION_HORIZONTAL' => 'left',
-			'POSITION_VERTICAL' => 'bottom',
-			'HIDE_ON_BASKET_PAGES' => 'Y'
+			'POSITION_HORIZONTAL' => $classBlock->get('CART_POSITION_HORIZONTAL'),
+			'POSITION_VERTICAL' => $classBlock->get('CART_POSITION_VERTICAL'),
+			'HIDE_ON_BASKET_PAGES' => 'Y',
+			'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID')
 		),
 		false
 	);?>
@@ -61,7 +74,8 @@ $sectionCode = $classBlock->get('SECTION_CODE');
 			'ACTION_VARIABLE' => 'action',
 			'PRODUCT_ID_VARIABLE' => 'id',
 			'POSITION_FIXED' => 'Y',
-			'POSITION' => 'top left'
+			'POSITION' => 'top left',
+			'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID')
 		),
 		false
 	);?>
@@ -125,8 +139,8 @@ $sectionCode = $classBlock->get('SECTION_CODE');
 						'MESS_BTN_SUBSCRIBE' => '',
 						'MESS_BTN_DETAIL' => '',
 						'MESS_NOT_AVAILABLE' => '',
-						'SECTION_URL' => $classBlock->get('SECTION_URL'),
-						'DETAIL_URL' => $classBlock->get('DETAIL_URL'),
+						'SECTION_URL' => $sectionUrl,
+						'DETAIL_URL' => $detailUrl,
 						'HIDE_DETAIL_URL' => $classBlock->get('HIDE_DETAIL_URL'),
 						'SECTION_ID_VARIABLE' => 'SECTION_CODE',
 						'AJAX_MODE' => 'N',
@@ -136,14 +150,14 @@ $sectionCode = $classBlock->get('SECTION_CODE');
 						'CACHE_TYPE' => 'A',
 						'CACHE_TIME' => '36000000',
 						'CACHE_GROUPS' => 'N',
-						'SET_META_KEYWORDS' => 'N',
+						'SET_META_KEYWORDS' => 'Y',
 						'META_KEYWORDS' => '',
-						'SET_META_DESCRIPTION' => 'N',
+						'SET_META_DESCRIPTION' => 'Y',
 						'META_DESCRIPTION' => '',
 						'BROWSER_TITLE' => '-',
 						'ADD_SECTIONS_CHAIN' => 'Y',
 						'SET_TITLE' => $classBlock->get('SET_TITLE'),
-						'SET_STATUS_404' => $classBlock->get('SET_404'),
+						'SET_STATUS_404' => 'N',
 						'CACHE_FILTER' => 'N',
 						'CONVERT_CURRENCY' => 'Y',
 						'BASKET_URL' => '#system_cart',
@@ -176,7 +190,7 @@ $sectionCode = $classBlock->get('SECTION_CODE');
 						'PAGER_DESC_NUMBERING_CACHE_TIME' => '36000',
 						'PAGER_SHOW_ALL' => 'N',
 						'AJAX_OPTION_ADDITIONAL' => '',
-						'SET_BROWSER_TITLE' => 'N',
+						'SET_BROWSER_TITLE' => 'Y',
 						'SHOW_CLOSE_POPUP' => 'Y',
 						'MESS_BTN_COMPARE' => '',
 						'ADD_TO_BASKET_ACTION' => 'BUY',
@@ -246,6 +260,7 @@ $sectionCode = $classBlock->get('SECTION_CODE');
 						'DATA_LAYER_NAME' => $classBlock->get('DATA_LAYER_NAME'),
 						'BRAND_PROPERTY' => $classBlock->get('BRAND_PROPERTY'),
 						'CUSTOM_SITE_ID' => $classBlock->get('SITE_ID'),
+						'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID'),
 						'SECTIONS_CHAIN_START_FROM' => 1
 					),
 					false

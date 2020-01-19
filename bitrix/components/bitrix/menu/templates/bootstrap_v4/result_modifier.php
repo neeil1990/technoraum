@@ -6,16 +6,7 @@ if (empty($arResult))
 if (isset($arParams["MENU_THEME"]) && !empty($arParams["MENU_THEME"]))
 {
 	$arAvailableThemes = array();
-	$dir = trim(preg_replace("'[\\\\/]+'", "/", dirname(__FILE__)."/themes/"));
-	if (is_dir($dir) && $directory = opendir($dir))
-	{
-		while (($file = readdir($directory)) !== false)
-		{
-			if ($file != "." && $file != ".." && is_dir($dir.$file))
-				$arAvailableThemes[] = $file;
-		}
-		closedir($directory);
-	}
+
 
 	if ($arParams["MENU_THEME"] == "site")
 	{
@@ -25,18 +16,11 @@ if (isset($arParams["MENU_THEME"]) && !empty($arParams["MENU_THEME"]))
 			$templateId = COption::GetOptionString("main", "wizard_template_id", "eshop_bootstrap", SITE_ID);
 			$templateId = (preg_match("/^eshop_adapt/", $templateId)) ? "eshop_adapt" : $templateId;
 			$theme = COption::GetOptionString("main", "wizard_".$templateId."_theme_id", "blue", SITE_ID);
-			$arParams["MENU_THEME"] = (in_array($theme, $arAvailableThemes)) ? $theme : "blue";
+			$arParams["MENU_THEME"] = $theme;
 		}
 	}
-	else
-	{
-		$arParams["MENU_THEME"] = (in_array($arParams["MENU_THEME"], $arAvailableThemes)) ? $arParams["MENU_THEME"] : "blue";
-	}
 }
-else
-{
-	$arParams["MENU_THEME"] = "blue";
-}
+
 
 if(!function_exists("FillAllPicturesAndDescriptions"))
 {

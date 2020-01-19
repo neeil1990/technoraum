@@ -10,6 +10,14 @@ use \Bitrix\Main\Localization\Loc;
  * @var CBitrixComponentTemplate $this
  * @var string $templateName
  * @var string $componentPath
+ *
+ *  _________________________________________________________________________
+ * |	Attention!
+ * |	The following comments are for system use
+ * |	and are required for the component to work correctly in ajax mode:
+ * |	<!-- items-container -->
+ * |	<!-- pagination-container -->
+ * |	<!-- component-end -->
  */
 
 $this->setFrameMode(true);
@@ -742,3 +750,4 @@ $themeClass = isset($arParams['TEMPLATE_THEME']) ? ' bx-'.$arParams['TEMPLATE_TH
 
 	</div>
 </div> <? //end wrapper?>
+<!-- component-end -->

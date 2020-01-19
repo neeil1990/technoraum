@@ -83,8 +83,13 @@ final class FilePreviewTable extends DataManager
 
 		foreach ($files as $file)
 		{
-			self::deleteContent($file);
-			self::delete($file['ID']);
+			$keepImage = isset($file['PREVIEW_IMAGE_ID']);
+
+			self::deleteContent($file, $keepImage);
+			if (!$keepImage)
+			{
+				self::delete($file['ID']);
+			}
 		}
 	}
 
@@ -112,17 +117,20 @@ final class FilePreviewTable extends DataManager
 		self::deleteContent($file);
 	}
 
-	protected static function deleteContent(array $file)
+	protected static function deleteContent(array $file, $keepImage = false)
 	{
 		if (isset(self::$alreadyDeleted[$file['ID']]))
 		{
 			return;
 		}
 
-		\CFile::delete($file['PREVIEW_ID']);
-		\CFile::delete($file['PREVIEW_IMAGE_ID']);
-
 		self::$alreadyDeleted[$file['ID']] = true;
+
+		\CFile::delete($file['PREVIEW_ID']);
+		if (!$keepImage)
+		{
+			\CFile::delete($file['PREVIEW_IMAGE_ID']);
+		}
 	}
 
 	/**
@@ -139,7 +147,7 @@ final class FilePreviewTable extends DataManager
 		{
 			return;
 		}
-		
+
 		$file = self::getRow([
 			'filter' => [
 				'=FILE_ID' => $bfile['ID'],

@@ -14,6 +14,8 @@
 	 * @param {object} [parameters] - Parameters.
 	 * @param {string} [parameters.attributeName] - Name of hint attribute.
 	 * @param {string} [parameters.attributeInitName] - Name of init hint attribute.
+	 * @param {string} [parameters.classNameIcon]
+	 * @param {string} [parameters.className]
 	 * @param {Element} [parameters.content] - Content node for text of hint.
 	 * @param {BX.PopupWindow} [parameters.popup] - Custom popup instance.
 	 * @param {object} [parameters.popupParameters] - Parameters for standard popup.
@@ -25,6 +27,14 @@
 		if (parameters.attributeName)
 		{
 			this.attributeName = parameters.attributeName;
+		}
+		if (parameters.classNameIcon)
+		{
+			this.classNameIcon = parameters.classNameIcon;
+		}
+		if (parameters.className)
+		{
+			this.className = parameters.className;
 		}
 		if (parameters.attributeInitName)
 		{
@@ -52,6 +62,7 @@
 		}
 
 		this.initByClassName();
+		BX.ready(this.initByClassName.bind(this));
 	}
 	Manager.prototype = {
 		attributeName: 'data-hint',
@@ -133,12 +144,15 @@
 				return;
 			}
 
-			BX.addClass(node, this.className);
-			node.innerHTML = '';
+			if (!node.hasAttribute('data-hint-no-icon'))
+			{
+				BX.addClass(node, this.className);
+				node.innerHTML = '';
 
-			var iconNode = document.createElement('span');
-			BX.addClass(iconNode, this.classNameIcon);
-			node.appendChild(iconNode);
+				var iconNode = document.createElement('span');
+				BX.addClass(iconNode, this.classNameIcon);
+				node.appendChild(iconNode);
+			}
 
 			BX.bind(node, 'mouseenter', this.show.bind(this, node, text));
 			BX.bind(node, 'mouseleave', this.hide.bind(this));

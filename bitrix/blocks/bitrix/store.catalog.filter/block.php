@@ -38,6 +38,7 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 					'PAGER_PARAMS_NAME' => '',
 					'INSTANT_RELOAD' => 'N',
 					'PRICE_CODE' => $classBlock->get('PRICE_CODE'),
+					'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID')
 				),
 				false
 			);

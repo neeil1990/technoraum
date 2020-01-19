@@ -152,11 +152,6 @@ class Property
 			$filterData = $filterOption->getFilter();
 			foreach($listProperty as $property)
 			{
-				if (empty($property['LINK_IBLOCK_ID']) || empty($property['FIELD_ID']))
-				{
-					continue;
-				}
-
 				$currentElements = array();
 				if(!empty($filterData[$property['FIELD_ID']]))
 				{

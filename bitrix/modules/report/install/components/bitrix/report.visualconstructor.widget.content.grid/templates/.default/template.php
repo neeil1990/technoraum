@@ -17,6 +17,7 @@ $APPLICATION->IncludeComponent(
 		'SHOW_GRID_SETTINGS_MENU' => false,
 		'SHOW_SELECTED_COUNTER' => false,
 		'SHOW_TOTAL_COUNTER' => false,
+		'ALLOW_COLUMNS_SORT' => false
 	),
 	$component,
 	array(

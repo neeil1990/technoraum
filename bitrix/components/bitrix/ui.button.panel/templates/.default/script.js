@@ -12,7 +12,7 @@
 		init: function (options)
 		{
 			options = options || {};
-			this.context = BX('ui-button-panel');
+			this.context = BX(options.containerId);
 			this.isFrame = options.isFrame || false;
 			this.hasHints = options.hasHints || false;
 

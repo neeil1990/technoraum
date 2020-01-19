@@ -7,7 +7,9 @@ use Bitrix\Sale\Location\Admin\LocationHelper as Helper;
 use Bitrix\Sale\Location\Admin\SearchHelper;
 
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_before.php");
-require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/include.php");
+
+\Bitrix\Main\Loader::includeModule('sale');
+
 require_once($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/sale/prolog.php');
 
 Loc::loadMessages(__FILE__);
@@ -26,6 +28,11 @@ $userIsAdmin = $APPLICATION->GetGroupRight("sale") >= "W";
 
 try
 {
+	if(!\Bitrix\Sale\Location\LocationTable::checkIntegrity())
+	{
+		throw new Main\SystemException(Loc::getMessage('SALE_LOCATION_L_ERROR'));
+	}
+
 	$itemId = intval($_REQUEST[Helper::URL_PARAM_PARENT_ID]) ? intval($_REQUEST[Helper::URL_PARAM_PARENT_ID]) : false;
 	$nameToDisplay = Helper::getNameToDisplay($itemId);
 
@@ -140,6 +147,7 @@ try
 		"name" => GetMessage("SALE_LOCATION_L_LEVEL"),
 		"type" => "list",
 		"items" => array(
+			"ANY" => GetMessage("SALE_LOCATION_L_ANY"),
 			"CURRENT_AND_LOWER" => GetMessage("SALE_LOCATION_L_CURRENT_AND_LOWER"),
 			"CURRENT" => GetMessage("SALE_LOCATION_L_CURRENT")
 		),
@@ -152,29 +160,31 @@ try
 
 	$lAdmin->AddFilter($filterFields, $listParams['filter']);
 
-	if (empty($listParams['filter']['LEVEL']))
+	if (!empty($listParams['filter']['LEVEL']))
 	{
-		unset($listParams['filter']['=PARENT_ID']);
-	}
-	elseif ($listParams['filter']['LEVEL'] == 'CURRENT_AND_LOWER')
-	{
-		if(intval($listParams['filter']['=PARENT_ID']) > 0)
+		if ($listParams['filter']['LEVEL'] == 'ANY')
 		{
-			$res = Location\LocationTable::getList(array(
-				'filter' => array(
-					'ID' => intval($listParams['filter']['=PARENT_ID'])
-				),
-				'select' => array('ID', 'LEFT_MARGIN', 'RIGHT_MARGIN')
-			));
-
-			if($loc = $res->fetch())
-			{
-				$listParams['filter']['>LEFT_MARGIN'] = $loc['LEFT_MARGIN'];
-				$listParams['filter']['<RIGHT_MARGIN'] = $loc['RIGHT_MARGIN'];
-			}
+			unset($listParams['filter']['=PARENT_ID']);
 		}
+		elseif ($listParams['filter']['LEVEL'] == 'CURRENT_AND_LOWER')
+		{
+			if(intval($listParams['filter']['=PARENT_ID']) > 0)
+			{
+				$res = Location\LocationTable::getList(array(
+					'filter' => array(
+						'ID' => intval($listParams['filter']['=PARENT_ID'])
+					),
+					'select' => array('ID', 'LEFT_MARGIN', 'RIGHT_MARGIN')
+				));
 
-		unset($listParams['filter']['=PARENT_ID']);
+				if($loc = $res->fetch())
+				{
+					$listParams['filter']['>LEFT_MARGIN'] = $loc['LEFT_MARGIN'];
+					$listParams['filter']['<RIGHT_MARGIN'] = $loc['RIGHT_MARGIN'];
+				}
+			}
+			unset($listParams['filter']['=PARENT_ID']);
+		}
 	}
 
 	unset($listParams['filter']['LEVEL']);
@@ -373,29 +383,32 @@ if(empty($fatal))
 
 <?$APPLICATION->SetTitle(Loc::getMessage('SALE_LOCATION_L_EDIT_PAGE_TITLE').($nameToDisplay ? ': '.$nameToDisplay : ''))?>
 
-<?require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");?>
+<?require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
+if (!$publicMode && \Bitrix\Sale\Update\CrmEntityCreatorStepper::isNeedStub())
+{
+	$APPLICATION->IncludeComponent("bitrix:sale.admin.page.stub", ".default");
+}
+else
+{
+	SearchHelper::checkIndexesValid();
 
-<?SearchHelper::checkIndexesValid();?>
-
-<?if(strlen($fatal)):?>
-	<?
-	$messageParams = array('MESSAGE' => $fatal, 'type' => 'ERROR');
-	if ($publicMode)
+	if(strlen($fatal))
 	{
-		$messageParams["SKIP_PUBLIC_MODE"] = true;
+		$messageParams = array('MESSAGE' => $fatal, 'type' => 'ERROR');
+		if ($publicMode)
+		{
+			$messageParams["SKIP_PUBLIC_MODE"] = true;
+		}
+		?>
+		<div class="error-message">
+			<?CAdminMessage::ShowMessage($messageParams)?>
+		</div>
+		<?
 	}
-	?>
-	<div class="error-message">
-		<?CAdminMessage::ShowMessage($messageParams)?>
-	</div>
-
-<?else:?>
-
-	<?
+	else
+	{
 		$lAdmin->DisplayFilter($filterFields);
 		$lAdmin->DisplayList();
-	?>
-
-<?endif;
-
+	}
+}
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");

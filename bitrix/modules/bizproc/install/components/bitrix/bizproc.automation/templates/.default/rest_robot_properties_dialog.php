@@ -23,3 +23,21 @@ foreach ($properties as $id => $property):
 	</div>
 	<?
 endforeach;
+
+if ($activityData['USE_PLACEMENT'] === 'Y' && !empty($activityData['APP_ID_INT'])):
+
+$appJs = (int) $activityData['APP_ID_INT'];
+$codeJs = htmlspecialcharsbx(CUtil::JSEscape($activityData['CODE']));
+$actNameJs = htmlspecialcharsbx(CUtil::JSEscape($dialog->getActivityName()));
+?>
+	<div class="bizproc-automation-popup-settings">
+		<span class="ui-btn ui-btn-primary" onclick="if (!BX.rest) return false; BX.rest.AppLayout.openApplication(<?=$appJs?>, {
+			action: 'robot_settings',
+			code: '<?=$codeJs?>',
+			activity_name: '<?=$actNameJs?>'
+		});">
+			<?=GetMessage('BIZPROC_AUTOMATION_CONFIGURE')?>
+		</span>
+	</div>
+<?
+endif;

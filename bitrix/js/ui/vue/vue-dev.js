@@ -4,7 +4,7 @@
  * Released under the MIT License.
  */
 (function(window) {
-	if (window.Vue) {return;}
+	if (window.Vue && !window.BITRIX_REINIT_VUE) {return;}
 
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :

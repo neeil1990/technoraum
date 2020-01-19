@@ -1,4 +1,4 @@
-<h2><span style="font-family: Arial, Helvetica;"><b><span style="font-family: Tahoma, Geneva;">Почему купить технику Karcher в фирменном магазине «ТехноРаум» выгодно?</span></b></span></h2>
+<h2><span style="font-family: Arial, Helvetica;"><b><span style="font-family: Tahoma, Geneva;">Почему купить технику Karcher в фирменном интернет-магазине «ТехноРаум» выгодно?</span></b></span></h2>
  <span style="font-family: Tahoma, Geneva;"> </span><span style="font-family: Tahoma, Geneva;"> </span><span style="font-family: Tahoma, Geneva;"> </span>
 <ul>
 	<p>

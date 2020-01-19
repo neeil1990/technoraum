@@ -33,11 +33,12 @@ $arParams["SOCNET_GROUP_ID"] = IntVal($arParams["SOCNET_GROUP_ID"]);
 $arResult["bIntranetInstalled"] = ModuleManager::isModuleInstalled("intranet");
 $arResult["bTasksAvailable"] = (
 	(!isset($arParams["bPublicPage"]) || !$arParams["bPublicPage"])
-	&& IsModuleInstalled("tasks")
+	&& ModuleManager::isModuleInstalled("tasks")
 	&& (
-		!CModule::IncludeModule('bitrix24')
+		!Loader::includeModule('bitrix24')
 		|| CBitrix24BusinessTools::isToolAvailable($USER->GetID(), "tasks")
 	)
+	&& CSocNetFeaturesPerms::CurrentUserCanPerformOperation(SONET_ENTITY_USER, $USER->getId(), "tasks", "create_tasks")
 );
 
 $arParams["ID"] = trim($arParams["ID"]);
@@ -736,7 +737,7 @@ if(
 						{
 							if (!$conn->isUtf8mb4($table, 'POST_TEXT'))
 							{
-								$arFields["POST_TEXT"] = \Bitrix\Main\Text\UtfSafeString::escapeInvalidUtf($arFields["POST_TEXT"]);
+								$arFields["POST_TEXT"] = \Bitrix\Main\Text\Emoji::encode($arFields["POST_TEXT"]);
 							}
 						}
 					}
@@ -1039,7 +1040,8 @@ if(
 								{
 									$arFieldsIM["MENTION_ID"] = $arMention[1];
 									if (
-										$_POST["act"] != "edit"
+										$arParams["MOBILE"] == "Y"
+										&& $_POST["act"] != "edit"
 										&& is_array($arMention[1])
 										&& !empty($arMention[1])
 									)

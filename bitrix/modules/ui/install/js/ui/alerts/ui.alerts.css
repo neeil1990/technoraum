@@ -17,7 +17,10 @@
 
 /*endregion*/
 
-.ui-alert-inline { display: inline-flex; }
+.ui-alert-inline {
+	display: inline-flex;
+	width:auto;
+}
 
 .ui-alert-text-center { justify-content: center; }
 

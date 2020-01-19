@@ -1,0 +1,24 @@
+<?
+$MESS["SALE_CSM_MODULE_NOT_INSTALL"] = "Модуль Інтернет-магазину не встановлений.";
+$MESS["SALE_CSM_TITLE"] = "Конвертація замовлень в Бітрікс24";
+$MESS["SALE_CSM_WIZARD_STEP_NOT_FOUND"] = "Файл з кроком #STEP_NAME# не знайдений";
+$MESS["SALE_CSM_WIZARD_TEMPLATE_NOT_FOUND"] = "Файл з шаблоном майстра не знайдений";
+$MESS["SALE_CSM_WIZARD_ERROR_SESSION_EXPIRED"] = "Ваша сесія закінчилася.";
+$MESS["SALE_CSM_ACCESS_DENIED"] = "Доступ заборонено";
+$MESS["SALE_CSM_MODULE_CALENDAR_NAME"] = "Календар подій";
+$MESS["SALE_CSM_MODULE_CRM_NAME"] = "CRM";
+$MESS["SALE_CSM_MODULE_DAV_NAME"] = "DAV";
+$MESS["SALE_CSM_MODULE_DISK_NAME"] = "Диск";
+$MESS["SALE_CSM_MODULE_IMCONNECTOR_NAME"] = "Конектори для зовнішніх месенджерів";
+$MESS["SALE_CSM_MODULE_IMOPENLINES_NAME"] = "Відкриті лінії";
+$MESS["SALE_CSM_MODULE_IM_NAME"] = "Веб-месенджер";
+$MESS["SALE_CSM_MODULE_INTRANET_NAME"] = "Інтранет";
+$MESS["SALE_CSM_MODULE_MEETING_NAME"] = "Планерки і збори";
+$MESS["SALE_CSM_MODULE_MOBILEAPP_NAME"] = "Мобільна платформа";
+$MESS["SALE_CSM_MODULE_MOBILE_NAME"] = "Мобільний застосунок";
+$MESS["SALE_CSM_MODULE_PULL_NAME"] = "Push and Pull";
+$MESS["SALE_CSM_MODULE_TASKS_NAME"] = "Завдання";
+$MESS["SALE_CSM_MODULE_TIMEMAN_NAME"] = "Облік робочого часу";
+$MESS["SALE_CSM_MODULE_VOXIMPLANT_NAME"] = "Телефонія";
+$MESS["ORDER_CRM_SITE_MASTER_ACCESS_DENIED"] = "Доступ заборонений.";
+$MESS["SALE_CSM_MODULE_MAIN_NAME"] = "Головний модуль";

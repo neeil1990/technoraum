@@ -10,6 +10,7 @@ return array(
 	'block' => array(
 		'name' => Loc::getMessage('LANDING_BLOCK_48.2.VIDEO_BUTTON_ON_BGIMG_NAME'),
 		'section' => array('cover', 'video'),
+		'dynamic' => false,
 	),
 	'cards' => array(),
 	'nodes' => array(
@@ -42,7 +43,7 @@ return array(
 			),
 			'.landing-block-node-bgimg' => array(
 				'name' => Loc::getMessage('LANDING_BLOCK_48.2.VIDEO_BUTTON_ON_BGIMG_NODES_LANDINGBLOCKNODEBGIMG'),
-				'type' => ['background-overlay', 'height-vh'],
+				'type' => ['background-overlay', 'height-vh', 'background-attachment'],
 			),
 		),
 	),

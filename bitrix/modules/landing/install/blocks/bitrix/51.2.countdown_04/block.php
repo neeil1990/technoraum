@@ -8,7 +8,7 @@
 
 		<div class="row">
 			<div class="landing-block-node-date mx-auto js-countdown u-countdown text-center"
-				 data-end-date="1555056180000"
+				 data-end-date="1586678580000"
 				 data-days-format="%D"
 				 data-hours-format="%H"
 				 data-minutes-format="%M"
@@ -16,32 +16,32 @@
 				 data-days-expired-classes="u-countdown--days-expiried"
 			>
 
-				<div class="landing-block-node-number landing-block-node-number-days u-countdown--days-hide d-inline-block align-top g-mx-20 g-mx-55--sm">
-					<div class="landing-block-node-number-number landing-block-node-number-number-days g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
+				<div class="d-inline-block align-top g-mx-20 g-mx-55--sm u-countdown--days-hide">
+					<div class="landing-block-node-number-number g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
 						<span class="js-cd-days">12</span>
 					</div>
-					<span class="landing-block-node-number-text landing-block-node-number-text-days g-color-white g-font-size-12 g-font-size-14--sm">Days</span>
+					<span class="landing-block-node-number-text g-color-white g-font-size-12 g-font-size-14--sm">Days</span>
 				</div>
 
-				<div class="landing-block-node-number landing-block-node-number-hours d-inline-block align-top g-mx-20 g-mx-55--sm">
-					<div class="landing-block-node-number-number landing-block-node-number-number-hours g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
+				<div class="d-inline-block align-top g-mx-20 g-mx-55--sm">
+					<div class="landing-block-node-number-number g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
 						<span class="js-cd-hours">01</span>
 					</div>
-					<span class="landing-block-node-number-text landing-block-node-number-text-hours g-color-white g-font-size-12 g-font-size-14--sm">Hours</span>
+					<span class="landing-block-node-number-text g-color-white g-font-size-12 g-font-size-14--sm">Hours</span>
 				</div>
 
-				<div class="landing-block-node-number landing-block-node-number-minutes d-inline-block align-top g-mx-20 g-mx-55--sm">
-					<div class="landing-block-node-number-number landing-block-node-number-number-minutes g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
+				<div class="d-inline-block align-top g-mx-20 g-mx-55--sm">
+					<div class="landing-block-node-number-number g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
 						<span class="js-cd-minutes">52</span>
 					</div>
-					<span class="landing-block-node-number-text landing-block-node-number-text-minutes g-color-white g-font-size-12 g-font-size-14--sm">Minutes</span>
+					<span class="landing-block-node-number-text g-color-white g-font-size-12 g-font-size-14--sm">Minutes</span>
 				</div>
 
-				<div class="landing-block-node-number landing-block-node-number-seconds d-inline-block align-top g-mx-20 g-mx-55--sm">
-					<div class="landing-block-node-number-number landing-block-node-number-number-seconds g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
+				<div class="d-inline-block align-top g-mx-20 g-mx-55--sm">
+					<div class="landing-block-node-number-number g-color-white g-font-size-30 g-font-size-45--sm g-font-weight-300 g-line-height-1 mb-0">
 						<span class="js-cd-seconds">52</span>
 					</div>
-					<span class="landing-block-node-number-text landing-block-node-number-text-seconds g-color-white g-font-size-12 g-font-size-14--sm">Seconds</span>
+					<span class="landing-block-node-number-text g-color-white g-font-size-12 g-font-size-14--sm">Seconds</span>
 				</div>
 
 			</div>

@@ -201,10 +201,13 @@ if ($arResult["USE_UI_FILTER"])
 			$filtered = true;
 			$arResult["filter_member"] = intval($matches[1]);
 
-			\Bitrix\Main\FinderDestTable::merge(array(
-				"CONTEXT" => "SONET_GROUP_LIST_FILTER_MEMBER",
-				"CODE" => $filterData['MEMBER']
-			));
+			if (SITE_TEMPLATE_ID != 'bitrix24')
+			{
+				\Bitrix\Main\FinderDestTable::merge(array(
+					"CONTEXT" => "SONET_GROUP_LIST_FILTER_MEMBER",
+					"CODE" => $filterData['MEMBER']
+				));
+			}
 		}
 
 		if (
@@ -218,10 +221,13 @@ if ($arResult["USE_UI_FILTER"])
 			$filtered = true;
 			$arResult["filter_owner"] = intval($matches[1]);
 
-			\Bitrix\Main\FinderDestTable::merge(array(
-				"CONTEXT" => "SONET_GROUP_LIST_FILTER_OWNER",
-				"CODE" => $filterData['OWNER']
-			));
+			if (SITE_TEMPLATE_ID != 'bitrix24')
+			{
+				\Bitrix\Main\FinderDestTable::merge(array(
+					"CONTEXT" => "SONET_GROUP_LIST_FILTER_OWNER",
+					"CODE" => $filterData['OWNER']
+				));
+			}
 		}
 
 		if (isset($filterData['EXTRANET']))
@@ -235,6 +241,14 @@ if ($arResult["USE_UI_FILTER"])
 		)
 		{
 			$arResult["filter_favorites"] = 'Y';
+		}
+
+		if (
+			isset($filterData['LANDING'])
+			&& $filterData['LANDING'] == 'Y'
+		)
+		{
+			$arResult["filter_landing"] = 'Y';
 		}
 
 		if (!empty($filterData['TAG']))
@@ -818,6 +832,11 @@ if (StrLen($arResult["FatalError"]) <= 0)
 					$arGroupFilter["=PROJECT"] = 'Y';
 				}
 
+				if (!empty($arResult["filter_landing"]))
+				{
+					$arGroupFilter["=LANDING"] = $arResult["filter_landing"];
+				}
+
 				if (
 					!empty($arResult["filter_extranet"])
 					&& CModule::IncludeModule("extranet")
@@ -838,14 +857,6 @@ if (StrLen($arResult["FatalError"]) <= 0)
 					{
 						$arUserGroupFilter["!=GROUP_SITE_ID"] = CExtranet::GetExtranetSiteID();
 					}
-				}
-
-				if (
-					!$arResult["CurrentUserPerms"]["IsCurrentUser"] 
-					&& !CSocNetUser::IsCurrentUserModuleAdmin()
-				)
-				{
-					$arGroupFilter["=VISIBLE"] = "Y";
 				}
 			}
 
@@ -890,49 +901,9 @@ if (StrLen($arResult["FatalError"]) <= 0)
 			if (
 				$arParams["USE_KEYWORDS"] == "Y"
 				&& strlen($arResult["~tags"]) > 0 
-				&& CModule::IncludeModule("search")
 			)
 			{
-				$arFilter = array(
-					"SITE_ID" => SITE_ID,
-					"QUERY" => "",
-					array(
-						"=MODULE_ID" => "socialnetwork",
-						"PARAMS" => array(
-							"entity" => "socnet_group",
-						),
-					),
-					"CHECK_DATES" => "Y",
-					"TAGS" => $arResult["~tags"]
-				);
-				$aSort = array("DATE_CHANGE" => "DESC", "CUSTOM_RANK" => "DESC", "RANK" => "DESC");
-
-				$obSearch = new CSearch();
-				$obSearch->Search($arFilter);
-				if ($obSearch->errorno == 0)
-				{
-					$arTagGroups = array();
-					while ($arSearch = $obSearch->Fetch())
-					{
-						if (intval($arSearch["PARAM2"]) > 0)
-						{
-							$arTagGroups[] = $arSearch["PARAM2"];
-						}
-					}
-
-					if (empty($arTagGroups))
-					{
-						$bNoMyGroups = true;
-					}
-
-					if (
-						!empty($arTagGroups)
-						&& !$bNoMyGroups
-					)
-					{
-						$arGroupFilter["ID"] = (!empty($arGroupFilter["ID"]) ? array_intersect($arGroupFilter["ID"], $arTagGroups) : $arTagGroups);
-					}
-				}
+				$arGroupFilter['Bitrix\Socialnetwork\WorkgroupTag:GROUP.NAME'] = ToLower($arResult["~tags"]);
 			}
 
 			if (
@@ -1197,6 +1168,7 @@ if (StrLen($arResult["FatalError"]) <= 0)
 						),
 						"NUMBER_OF_MEMBERS" => $arGroup["NUMBER_OF_MEMBERS"],
 					);
+					$CACHE_MANAGER->registerTag("sonet_user2group_G".$arGroup["ID"]);
 
 					$arGroupID[] = $arGroup["ID"];
 				}
@@ -1386,6 +1358,14 @@ if (StrLen($arResult["FatalError"]) <= 0)
 			{
 				$APPLICATION->SetTitle(Loc::getMessage("SONET_C36_PAGE_TITLE_COMMON"));
 			}
+			elseif (
+				$arParams["PAGE"] == "user_groups"
+				&& !empty($_REQUEST['IFRAME'])
+				&& $_REQUEST['IFRAME'] == 'Y'
+			)
+			{
+				$APPLICATION->SetTitle($strTitleFormatted.": ".Loc::getMessage("SONET_C36_PAGE_TITLE1"));
+			}
 			elseif ($arParams["PAGE"] == "group_request_group_search")
 			{
 				$APPLICATION->SetTitle($strTitleFormatted.": ".Loc::getMessage("SONET_C36_PAGE_TITLE"));
@@ -1398,7 +1378,7 @@ if (StrLen($arResult["FatalError"]) <= 0)
 				}
 				else
 				{
-					$APPLICATION->SetTitle(Loc::getMessage("SONET_C36_PAGE_TITLE1"));
+					$APPLICATION->SetTitle($strTitleFormatted.": ".Loc::getMessage("SONET_C36_PAGE_TITLE1"));
 				}
 			}
 			elseif ($arParams["PAGE"] == "user_projects")

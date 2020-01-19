@@ -24,6 +24,11 @@
 				renderer = this.getRenderFunctionName(property),
 				needInit = true;
 
+			if (BX.type.isString(documentType))
+			{
+				documentType = documentType.split('@');
+			}
+
 			if (renderer)
 			{
 				if (isMultiple(property) && property.Type !== 'select')
@@ -78,7 +83,8 @@
 						'rnd' : Math.random(),
 						'Mode' : '',
 						'Func' : '',
-						'sessid' : BX.bitrix_sessid()
+						'sessid' : BX.bitrix_sessid(),
+						'RenderMode': 'public'
 					},
 					function(v) {
 						if (v)
@@ -111,7 +117,20 @@
 
 				case 'select':
 				case 'internalselect':
-					result = property['Options'][value];
+					if (BX.type.isArray(value))
+					{
+						result = [];
+						value.forEach(function(v)
+						{
+							result.push(property['Options'][v]);
+						});
+						result = result.join(', ');
+					}
+					else
+					{
+						result = property['Options'][value];
+					}
+
 					break;
 
 				case 'date':
@@ -344,7 +363,30 @@
 					}
 				});
 
-				return BX.create('div', {children: [input, img]});
+				var lc;
+
+				if (property['Settings'] && property['Settings']['timezones'])
+				{
+					lc = BX.create('select', {
+						props: {name: 'tz_' + (fieldName + (isMultiple(property) ? '[]' : ''))},
+						attrs: {className: 'bizproc-type-control-date-lc'}
+					});
+
+					property['Settings']['timezones'].forEach(function(zone)
+					{
+						var option = BX.create('option', {
+							props: {value: zone.value},
+							text: zone.text
+						});
+						if (zone.value === 'current')
+						{
+							option.setAttribute('selected', 'selected');
+						}
+						lc.appendChild(option);
+					});
+				}
+
+				return BX.create('div', {children: [input, img, lc]});
 			}
 
 			return input;
@@ -551,9 +593,13 @@
 		{
 			var fields = [];
 			var dlg = BX.Bizproc.Automation && BX.Bizproc.Automation.Designer.getRobotSettingsDialog();
-			if (dlg)
+			if (dlg && dlg.robot.component)
 			{
 				fields = dlg.robot.component.data['DOCUMENT_FIELDS'];
+			}
+			if (!fields.length && BX.Bizproc.Automation && BX.Bizproc.Automation.API.documentFields)
+			{
+				fields = BX.Bizproc.Automation.API.documentFields;
 			}
 
 			return fields;

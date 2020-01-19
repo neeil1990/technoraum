@@ -20,7 +20,12 @@
 	{
 		BX.Landing.UI.Panel.BasePanel.apply(this, arguments);
 		addClass(this.layout, "landing-ui-panel-status");
-		document.body.appendChild(this.layout);
+
+		if (!!document.body.querySelector('.landing-edit-mode'))
+		{
+			document.body.appendChild(this.layout);
+		}
+
 		this.runInterval();
 		this.updateTime();
 	};
@@ -51,7 +56,7 @@
 		updateTime: function()
 		{
 			this.setContent([
-				BX.message("LANDING_PAGE_STATUS_UPDATED"),
+				BX.Landing.Loc.getMessage("LANDING_PAGE_STATUS_UPDATED"),
 				BX.date.format(format, lastUpdate.getTime() / 1000, (new Date()).getTime() / 1000)
 			].join(" "));
 		},
@@ -62,7 +67,7 @@
 				.then(function() {
 					this.runInterval();
 					lastUpdate = new Date();
-					this.setContent(BX.message("LANDING_PAGE_STATUS_UPDATED_NOW"));
+					this.setContent(BX.Landing.Loc.getMessage("LANDING_PAGE_STATUS_UPDATED_NOW"));
 				}.bind(this));
 		}
 	};

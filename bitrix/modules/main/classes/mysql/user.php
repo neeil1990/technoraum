@@ -101,6 +101,14 @@ class CUser extends CAllUser
 			if(is_set($arFields, "GROUP_ID"))
 				CUser::SetUserGroup($ID, $arFields["GROUP_ID"], true);
 
+			if(isset($arFields["PHONE_NUMBER"]) && $arFields["PHONE_NUMBER"] <> '')
+			{
+				Main\UserPhoneAuthTable::add(array(
+					"USER_ID" => $ID,
+					"PHONE_NUMBER" => $arFields["PHONE_NUMBER"],
+				));
+			}
+
 			//update digest hash for http digest authorization
 			if(COption::GetOptionString('main', 'use_digest_auth', 'N') == 'Y')
 				CUser::UpdateDigest($ID, $original_pass);
@@ -530,13 +538,6 @@ class CUser extends CAllUser
 					U.LOGIN %1\$s", $dir
 				);
 			}
-			else
-			{
-				$field = "TIMESTAMP_X";
-				$arSqlOrder[$field] = "U.".$field." ".$dir;
-				if ($bSingleBy)
-					$by = strtolower($field);
-			}
 		}
 
 		$userFieldsSelect = $obUserFieldsSql->GetSelect();
@@ -691,9 +692,9 @@ class CGroup extends CAllGroup
 		$DB->Query($strSql);
 		$ID = $DB->LastID();
 
-		if (count($arFields["USER_ID"]) > 0)
+		if (is_array($arFields["USER_ID"]) && !empty($arFields["USER_ID"]))
 		{
-			if (is_array($arFields["USER_ID"][0]) && count($arFields["USER_ID"][0]) > 0)
+			if (is_array($arFields["USER_ID"][0]) && !empty($arFields["USER_ID"][0]))
 			{
 				$arTmp = array();
 				foreach ($arFields["USER_ID"] as $userId)

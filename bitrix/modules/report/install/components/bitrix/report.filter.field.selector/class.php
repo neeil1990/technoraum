@@ -38,7 +38,7 @@ class CReportComponent extends \CBitrixComponent
 		if (isset($this->moduleIncluded[$moduleName]))
 			return $this->moduleIncluded[$moduleName];
 
-		$this->moduleIncluded[$moduleName] = CModule::IncludeModule($moduleName);
+		$this->moduleIncluded[$moduleName] = Bitrix\Main\Loader::includeModule($moduleName);
 
 		return $this->moduleIncluded[$moduleName];
 	}
@@ -59,9 +59,12 @@ class CReportComponent extends \CBitrixComponent
 							array($ufInfo['USER_TYPE']['CLASS_NAME'], 'getlist'),
 							array($ufInfo)
 						);
-						while($arEnum = $rsEnum->GetNext())
+						if (is_object($rsEnum))
 						{
-							$enum[$arEnum['ID']] = $arEnum['VALUE'];
+							while($arEnum = $rsEnum->GetNext())
+							{
+								$enum[$arEnum['ID']] = $arEnum['VALUE'];
+							}
 						}
 						unset($rsEnum, $arEnum);
 					}
@@ -109,6 +112,16 @@ class CReportComponent extends \CBitrixComponent
 								$this->selectorItems[] = $selectorItem;
 						}
 						break;
+					case 'money':
+						if($this->ensureModuleIncluded('currency'))
+						{
+							$selectorItem = $this->prepareMoneySelectorItem($ufInfo);
+							if ($selectorItem)
+							{
+								$this->selectorItems[] = $selectorItem;
+							}
+						}
+						break;
 				}
 			}
 		}
@@ -152,8 +165,10 @@ class CReportComponent extends \CBitrixComponent
 		$result = false;
 		$selectorItem = array();
 		
-		if(!CModule::IncludeModule('crm'))
+		if(!Bitrix\Main\Loader::includeModule('crm'))
+		{
 			return $result;
+		}
 
 		$CCrmPerms = new CCrmPerms($USER->GetID());
 		$nPermittedEntityTypes = 0;
@@ -216,7 +231,7 @@ class CReportComponent extends \CBitrixComponent
 						$arImg =  CFile::ResizeImageGet($arFile, array('width' => 25, 'height' => 25), BX_RESIZE_IMAGE_EXACT);
 						if(is_array($arImg) && isset($arImg['src']))
 						{
-							$strImg = CHTTP::URN2URI($arImg['src'], '', true);
+							$strImg = CHTTP::URN2URI($arImg['src'], '');
 						}
 					}
 				}
@@ -257,7 +272,7 @@ class CReportComponent extends \CBitrixComponent
 						$arImg =  CFile::ResizeImageGet($arFile, array('width' => 25, 'height' => 25), BX_RESIZE_IMAGE_EXACT);
 						if(is_array($arImg) && isset($arImg['src']))
 						{
-							$strImg = CHTTP::URN2URI($arImg['src'], '', true);
+							$strImg = CHTTP::URN2URI($arImg['src'], '');
 						}
 					}
 
@@ -423,5 +438,53 @@ class CReportComponent extends \CBitrixComponent
 	protected function prepareIblockSectionSelectorItem($ufInfo)
 	{
 		return $this->prepareBaseListSelectorItem($ufInfo);
+	}
+
+	protected function prepareMoneySelectorItem($ufInfo)
+	{
+		$result = false;
+
+		if (!Bitrix\Main\Loader::includeModule('currency'))
+		{
+			return $result;
+		}
+
+		$currencyListSrc = Bitrix\Currency\Helpers\Editor::getListCurrency();
+		if (!is_array($currencyListSrc))
+		{
+			$currencyListSrc = [];
+		}
+		$currencyList = [['id' => '', 'title' => Loc::getMessage('REPORT_IGNORE_FILTER_VALUE')]];
+
+		$defaultCurrency = '';
+		$defaultCurrencyIndex = 0;
+		$index = 0;
+		foreach($currencyListSrc as $currency => $currencyInfo)
+		{
+			$value = ['id' => $currency, 'title' => $currencyInfo['NAME']];
+			$currencyList[] = $value;
+
+			if($defaultCurrency === '' || $currencyInfo['BASE'] === 'Y')
+			{
+				$defaultCurrency = $value["id"];
+				$defaultCurrencyIndex = $index;
+			}
+
+			$index++;
+		}
+		unset($currencyListSrc, $index, $currency, $currencyInfo, $value);
+
+		$result = [];
+
+		$result['USER_TYPE_ID'] = $ufInfo['USER_TYPE_ID'];
+		$result['ENTITY_ID'] = $ufInfo['ENTITY_ID'];
+		$result['FIELD_NAME'] = $ufInfo['FIELD_NAME'];
+
+		$result['CURRENCY_LIST'] = $currencyList;
+		$result['DEFAULT_CURRENCY_VALUE'] = $defaultCurrency;
+		$result['DEFAULT_CURRENCY_INDEX'] = $defaultCurrencyIndex;
+		$result['DEFAULT_NUMBER_VALUE'] = '';
+
+		return $result;
 	}
 }

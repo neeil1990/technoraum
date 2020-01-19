@@ -273,7 +273,7 @@ class Binder
 
 		throw new ObjectNotFoundException(
 			"Could not find value for class {{$message}} to build auto wired argument",
-			$exception
+			$exception instanceof \TypeError? null : $exception //fix it. When we will use php7.1
 		);
 	}
 

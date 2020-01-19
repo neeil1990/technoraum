@@ -27,6 +27,7 @@ BX.VideoRecorder = {
 	transformTime: 70,
 	transformTimerShown: false,
 	errorCode: null,
+	reader: null,
 	getScreenWidth: function()
 	{
 		if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement)
@@ -333,7 +334,7 @@ BX.VideoRecorder = {
 		{
 			BX.VideoRecorder.hideTransformTimer();
 			BX.VideoRecorder.recordBlob = new Blob(BX.VideoRecorder.chunks, {'type': 'video/webm'});
-			BX.VideoRecorder.outputVideo.src = URL.createObjectURL(BX.VideoRecorder.recordBlob);
+			BX.VideoRecorder.setSourceFromBlob(BX.VideoRecorder.recordBlob);
 			BX.VideoRecorder.state = 'idle';
 			BX.VideoRecorder.buttonPlay.style.display = 'block';
 			BX.VideoRecorder.buttonSave.style.display = 'inline-block';
@@ -621,14 +622,7 @@ BX.VideoRecorder = {
 	},
 	setVideoSrc: function(object)
 	{
-		if (BX.VideoRecorder.outputVideo.srcObject)
-		{
-			BX.VideoRecorder.outputVideo.srcObject = object;
-		}
-		else
-		{
-			BX.VideoRecorder.outputVideo.src = URL.createObjectURL(object);
-		}
+		BX.VideoRecorder.outputVideo.srcObject = object;
 	},
 	isTimeToShowTransformationAlert: function()
 	{
@@ -691,6 +685,24 @@ BX.VideoRecorder = {
 		{
 			BX.VideoRecorder.askDevicePermission();
 		}
+	},
+	getReader: function()
+	{
+		if(!BX.VideoRecorder.reader)
+		{
+			BX.VideoRecorder.reader = new FileReader();
+			BX.VideoRecorder.reader.onload = BX.proxy(function(e)
+			{
+				BX.VideoRecorder.outputVideo.srcObject = null;
+				BX.VideoRecorder.outputVideo.src = e.target.result;
+			}, this);
+		}
+
+		return BX.VideoRecorder.reader;
+	},
+	setSourceFromBlob: function(blob)
+	{
+		BX.VideoRecorder.getReader().readAsDataURL(blob);
 	}
 };
 

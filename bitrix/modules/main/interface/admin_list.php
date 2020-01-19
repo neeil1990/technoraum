@@ -57,8 +57,8 @@ class CAdminList
 
 	/**
 	 * @deprecated
-	 * @param $table_id
-	 * @param bool $sort
+	 * @param string $table_id
+	 * @param CAdminSorting|bool $sort
 	 */
 	public function CAdminList($table_id, $sort = false)
 	{
@@ -193,6 +193,10 @@ class CAdminList
 			$this->context = new CAdminContextMenuList($aContext, $aAdditionalMenu);
 	}
 
+	/**
+	 * @param string|int $ID
+	 * @return bool
+	 */
 	public function IsUpdated($ID)
 	{
 		$f = $_REQUEST['FIELDS'][$ID];
@@ -234,6 +238,9 @@ class CAdminList
 		return false;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function EditAction()
 	{
 		if($_SERVER['REQUEST_METHOD']=='POST' && isset($_REQUEST['save'])  && check_bitrix_sessid())
@@ -264,43 +271,100 @@ class CAdminList
 		return false;
 	}
 
+	/**
+	 * Returns field values in for inline edit grid mode.
+	 *
+	 * @return array
+	 */
+	public function GetEditFields()
+	{
+		return (isset($_REQUEST['FIELDS']) && is_array($_REQUEST['FIELDS']) ? $_REQUEST['FIELDS'] : []);
+	}
+
+	/**
+	 * @return array|false
+	 */
 	public function GroupAction()
 	{
-		//AddMessage2Log("GroupAction");
-		if(!empty($_REQUEST['action_button']))
-			$_REQUEST['action'] = $_REQUEST['action_button'];
+		$this->PrepareAction();
 
-		if(!isset($_REQUEST['action']) || !check_bitrix_sessid())
-			return false;
-
-		//AddMessage2Log("GroupAction = ".$_REQUEST['action']." & ".($this->bCanBeEdited?'bCanBeEdited':'ne'));
-		if($_REQUEST['action']=="edit")
+		if (!check_bitrix_sessid())
 		{
-			if(isset($_REQUEST['ID']))
-			{
-				if(!is_array($_REQUEST['ID']))
-					$arID = Array($_REQUEST['ID']);
-				else
-					$arID = $_REQUEST['ID'];
+			return false;
+		}
 
+		$action = $this->GetAction();
+		if ($action === null)
+		{
+			return false;
+		}
+
+		if($action=="edit")
+		{
+			$arID = $this->GetGroupIds();
+			if ($arID !== null)
+			{
 				$this->arEditedRows = $arID;
 				$this->bEditMode = true;
 			}
 			return false;
 		}
 
-		//AddMessage2Log("GroupAction = X");
-		if($_REQUEST['action_target']!='selected')
+		if (!$this->IsGroupActionToAll())
 		{
-			if(!is_array($_REQUEST['ID']))
-				$arID = Array($_REQUEST['ID']);
-			else
-				$arID = $_REQUEST['ID'];
+			$arID = $this->GetGroupIds();
+			if ($arID === null)
+			{
+				$arID = false;
+			}
 		}
 		else
-			$arID = Array('');
-
+		{
+			$arID = array('');
+		}
 		return $arID;
+	}
+
+	/**
+	 * Returns true if the user has set the flag "To all" in the list.
+	 *
+	 * @return bool
+	 */
+	public function IsGroupActionToAll()
+	{
+		return (isset($_REQUEST['action_target']) && $_REQUEST['action_target'] === 'selected');
+	}
+
+	/**
+	 * @return void
+	 */
+	protected function PrepareAction()
+	{
+		if (!empty($_REQUEST['action_button']))
+		{
+			$_REQUEST['action'] = $_REQUEST['action_button'];
+		}
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function GetAction()
+	{
+		return (isset($_REQUEST['action']) ? $_REQUEST['action'] : null);
+	}
+
+	/**
+	 * @return array|null
+	 */
+	protected function GetGroupIds()
+	{
+		$result = null;
+		if (isset($_REQUEST['ID']))
+		{
+			$result = (!is_array($_REQUEST['ID']) ? array($_REQUEST['ID']) : $_REQUEST['ID']);
+		}
+		return $result;
 	}
 
 	public function ActionRedirect($url)
@@ -727,7 +791,6 @@ class CAdminList
 		echo '</body></html>';
 	}
 
-
 	public function AddGroupActionTable($arActions, $arParams=array())
 	{
 		//array("action"=>"text", ...)
@@ -739,14 +802,13 @@ class CAdminList
 
 	public function ShowActionTable()
 	{
-		if(count($this->arActions)<=0 && !$this->bCanBeEdited)
+		if (empty($this->arActions) && !$this->bCanBeEdited)
 			return;
-
 ?>
-<div class="adm-list-table-footer" id="<?=$this->table_id?>_footer<?=$this->bEditMode || count($this->arUpdateErrorIDs)>0 ? '_edit' : ''?>">
-	<input type="hidden" name="action_button" value="" />
+<div class="adm-list-table-footer" id="<?=$this->table_id?>_footer<?=$this->bEditMode || !empty($this->arUpdateErrorIDs) ? '_edit' : ''?>">
+	<input type="hidden" name="action_button" id="<?=$this->table_id; ?>_action_button" value="" />
 <?
-		if($this->bEditMode || count($this->arUpdateErrorIDs)>0):
+		if($this->bEditMode || !empty($this->arUpdateErrorIDs)):
 ?>
 		<input type="hidden" name="save" id="<?=$this->table_id?>_hidden_save" value="Y">
 		<input type="submit" class="adm-btn-save" name="save" value="<?=GetMessage("admin_lib_list_edit_save")?>" title="<?=GetMessage("admin_lib_list_edit_save_title")?>" />
@@ -815,19 +877,19 @@ class CAdminList
 				}
 			}
 
-			if (strlen($buttons) > 0)
+			if ($buttons != '')
 				echo '<span class="adm-list-footer-ext">'.$buttons.'</span>';
 
-			if (strlen($list) > 0):
+			if ($list != ''):
 ?>
 	<span class="adm-select-wrap">
-		<select name="action" class="adm-select"<?=($this->arActionsParams["select_onchange"] <> ""? ' onchange="'.htmlspecialcharsbx($this->arActionsParams["select_onchange"]).'"':'')?>>
+		<select name="action" id="<?=$this->table_id.'_action'; ?>" class="adm-select"<?=($this->arActionsParams["select_onchange"] <> ""? ' onchange="'.htmlspecialcharsbx($this->arActionsParams["select_onchange"]).'"':'')?>>
 			<option value=""><?=GetMessage("admin_lib_list_actions")?></option>
 <?=$list?>
 		</select>
 	</span>
 <?
-				if (strlen($html) > 0)
+				if ($html != '')
 					echo $html;
 ?>
 	<input type="submit" name="apply" value="<?=GetMessage("admin_lib_list_apply")?>" onclick="if(this.form.action[this.form.action.selectedIndex].getAttribute('custom_action')){eval(this.form.action[this.form.action.selectedIndex].getAttribute('custom_action'));return false;}" disabled="disabled" class="adm-table-action-button" />
@@ -1044,6 +1106,11 @@ class CAdminListRow
 	var $pList;
 	var $isPublicMode = false;
 
+	/**
+	* CAdminListRow constructor.
+	* @param array &$aHeaders
+	* @param string $table_id
+	*/
 	public function __construct(&$aHeaders, $table_id)
 	{
 		$this->aHeaders = $aHeaders;
@@ -1053,7 +1120,10 @@ class CAdminListRow
 		$this->isPublicMode = (defined("PUBLIC_MODE") && PUBLIC_MODE == 1);
 	}
 
-	/** @deprecated */
+	/** @deprecated
+	* @param array &$aHeaders
+	* @param string $table_id
+	*/
 	public function CAdminListRow(&$aHeaders, $table_id)
 	{
 		self::__construct($aHeaders, $table_id);
@@ -1192,7 +1262,8 @@ class CAdminListRow
 
 	function AddActions($aActions)
 	{
-		$this->aActions = $aActions;
+		if (is_array($aActions))
+			$this->aActions = $aActions;
 	}
 
 	function __AttrGen($attr)
@@ -1212,35 +1283,21 @@ class CAdminListRow
 	function Display()
 	{
 		$sDefAction = $sDefTitle = "";
+
 		if(!$this->bEditMode)
 		{
-			global $adminSidePanelHelper;
-
 			if(!empty($this->link))
 			{
-				$sDefAction = ((is_object($adminSidePanelHelper) && $adminSidePanelHelper->isPublicSidePanel()) ?
-					"BX.adminSidePanel.onOpenPage('".CUtil::JSEscape($this->link)."');" :
-					"BX.adminPanel.Redirect([], '".CUtil::JSEscape($this->link)."', event);");
+				$sDefAction = $this->getActionLink($this->link);
 				$sDefTitle = $this->title;
 			}
 			else
 			{
-				$this->aActions = array_values($this->aActions);
 				foreach($this->aActions as $action)
 				{
 					if($action["DEFAULT"] == true)
 					{
-						if (!empty($action["ACTION"]))
-						{
-							$sDefAction = $action["ACTION"];
-						}
-						else
-						{
-							$sDefAction = ((is_object($adminSidePanelHelper) && $adminSidePanelHelper->isPublicSidePanel()) ?
-								"BX.adminSidePanel.onOpenPage('".CUtil::JSEscape($this->link)."');" :
-								"BX.adminPanel.Redirect([], '".CUtil::JSEscape($action["LINK"])."', event)");
-						}
-
+						$sDefAction = $this->getActionsItemLink($action);
 						$sDefTitle = (!empty($action["TITLE"])? $action["TITLE"] : $action["TEXT"]);
 						break;
 					}
@@ -1313,7 +1370,7 @@ class CAdminListRow
 				{
 					case "checkbox":
 						echo '<input type="hidden" name="FIELDS['.htmlspecialcharsbx($this->id).']['.htmlspecialcharsbx($id).']" value="N">';
-						echo '<input type="checkbox" name="FIELDS['.htmlspecialcharsbx($this->id).']['.htmlspecialcharsbx($id).']" value="Y"'.($val=='Y'?' checked':'').'>';
+						echo '<input type="checkbox" name="FIELDS['.htmlspecialcharsbx($this->id).']['.htmlspecialcharsbx($id).']" value="Y"'.($val=='Y' || $val === true?' checked':'').'>';
 						break;
 					case "select":
 						echo '<select name="FIELDS['.htmlspecialcharsbx($this->id).']['.htmlspecialcharsbx($id).']"'.$this->__AttrGen($field["edit"]["attributes"]).'>';
@@ -1352,7 +1409,7 @@ class CAdminListRow
 			}
 			else
 			{
-				if(!is_array($this->arRes[$id]))
+				if(is_string($this->arRes[$id]))
 					$val = trim($this->arRes[$id]);
 				else
 					$val = $this->arRes[$id];
@@ -1362,7 +1419,7 @@ class CAdminListRow
 					switch($field["view"]["type"])
 					{
 						case "checkbox":
-							if($val=='Y')
+							if($val == 'Y' || $val === true)
 								$val = htmlspecialcharsex(GetMessage("admin_lib_list_yes"));
 							else
 								$val = htmlspecialcharsex(GetMessage("admin_lib_list_no"));
@@ -1411,5 +1468,29 @@ class CAdminListRow
 ?>
 </tr>
 <?
+	}
+
+	/**
+	 * @param string $url
+	 * @return string
+	 */
+	protected function getActionLink($url)
+	{
+		global $adminSidePanelHelper;
+		if (is_object($adminSidePanelHelper) && $adminSidePanelHelper->isPublicSidePanel())
+			return "BX.adminSidePanel.onOpenPage('".CUtil::JSEscape($url)."');";
+		return "BX.adminPanel.Redirect([], '".CUtil::JSEscape($url)."', event);";
+	}
+
+	/**
+	* @param array $item
+	* @return bool
+	*/
+	protected function getActionsItemLink(array $item)
+	{
+		return (!empty($item["ACTION"])
+			? $item["ACTION"]
+			: $this->getActionLink($item["LINK"])
+		);
 	}
 }

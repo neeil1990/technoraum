@@ -91,7 +91,16 @@ class CBPWorkflow
 		$this->rootActivity = $rootActivity;
 		$rootActivity->SetWorkflow($this);
 		if (method_exists($rootActivity, 'SetWorkflowTemplateId'))
+		{
 			$rootActivity->SetWorkflowTemplateId($workflowTemplateId);
+		}
+
+		if (method_exists($rootActivity, 'setTemplateUserId'))
+		{
+			$rootActivity->setTemplateUserId(
+				CBPWorkflowTemplateLoader::getTemplateUserId($workflowTemplateId)
+			);
+		}
 
 		$arDocumentId = CBPHelper::ParseDocumentId($documentId);
 
@@ -117,7 +126,17 @@ class CBPWorkflow
 		if (is_array($workflowVariablesTypes))
 		{
 			foreach ($workflowVariablesTypes as $k => $v)
-				$rootActivity->SetVariable($k, $v["Default"]);
+			{
+				$variableValue = $v["Default"];
+				if ($documentType && $fieldTypeObject = $documentService->getFieldTypeObject($documentType, $v))
+				{
+					$fieldTypeObject->setDocumentId($arDocumentId);
+					$variableValue = $fieldTypeObject->internalizeValue('Variable', $variableValue);
+				}
+
+				//set defaults on start
+				$rootActivity->SetVariable($k, $variableValue);
+			}
 		}
 
 		$rootActivity->SetPropertiesTypes($workflowParametersTypes);

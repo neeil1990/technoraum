@@ -9,7 +9,8 @@ $saleModulePermissions = $APPLICATION->GetGroupRight("sale");
 if ($saleModulePermissions < "W")
 	$APPLICATION->AuthForm(GetMessage("ACCESS_DENIED"));
 
-require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/include.php");
+\Bitrix\Main\Loader::includeModule('sale');
+
 IncludeModuleLangFile(__FILE__);
 
 ClearVars();
@@ -46,6 +47,7 @@ if ($REQUEST_METHOD=="POST" && strlen($Update)>0 && $saleModulePermissions>="W" 
 			"SORT" => $SORT,
 			"ACTIVE" => $ACTIVE,
 			"ENTITY_REGISTRY_TYPE" => \Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER,
+			"XML_ID" => $XML_ID ?: \Bitrix\Sale\PersonType::generateXmlId(),
 		);
 
 		if ($ID > 0)
@@ -136,17 +138,23 @@ if ($saleModulePermissions < "W")
 
 if(IntVal($ID) > 0)
 {
-	$dbPersonType = CSalePersonType::GetList(Array(), array("ID" => $ID));
-	$dbPersonType->ExtractFields("str_");
+	$personType = \Bitrix\Sale\Internals\PersonTypeTable::getRowById($ID);
+
+	$dbRes = \Bitrix\Sale\Internals\PersonTypeSiteTable::getList([
+		'filter' => [
+			'=PERSON_TYPE_ID' => $personType['ID']
+		]
+	]);
+	while ($data = $dbRes->fetch())
+	{
+		$personType['LIDS'][] = $data['SITE_ID'];
+	}
 }
 else
 {
 	$ID = 0;
-//	$str_ACTIVE = "Y";
 }
 
-if ($bVarsFromForm)
-	$DB->InitTableVarsForEdit("b_sale_person_type", "", "str_");
 ?>
 
 <?
@@ -169,19 +177,22 @@ if ($ID > 0 && $saleModulePermissions >= "W")
 		"ICON" => "btn_new"
 	);
 
-	$deleteUrl = $selfFolderUrl."sale_person_type.php?ID=".$ID."&action=delete&lang=".LANGUAGE_ID."&".bitrix_sessid_get()."#tb";
-	$buttonAction = "LINK";
-	if ($adminSidePanelHelper->isPublicFrame())
+	if ($personType['CODE'] !== 'CRM_COMPANY' && $personType['CODE'] !== 'CRM_CONTACT')
 	{
-		$deleteUrl = $adminSidePanelHelper->editUrlToPublicPage($deleteUrl);
-		$buttonAction = "ONCLICK";
+		$deleteUrl = $selfFolderUrl."sale_person_type.php?ID=".$ID."&action=delete&lang=".LANGUAGE_ID."&".bitrix_sessid_get()."#tb";
+		$buttonAction = "LINK";
+		if ($adminSidePanelHelper->isPublicFrame())
+		{
+			$deleteUrl = $adminSidePanelHelper->editUrlToPublicPage($deleteUrl);
+			$buttonAction = "ONCLICK";
+		}
+		$aMenu[] = array(
+			"TEXT" => GetMessage("SPTEN_DELETE_PERSON_TYPE"),
+			$buttonAction => "javascript:if(confirm('".GetMessage("SPTEN_DELETE_PERSON_TYPE_CONFIRM")."')) top.window.location.href='".$deleteUrl."';",
+			"WARNING" => "Y",
+			"ICON" => "btn_delete"
+		);
 	}
-	$aMenu[] = array(
-		"TEXT" => GetMessage("SPTEN_DELETE_PERSON_TYPE"),
-		$buttonAction => "javascript:if(confirm('".GetMessage("SPTEN_DELETE_PERSON_TYPE_CONFIRM")."')) top.window.location.href='".$deleteUrl."';",
-		"WARNING" => "Y",
-		"ICON" => "btn_delete"
-	);
 }
 $context = new CAdminContextMenu($aMenu);
 $context->Show();
@@ -220,31 +231,42 @@ $tabControl->BeginNextTab();
 	<tr>
 		<td width="40%"><?echo GetMessage("F_ACTIVE");?>:</td>
 		<td width="60%">
-			<input type="checkbox" name="ACTIVE" value="Y" <?if ($str_ACTIVE=="Y") echo "checked"?>>
+			<input type="checkbox" name="ACTIVE" value="Y" <?if ($personType['ACTIVE']=="Y") echo "checked"?>>
 		</td>
 	</tr>
 	<tr class="adm-detail-required-field">
 		<td width="40%" valign="top"><?echo GetMessage("SPTEN_SITE")?>:</td>
 		<td width="60%">
-			<?echo CSite::SelectBoxMulti("LID", $str_LIDS);?>
+			<?echo CSite::SelectBoxMulti("LID", $personType['LIDS']);?>
 		</td>
 	</tr>
 	<tr class="adm-detail-required-field">
 		<td width="40%"><?echo GetMessage("SPTEN_NAME")?>:</td>
 		<td width="60%">
-			<input type="text" name="NAME" size="30" maxlength="100" value="<?= $str_NAME ?>">
+			<input type="text" name="NAME" size="30" maxlength="100" value="<?= htmlspecialcharsbx($personType['NAME']);?>">
 		</td>
 	</tr>
 	<tr>
 		<td width="40%"><?echo GetMessage("SPTEN_CODE")?>:</td>
 		<td width="60%">
-			<input type="text" name="CODE" size="30" maxlength="100" value="<?= $str_CODE ?>">
+			<?if ($personType['CODE'] === 'CRM_COMPANY' || $personType['CODE'] === 'CRM_CONTACT'):?>
+				<?=$personType['CODE'];?>
+				<input type="hidden" name="CODE" size="30" maxlength="100" value="<?= htmlspecialcharsbx($personType['CODE']);?>">
+			<?else:?>
+				<input type="text" name="CODE" size="30" maxlength="100" value="<?= htmlspecialcharsbx($personType['CODE']) ?>">
+			<?endif;?>
 		</td>
 	</tr>
 	<tr>
 		<td><?echo GetMessage("SPTEN_SORT")?>:</td>
 		<td>
-			<input type="text" name="SORT" value="<?= IntVal($str_SORT) ?>">
+			<input type="text" name="SORT" value="<?= IntVal($personType['SORT']) ?>">
+		</td>
+	</tr>
+	<tr>
+		<td width="40%"><?echo GetMessage("SPTEN_XML_ID")?>:</td>
+		<td width="60%">
+			<input type="text" name="XML_ID" size="30" value="<?= $personType['XML_ID'] ? htmlspecialcharsbx($personType['XML_ID']): \Bitrix\Sale\PersonType::generateXmlId() ?>">
 		</td>
 	</tr>
 	<?

@@ -27,5 +27,8 @@ class StoreCartBlock extends \Bitrix\Landing\LandingBlock
 		{
 			$this->params['EMPTY_PATH'] = '#system_mainpage';
 		}
+
+		$this->params['SITE_ID'] = $params['site_id'];
+		$this->params['LANDING_ID'] = $params['landing_id'];
 	}
 }

@@ -1,14 +1,13 @@
-<?
+<?php
+
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
 
-global $MESS;
 $strPath2Lang = str_replace("\\", "/", __FILE__);
 $strPath2Lang = substr($strPath2Lang, 0, strlen($strPath2Lang)-strlen("/install/index.php"));
-include(GetLangFileName($strPath2Lang."/lang/", "/install.php"));
 
-
+Loc::loadMessages($strPath2Lang. '/install.php');
 
 Class sale extends CModule
 {
@@ -20,7 +19,7 @@ Class sale extends CModule
 	var $MODULE_CSS;
 	var $MODULE_GROUP_RIGHTS = "Y";
 
-	function sale()
+	function __construct()
 	{
 		$arModuleVersion = array();
 
@@ -39,8 +38,8 @@ Class sale extends CModule
 			$this->MODULE_VERSION_DATE = SALE_VERSION_DATE;
 		}
 
-		$this->MODULE_NAME = GetMessage("SALE_INSTALL_NAME");
-		$this->MODULE_DESCRIPTION = GetMessage("SALE_INSTALL_DESCRIPTION");
+		$this->MODULE_NAME = Loc::getMessage("SALE_INSTALL_NAME");
+		$this->MODULE_DESCRIPTION = Loc::getMessage("SALE_INSTALL_DESCRIPTION");
 	}
 
 	function DoInstall()
@@ -49,7 +48,7 @@ Class sale extends CModule
 		$step = IntVal($step);
 		if($step<2)
 		{
-			$APPLICATION->IncludeAdminFile(GetMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/step1.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/step1.php");
 		}
 		elseif($step==2)
 		{
@@ -58,7 +57,7 @@ Class sale extends CModule
 				$this->InstallEvents();
 			$GLOBALS["errors"] = $this->errors;
 
-			$APPLICATION->IncludeAdminFile(GetMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/step2.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/step2.php");
 		}
 	}
 
@@ -68,7 +67,7 @@ Class sale extends CModule
 		$step = IntVal($step);
 		if($step<2)
 		{
-			$APPLICATION->IncludeAdminFile(GetMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/unstep1.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/unstep1.php");
 		}
 		elseif($step==2)
 		{
@@ -81,7 +80,7 @@ Class sale extends CModule
 			));
 
 			$GLOBALS["errors"] = $this->errors;
-			$APPLICATION->IncludeAdminFile(GetMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/unstep2.php");
+			$APPLICATION->IncludeAdminFile(Loc::getMessage("SALE_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/install/unstep2.php");
 		}
 	}
 
@@ -90,11 +89,11 @@ Class sale extends CModule
 		$arr = array(
 			"reference_id" => array("D",/* "R",*/ "P", "U", "W"),
 			"reference" => array(
-					"[D] ".GetMessage("SINS_PERM_D"),
-					//"[R] ".GetMessage("SINS_PERM_R"),
-					"[P] ".GetMessage("SINS_PERM_P"),
-					"[U] ".GetMessage("SINS_PERM_U"),
-					"[W] ".GetMessage("SINS_PERM_W")
+					"[D] ".Loc::getMessage("SINS_PERM_D"),
+					//"[R] ".Loc::getMessage("SINS_PERM_R"),
+					"[P] ".Loc::getMessage("SINS_PERM_P"),
+					"[U] ".Loc::getMessage("SINS_PERM_U"),
+					"[W] ".Loc::getMessage("SINS_PERM_W")
 				)
 			);
 		return $arr;
@@ -223,8 +222,14 @@ Class sale extends CModule
 		$eventManager->registerEventHandler('main', '\Bitrix\Main\Numerator\Model\Numerator::OnAfterAdd', 'sale', '\Bitrix\Sale\Integration\Numerator\AccountNumberCompatibilityManager', 'updateAccountNumberType');
 		$eventManager->registerEventHandler('main', '\Bitrix\Main\Numerator\Model\Numerator::OnAfterUpdate', 'sale', '\Bitrix\Sale\Integration\Numerator\AccountNumberCompatibilityManager', 'updateAccountNumberType');
 		$eventManager->registerEventHandler('main', '\Bitrix\Main\Numerator\Model\Numerator::OnAfterDelete', 'sale', '\Bitrix\Sale\Integration\Numerator\AccountNumberCompatibilityManager', 'resetAccountNumberType');
+		$eventManager->registerEventHandler('main', 'OnAfterUserLogin', 'sale', '\Bitrix\Sale\Update\CrmEntityCreatorStepper', 'OnAfterUserLogin');
 
 		$eventManager->registerEventHandler('landing', '\Bitrix\Landing\Internals\Site::OnAfterAdd', 'sale', '\Bitrix\Sale\TradingPlatform\Landing\Landing', 'onLandingSiteAdd');
+		$eventManager->registerEventHandler('landing', '\Bitrix\Landing\Internals\Site::OnAfterDelete', 'sale', '\Bitrix\Sale\TradingPlatform\Landing\Landing', 'onLandingSiteDelete');
+		$eventManager->registerEventHandler('landing', 'onBeforeSiteRecycle', 'sale', '\Bitrix\Sale\TradingPlatform\Landing\Landing', 'onLandingBeforeSiteRecycle');
+
+		$eventManager->registerEventHandler('report', 'onAnalyticPageCollect', 'sale', '\Bitrix\Sale\Integration\Report\EventHandler', 'onAnalyticPageCollect');
+		$eventManager->registerEventHandler('report', 'onAnalyticPageBatchCollect', 'sale', '\Bitrix\Sale\Integration\Report\EventHandler', 'onAnalyticPageBatchCollect');
 
 		COption::SetOptionString("sale", "viewed_capability", "N");
 		COption::SetOptionString("sale", "viewed_count", 10);
@@ -236,9 +241,6 @@ Class sale extends CModule
 
 		$eventManager->registerEventHandler('sale', 'OnSaleBasketItemEntitySaved', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemEntitySaved');
 		$eventManager->registerEventHandler('sale', 'OnSaleBasketItemDeleted', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemDeleted');
-		$eventManager->registerEventHandler('sale', 'OnCrmOrderBasketItemEntitySaved', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemEntitySaved');
-		$eventManager->registerEventHandler('sale', 'OnCrmOrderBasketItemDeleted', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemDeleted');
-
 
 		COption::SetOptionString("sale", "p2p_status_list", serialize(array(
 			"N", "P", "F", "F_CANCELED", "F_DELIVERY", "F_PAY", "F_OUT"
@@ -285,6 +287,11 @@ Class sale extends CModule
 
 		if (\Bitrix\Main\Loader::includeModule('sale'))
 		{
+			if ($DB->Query("CREATE FULLTEXT INDEX IX_B_SALE_ORDER_SEARCH ON b_sale_order(SEARCH_CONTENT)", true))
+			{
+				\Bitrix\Sale\Internals\OrderTable::getEntity()->enableFullTextIndex('SEARCH_CONTENT');
+			}
+
 			\Bitrix\Sale\Compatible\EventCompatibility::registerEvents();
 			
 			// install statuses
@@ -302,11 +309,11 @@ Class sale extends CModule
 				$languageId = $row['LID'];
 				Bitrix\Main\Localization\Loc::loadLanguageFile($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/sale/lib/status.php', $languageId);
 				foreach (array($orderInitialStatus, $orderFinalStatus, $deliveryInitialStatus, $deliveryFinalStatus) as $statusId)
-					if ($statusName = Bitrix\Main\Localization\Loc::getMessage("SALE_STATUS_{$statusId}"))
+					if ($statusName = Loc::getMessage("SALE_STATUS_{$statusId}"))
 						$statusLanguages[$statusId] []= array(
 							'LID'         => $languageId,
 							'NAME'        => $statusName,
-							'DESCRIPTION' => Bitrix\Main\Localization\Loc::getMessage("SALE_STATUS_{$statusId}_DESCR"),
+							'DESCRIPTION' => Loc::getMessage("SALE_STATUS_{$statusId}_DESCR"),
 						);
 			}
 			Bitrix\Sale\OrderStatus::install(array(
@@ -476,11 +483,18 @@ Class sale extends CModule
 		$eventManager->unRegisterEventHandler('main', '\Bitrix\Main\Numerator\Model\Numerator::OnAfterAdd', 'sale', '\Bitrix\Sale\Integration\Numerator\AccountNumberCompatibilityManager', 'updateAccountNumberType');
 		$eventManager->unRegisterEventHandler('main', '\Bitrix\Main\Numerator\Model\Numerator::OnAfterUpdate', 'sale', '\Bitrix\Sale\Integration\Numerator\AccountNumberCompatibilityManager', 'updateAccountNumberType');
 		$eventManager->unRegisterEventHandler('main', '\Bitrix\Main\Numerator\Model\Numerator::OnAfterDelete', 'sale', '\Bitrix\Sale\Integration\Numerator\AccountNumberCompatibilityManager', 'resetAccountNumberType');
+		$eventManager->unRegisterEventHandler('main', 'OnAfterUserLogin', 'sale', '\Bitrix\Sale\Update\CrmEntityCreatorStepper', 'OnAfterUserLogin');
+
 		$eventManager->unRegisterEventHandler('sale', 'OnSaleBasketItemEntitySaved', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemEntitySaved');
 		$eventManager->unRegisterEventHandler('sale', 'OnSaleBasketItemDeleted', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemDeleted');
-		$eventManager->unRegisterEventHandler('sale', 'OnCrmOrderBasketItemEntitySaved', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemEntitySaved');
-		$eventManager->unRegisterEventHandler('sale', 'OnCrmOrderBasketItemDeleted', 'sale', '\Bitrix\Sale\Internals\Events', 'onSaleBasketItemDeleted');
 		$eventManager->unRegisterEventHandler('sale', 'OnSaleBasketItemRefreshData', 'sale', '\Bitrix\Sale\Compatible\DiscountCompatibility', 'OnSaleBasketItemRefreshData');
+
+		$eventManager->unRegisterEventHandler('landing', '\Bitrix\Landing\Internals\Site::OnAfterAdd', 'sale', '\Bitrix\Sale\TradingPlatform\Landing\Landing', 'onLandingSiteAdd');
+		$eventManager->unRegisterEventHandler('landing', '\Bitrix\Landing\Internals\Site::OnAfterDelete', 'sale', '\Bitrix\Sale\TradingPlatform\Landing\Landing', 'onLandingSiteDelete');
+		$eventManager->unRegisterEventHandler('landing', 'onBeforeSiteRecycle', 'sale', '\Bitrix\Sale\TradingPlatform\Landing\Landing', 'onLandingBeforeSiteRecycle');
+
+		$eventManager->unRegisterEventHandler('report', 'onAnalyticPageCollect', 'sale', '\Bitrix\Sale\Integration\Report\EventHandler', 'onAnalyticPageCollect');
+		$eventManager->unRegisterEventHandler('report', 'onAnalyticPageBatchCollect', 'sale', '\Bitrix\Sale\Integration\Report\EventHandler', 'onAnalyticPageBatchCollect');
 
 		if (\Bitrix\Main\Loader::includeModule('sale'))
 		{

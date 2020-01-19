@@ -14,6 +14,9 @@ class StoreCatalogFilterBlock extends \Bitrix\Landing\LandingBlock
 			$params['site_id']
 		);
 
+		$this->params['SITE_ID'] = $params['site_id'];
+		$this->params['LANDING_ID'] = $params['landing_id'];
+
 		$editMode = \Bitrix\Landing\Landing::getEditMode();
 		$isSearch = isset($_REQUEST['q']) && trim($_REQUEST['q']);
 		$sectionId = 0;

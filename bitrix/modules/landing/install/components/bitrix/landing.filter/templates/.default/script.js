@@ -37,7 +37,7 @@ BX.ready(function()
 	);
 
 	// apply filter
-	BX.addCustomEvent('BX.Main.Filter:apply', function()
+	var landingFilterCallback = function()
 	{
 		if (landingAjaxSend)
 		{
@@ -52,7 +52,7 @@ BX.ready(function()
 		});
 		document.body.appendChild(loaderContainer);
 
-		var loader = new BX.Loader({size: 130, color: "#bfc3c8"});
+		var loader = new BX.Loader({size: 130, color: '#bfc3c8'});
 		loader.show(loaderContainer);
 
 		BX.ajax({
@@ -67,9 +67,12 @@ BX.ready(function()
 				workArea.innerHTML = data;
 			}
 		});
-	});
+	};
 
-	// create folder
+	BX.addCustomEvent('BX.Main.Filter:apply', BX.delegate(landingFilterCallback));
+	BX.addCustomEvent('BX.Landing.Filter:apply', BX.delegate(landingFilterCallback));
+
+		// create folder
 	BX.bind(
 		createFolderEl,
 		'click',
@@ -95,7 +98,9 @@ BX.ready(function()
 				.then(
 					function() {
 						BX.ajax({
-							url: '/bitrix/tools/landing/ajax.php?action=Landing::add&folder=Y',
+							url: '/bitrix/tools/landing/ajax.php?' + '' +
+									'action=Landing::add&folder=Y&' +
+									'type=' + BX.data(createFolderEl, 'type'),
 							method: 'POST',
 							data: {
 								data: {
@@ -149,4 +154,100 @@ BX.ready(function()
 				);
 		}
 	);
+
+	// settings button
+	var onSettingsClick = function(event) {
+		if (!Array.isArray(landingSettingsButtons))
+		{
+			return;
+		}
+		var lastLocation = top.location.toString();
+		var events = {
+			onClose: function()
+			{
+				if (window['landingSettingsSaved'] === true)
+				{
+					top.location = lastLocation;
+				}
+				if (BX.PopupMenu.getCurrentMenu())
+				{
+					BX.PopupMenu.getCurrentMenu().close();
+				}
+			}
+		};
+		if (landingSettingsButtons.length === 1)
+		{
+			BX.SidePanel.Instance.open(landingSettingsButtons[0]['href'], {
+				allowChangeHistory: false,
+				events: events
+			});
+		}
+		else
+		{
+			for (var i = 0, c = landingSettingsButtons.length; i < c; i++)
+			{
+				landingSettingsButtons[i]['onclick'] = function(event, item)
+				{
+					BX.SidePanel.Instance.open(item.href, {
+						allowChangeHistory: false,
+						events: events
+					});
+					BX.PreventDefault(event);
+				};
+			}
+			var menu = (
+				BX.PopupMenu.getMenuById('landing-menu-settings') ||
+				new BX.Landing.UI.Tool.Menu({
+					id: 'landing-menu-settings',
+					bindElement: event.currentTarget,
+					autoHide: true,
+					zIndex: 1200,
+					offsetLeft: 20,
+					angle: true,
+					closeByEsc: true,
+					items: landingSettingsButtons
+				})
+			);
+			menu.show();
+		}
+		BX.PreventDefault(event);
+	};
+	if (BX('landing-menu-settings'))
+	{
+		BX('landing-menu-settings').addEventListener(
+			'click',
+			BX.proxy(onSettingsClick, BX('landing-menu-settings'))
+		);
+	}
+
+	// create buttons
+	var onCreateActionsClick = function(event) {
+		if (BX.hasClass(BX('landing-create-element'), 'ui-btn-disabled'))
+		{
+			BX.PreventDefault(event);
+			return;
+		}
+		var menu = (
+			BX.PopupMenu.getMenuById('landing-menu-action') ||
+			new BX.Landing.UI.Tool.Menu({
+				id: 'landing-menu-action',
+				bindElement: event.currentTarget,
+				autoHide: true,
+				zIndex: 1200,
+				offsetLeft: 20,
+				angle: true,
+				closeByEsc: true,
+				items: landingCreateButtons || []
+			})
+		);
+		menu.show();
+		BX.PreventDefault(event);
+	};
+	if (BX('landing-menu-actions'))
+	{
+		BX('landing-menu-actions').addEventListener(
+			'click',
+			BX.proxy(onCreateActionsClick, BX('landing-menu-actions'))
+		);
+	}
 });

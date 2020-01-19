@@ -15,5 +15,6 @@ $MESS["BLOG_DR_ANOTHER_USER_DRAFT"] = "Вы не можете просматривать чужие черновик
 $MESS["BLOG_DR_TITLE"] = "Черновики";
 $MESS["BLOG_DR_PUB"] = "Опубликовать";
 $MESS["BLOG_DR_DELETE"] = "Удалить";
+$MESS["BLOG_DR_EDIT"] = "Редактировать";
 $MESS["BLOG_DR_DELETE_CONFIRM"] = "Вы уверены, что хотите удалить сообщение?";
 ?>

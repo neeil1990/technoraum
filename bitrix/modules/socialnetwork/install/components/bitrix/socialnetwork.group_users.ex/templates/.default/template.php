@@ -125,6 +125,11 @@ else
 
 	?><div class="socialnetwork-group-users-content"><?
 
+		if (SITE_TEMPLATE_ID == "bitrix24")
+		{
+			echo \Bitrix\Main\Update\Stepper::getHtml(array('socialnetwork' => array("Bitrix\Socialnetwork\Update\WorkgroupDeptSync")), Loc::getMessage('SONET_GUE_T_STEPPER_TITLE'));
+		}
+
 		?><div id="sonet_group_users_error_block" class="ui-alert ui-alert-xs ui-alert-danger ui-alert-icon-danger<?=(strlen($arResult["ErrorMessage"]) > 0 ? "" : " sonet-ui-form-error-block-invisible")?>"><?=$arResult["ErrorMessage"]?></div><?
 
 		if (!empty($arResult["Owner"]))
@@ -150,6 +155,7 @@ else
 						"bitrix:main.ui.selector",
 						".default",
 						array(
+							'API_VERSION' => 3,
 							'ID' => $selectorID,
 							'BIND_ID' => 'sonet-members-actionlink-changeowner',
 							'ITEMS_SELECTED' => array(
@@ -163,7 +169,9 @@ else
 								'openSearch' => ''
 							),
 							'OPTIONS' => array(
+								'useContainer' => 'Y',
 								'useNewCallback' => 'Y',
+								'lazyLoad' => 'Y',
 								'eventInit' => 'BX.SonetGroupUsers:openInit',
 								'eventOpen' => 'BX.SonetGroupUsers:open',
 								'context' => 'GROUP_SET_OWNER',
@@ -270,6 +278,7 @@ else
 						"bitrix:main.ui.selector",
 						".default",
 						array(
+							'API_VERSION' => 3,
 							'ID' => $selectorID,
 							'BIND_ID' => 'sonet-members-actionlink-addmoderator',
 							'ITEMS_SELECTED' => $arModeratorCodeList,
@@ -282,6 +291,7 @@ else
 							),
 							'OPTIONS' => array(
 								'useNewCallback' => 'Y',
+								'useContainer' => 'Y',
 								'eventInit' => 'BX.SonetGroupUsers:openInit',
 								'eventOpen' => 'BX.SonetGroupUsers:open',
 								'context' => 'GROUP_ADD_MODERATOR',
@@ -497,7 +507,7 @@ else
 
 							?><span class="sonet-members-member-text"><?
 								?><span class="sonet-members-member-title"><?
-									?><a href="<?=$arDepartment["URL"]?>" class="sonet-members-member-link" target="_top"><?=$arDepartment["NAME"]?></a><?
+									?><a href="<?=$arDepartment["URL"]?>" class="sonet-members-member-link" target="_top"><?=htmlspecialcharsEx($arDepartment["NAME"])?></a><?
 								?></span><?
 							?></span><?
 						?></span><?

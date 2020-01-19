@@ -6,16 +6,16 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
 
 return [
 	'js' =>[
-		'/bitrix/js/ui/vue/components/smiles/ui.vue.components.smiles.bundle.js',
+		'/bitrix/js/ui/vue/components/smiles/dist/smiles.bundle.js',
 	],
 	'css' => [
-		'/bitrix/js/ui/vue/components/smiles/ui.vue.components.smiles.bundle.css',
+		'/bitrix/js/ui/vue/components/smiles/dist/smiles.bundle.css',
 	],
 	'rel' => [
-		'main.polyfill.complex',
-		'ui.vue',
+		'main.polyfill.core',
 		'ui.vue.directives.lazyload',
-		'ui.indexeddb',
+		'ui.dexie',
+		'ui.vue',
 		'rest.client',
 	],
 	'skip_core' => true,

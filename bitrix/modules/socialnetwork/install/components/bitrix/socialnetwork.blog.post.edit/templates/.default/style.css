@@ -185,6 +185,7 @@
 
 .feed-add-grat-box {
 	background: url("/bitrix/components/bitrix/socialnetwork.log.ex/templates/.default/images/log/medals-2.png") no-repeat 100px 100px;
+	background-clip: content-box;
 	border-radius: 50%;
 	border: 3px solid #fff;
 	cursor: pointer;
@@ -386,6 +387,15 @@
 	border-style: solid;
 	border-width: 3px 3px 0 3px;
 	border-color: #80868e transparent transparent transparent;
+}
+
+.feed-add-post-more-icon-waiter {
+	width: 15px;
+	height: 15px;
+	position: absolute;
+	right: -18px;
+	top: 12px;
+	display: none;
 }
 
 .feed-add-post-form-link-active .feed-add-post-more-icon {

@@ -74,6 +74,7 @@ if($this->startResultCache(false, ($arParams["CACHE_GROUPS"]==="N"? false: $USER
 	$arFilter = array (
 		"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
 		"IBLOCK_ID"=> $arParams["IBLOCKS"],
+		"IBLOCK_LID" => SITE_ID,
 		"ACTIVE" => "Y",
 		"ACTIVE_DATE" => "Y",
 		"CHECK_PERMISSIONS" => "Y",

@@ -116,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !$readOnly && check_bitrix_sessid() 
 		'SORT'   => ($statusSort = intval($_POST['SORT'])) ? $statusSort : 100,
 		'NOTIFY' => $_POST['NOTIFY'] ? 'Y' : 'N',
 		'COLOR' => strlen($_POST['NEW_COLOR']) ? $_POST['NEW_COLOR'] : "",
+		'XML_ID' => strlen($_POST['XML_ID']) ? $_POST['XML_ID'] : StatusTable::generateXmlId(),
 	);
 
 	$isNew = true;
@@ -462,6 +463,10 @@ if ($errors)
 			?>
 			<div id="new_color_label" style="background: <?=htmlspecialcharsbx($status['COLOR'])?>"></div>
 		</td>
+	</tr>
+	<tr>
+		<td><?=$statusFields['XML_ID']->getTitle()?>:</td>
+		<td><input type="text" name="XML_ID" value="<?=$status['XML_ID'] ? htmlspecialcharsbx($status['XML_ID']): StatusTable::generateXmlId();?>" size="30"></td>
 	</tr>
 	<?foreach ($languages as $languageId => $languageName):?>
 		<tr class="heading">

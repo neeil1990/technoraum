@@ -13,6 +13,7 @@ BX.FileUploadAgent = function(arParams) {
 	this.values = (BX.type.isArray(arParams['values'])) ? arParams['values'] : []; // values which already have been uploaded
 	this.fileInputID = (!! arParams['fileInput']) ? arParams['fileInput'] : null; // ID DOM-element which type is "file" <input type=file id=arParams['fileInput']...
 	this.fileInputName = (!! arParams['fileInputName']) ? arParams['fileInputName'] : null; // Array name to upload file <input type=file name=arParams['fileInputName']
+	this.multiple = !!arParams['multiple'];
 
 	this.placeholder = (!! arParams['placeholder']) ? arParams['placeholder'] : null; // TBODY to add new row with info about new file
 	this.uploadDialog = (!! arParams['uploadDialog']) ? arParams['uploadDialog'] : null; // Parent class method to upload file
@@ -188,6 +189,8 @@ BX.FileUploadAgent.prototype._mkPlace = function(name, cacheID)
 		});
 
 		this._mkClose(this.place);
+		if (!this.multiple)
+			this.placeholder.innerHTML = '';
 		this.placeholder.appendChild(this.place);
 		window.wduf_places[cacheID] = this.place;
 	}
@@ -202,15 +205,17 @@ BX.FileUploadAgent.prototype._mkFileInput = function(parent)
 		BX.remove(oldFileInput);
 	}
 
+	var attrs = { type: 'file', size: '1' };
+	if (this.multiple)
+	{
+		attrs['multiple'] = 'multiple';
+	}
+
 	var newFileInput = BX.create('INPUT', {
 		props: {
 			className: this.classes.uploader
 		},
-		attrs: {
-			type: 'file',
-			size: '1',
-			multiple: 'multiple'
-		}
+		attrs : attrs
 	});
 	this.fileInput = newFileInput;
 	this.fileInput.name = this.fileInputName;
@@ -503,6 +508,7 @@ BX.FileUploadAgent.prototype.BindUploadEvents = function(dialog)
 				}
 				break;
 			}
+			if (!this.multiple) break;
 		}
 		if (this.uploadFile) {
 			if (this.fileInput) {
@@ -528,6 +534,7 @@ BX.FileUploadAgent.prototype.UploadDroppedFiles = function(files)
 	if (files.length > 0) {
 		for (var i=0; i<files.length; i++) {
 			this._mkPlace( files[i].fileName || files[i].name );
+			if (!this.multiple) break;
 		}
 		this.uploadDialog.SetFileInput(this.fileInput);
 		this._mkFileInput();

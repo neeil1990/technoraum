@@ -47,6 +47,7 @@ class AppTable extends Main\Entity\DataManager
 	const STATUS_PAID = 'P';
 	const STATUS_DEMO = 'D';
 	const STATUS_TRIAL = 'T';
+	const STATUS_SUBSCRIPTION = 'S';
 
 	const PAID_NOTIFY_DAYS = 30;
 	const PAID_GRACE_PERIOD = -14;
@@ -132,6 +133,7 @@ class AppTable extends Main\Entity\DataManager
 					static::STATUS_PAID,
 					static::STATUS_DEMO,
 					static::STATUS_TRIAL,
+					static::STATUS_SUBSCRIPTION,
 				),
 			),
 			'DATE_FINISH' => array(
@@ -405,6 +407,34 @@ class AppTable extends Main\Entity\DataManager
 				));
 			}
 		}
+	}
+
+	public static function checkUninstallAvailability($appId, $clean = 0)
+	{
+		$event = new Main\Event('rest', 'onBeforeApplicationUninstall', [
+			'ID' => $appId,
+			'CLEAN' => $clean
+		]);
+		$event->send();
+
+		$result = new Main\ErrorCollection();
+		if ($event->getResults())
+		{
+			/** @var \Bitrix\Main\EventResult $eventResult */
+			foreach ($event->getResults() as $eventResult)
+			{
+				if($eventResult->getType() === Main\EventResult::ERROR)
+				{
+					$eventResultData = $eventResult->getParameters();
+					if ($eventResultData instanceof Main\Error)
+					{
+						$result->add([$eventResultData]);
+					}
+				}
+			}
+		}
+
+		return $result;
 	}
 
 	public static function updateAppStatusInfo()

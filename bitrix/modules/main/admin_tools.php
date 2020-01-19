@@ -343,8 +343,11 @@ class CPageTemplate
 					if(!IsModuleInstalled($module))
 						continue 2;
 
-			foreach($arDesc as $key=>$val)
-				$arRes[$key] = $val;
+			if(is_array($arDesc))
+			{
+				foreach($arDesc as $key=>$val)
+					$arRes[$key] = $val;
+			}
 
 			$res[$file] = $arRes;
 		}

@@ -4,7 +4,7 @@
  * Released under the MIT License.
  */
 (function(window) {
-	if (window.Vue) {return;}
+	if (window.Vue && !window.BITRIX_REINIT_VUE) {return;}
 	!function(e,t){
 		"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):e.Vue=t();
 		/* declare a global variable for bitrix framework */

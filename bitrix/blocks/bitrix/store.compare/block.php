@@ -62,7 +62,8 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 				'SHOW_DISCOUNT_PERCENT' => $classBlock->get('SHOW_DISCOUNT_PERCENT'),
 				'USE_ENHANCED_ECOMMERCE' => $classBlock->get('USE_ENHANCED_ECOMMERCE'),
 				'DATA_LAYER_NAME' => $classBlock->get('DATA_LAYER_NAME'),
-				'BRAND_PROPERTY' => $classBlock->get('BRAND_PROPERTY')
+				'BRAND_PROPERTY' => $classBlock->get('BRAND_PROPERTY'),
+				'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID')
 			),
 			false
 		);?>

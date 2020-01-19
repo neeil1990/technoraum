@@ -4,7 +4,30 @@
 	BX.namespace("BX.Main");
 
 	BX.Main.ImageEditorLocale = {
+		"pesdk": {
+			"editor": {
+				"button": {
+					"new": BX.message("IMAGE_EDITOR_NEW"),
+					"export": BX.message("IMAGE_EDITOR_EXPORT"),
+					"cancel": BX.message("IMAGE_EDITOR_CANCEL"),
+					"close": BX.message("IMAGE_EDITOR_CLOSE"),
+				},
+			},
+			"adjustments": {
+				"text": {
+					"whites" : BX.message("IMAGE_EDITOR_ADJUSTMENT_WHITES"),
+					"blacks" : BX.message("IMAGE_EDITOR_ADJUSTMENT_BLACKS"),
+					"temperature" : BX.message("IMAGE_EDITOR_ADJUSTMENT_TEMPERATURE"),
+				}
+			}
+		},
 		"editor": {
+			"button": {
+				"new": BX.message("IMAGE_EDITOR_NEW"),
+				"export": BX.message("IMAGE_EDITOR_EXPORT"),
+				"cancel": BX.message("IMAGE_EDITOR_CANCEL"),
+				"close": BX.message("IMAGE_EDITOR_CLOSE"),
+			},
 			"new": BX.message("IMAGE_EDITOR_NEW"),
 			"export": BX.message("IMAGE_EDITOR_EXPORT"),
 			"cancel": BX.message("IMAGE_EDITOR_CANCEL"),
@@ -106,7 +129,7 @@
 					"reset": BX.message("IMAGE_EDITOR_ADJUSTMENT_RESET"),
 					"sections": {
 						"basics": BX.message("IMAGE_EDITOR_ADJUSTMENT_BASIC"),
-						"refinements": BX.message("IMAGE_EDITOR_ADJUSTMENT_REFINEMENTS")
+						"refinements": BX.message("IMAGE_EDITOR_ADJUSTMENT_REFINEMENTS_1")
 					},
 					"items": {
 						"brightness": BX.message("IMAGE_EDITOR_ADJUSTMENT_BRIGHTNESS"),
@@ -116,7 +139,10 @@
 						"gamma": BX.message("IMAGE_EDITOR_ADJUSTMENT_GAMMA"),
 						"shadows": BX.message("IMAGE_EDITOR_ADJUSTMENT_SHADOWS"),
 						"highlights": BX.message("IMAGE_EDITOR_ADJUSTMENT_HIGHLIGHTS"),
-						"clarity" : BX.message("IMAGE_EDITOR_ADJUSTMENT_CLARITY")
+						"clarity" : BX.message("IMAGE_EDITOR_ADJUSTMENT_CLARITY"),
+						"whites" : BX.message("IMAGE_EDITOR_ADJUSTMENT_WHITES"),
+						"blacks" : BX.message("IMAGE_EDITOR_ADJUSTMENT_BLACKS"),
+						"temperature" : BX.message("IMAGE_EDITOR_ADJUSTMENT_TEMPERATURE"),
 					}
 				},
 				"focus": {

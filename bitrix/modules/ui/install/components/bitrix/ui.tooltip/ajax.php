@@ -137,9 +137,11 @@ class CUITooltipComponentAjaxController extends \Bitrix\Main\Engine\Controller
 	private function getTooltipUserFields()
 	{
 		$userFields = $this->getUserFields($this->getUserId());
-		$this->setBirthday($this->getUserId());
-
-		$userFields['MANAGERS'] = $this->getUserManagers($userFields);
+		$this->setBirthday();
+		if (!empty($userFields))
+		{
+			$userFields['MANAGERS'] = $this->getUserManagers($userFields);
+		}
 
 		return $userFields;
 	}

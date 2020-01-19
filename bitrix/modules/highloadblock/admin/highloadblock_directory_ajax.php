@@ -88,7 +88,7 @@ if ($USER->IsAuthorized() && check_bitrix_sessid() && isset($_REQUEST['IBLOCK_ID
 
 	function addTableXmlIDCell($intPropID, $arPropInfo)
 	{
-		return '<input type="text" onblur="getDirectoryTableHead(this);" name="PROPERTY_DIRECTORY_VALUES['.$intPropID.'][UF_XML_ID]" id="PROPERTY_VALUES_XML_'.$intPropID.'" value="'.htmlspecialcharsbx($arPropInfo['UF_XML_ID']).'" size="20" style="width:90%">';
+		return '<input type="text" onchange="getDirectoryTableHead(this);" name="PROPERTY_DIRECTORY_VALUES['.$intPropID.'][UF_XML_ID]" id="PROPERTY_VALUES_XML_'.$intPropID.'" value="'.htmlspecialcharsbx($arPropInfo['UF_XML_ID']).'" size="20" style="width:90%">';
 	}
 
 	function addTableIdCell($intPropID, $arPropInfo)

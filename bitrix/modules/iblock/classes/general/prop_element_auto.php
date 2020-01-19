@@ -756,6 +756,11 @@ class CIBlockPropertyElementAutoComplete
 		$fields["property"] = $property;
 		$fields["customRender"] = ["\Bitrix\Iblock\Helpers\Filter\Property", "render"];
 		$fields["customFilter"] = ["Bitrix\Iblock\Helpers\Filter\Property", "addFilter"];
+		$fields["operators"] = array(
+			"default" => "=",
+			"exact" => "=",
+			"enum" => "@"
+		);
 	}
 
 	protected static function GetLinkElement($intElementID, $intIBlockID)

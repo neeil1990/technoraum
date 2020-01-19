@@ -71,9 +71,9 @@ $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/contact-tabs.js");
 
 	</div>
     <div id="sdek">
-        <?$APPLICATION->IncludeComponent(
+<?$APPLICATION->IncludeComponent(
             "ipol:ipol.sdekPickup",
-            "",
+            ".sdekPickup",
             Array(
                 "CITIES" => array(),
                 "CNT_BASKET" => "N",
@@ -85,6 +85,7 @@ $APPLICATION->AddHeadScript(SITE_TEMPLATE_PATH."/js/contact-tabs.js");
                 "PAYSYSTEM" => ""
             )
         );?>
+        
     </div>
 
 </div>

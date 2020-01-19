@@ -8,8 +8,8 @@
 					<p>Lorem ipsum dolor sit amet, consectetur adipiscing</p></div>
 
 				<address class="g-mb-20">
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="text">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-home"></i>
 						</div>
 						<div class="landing-block-node-card-contact-text g-color-gray-light-v1">
@@ -17,8 +17,8 @@
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="link">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="link">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-phone"></i>
 						</div>
 						<div>
@@ -27,8 +27,8 @@
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="link">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="link">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-envelope"></i>
 						</div>
 						<div>

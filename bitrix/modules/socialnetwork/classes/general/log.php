@@ -669,7 +669,7 @@ class CAllSocNetLog
 						if (StrLen($siteID) <= 0)
 							$siteID = $arSubscriber["USER_LID"];
 						if (StrLen($siteID) <= 0)
-							continue;
+							break;
 
 						$event = new CEvent;
 						$event->Send($mailTemplate, $siteID, $arFields, "N");
@@ -968,7 +968,6 @@ class CAllSocNetLog
 					$arEvent["MESSAGE_FORMAT"] = $messageTmp;
 					break;
 				default:
-					continue;
 					break;
 			}
 		}

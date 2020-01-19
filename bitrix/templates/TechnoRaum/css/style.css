@@ -140,7 +140,7 @@ header.fixed{position:fixed;width:100%;top:-150px;}
 .header_cart a.icon{display:block;text-decoration:none;position:absolute;top:0;left:0;width:100%;height:100%;}
 .header_cart span {display:block;float:right;margin-top: 3px;width:26px;height:18px;line-height:18px;color:#fff;background:#111;font-size:11px;text-align:center;-moz-border-radius:8px;-webkit-border-radius:8px;border-radius:8px;}
 
-a.button,.bx_ordercart.bx_blue .bx_ordercart_order_pay_center .checkout{text-shadow:none;max-width:100%;background:#feee35;font-size:16px;color:#111;text-transform:none;text-align:center;text-decoration:none;border: solid 2px #feee35;-moz-border-radius: 0px;-webkit-border-radius: 0px;border-radius: 0px;-moz-transition:all 0.6s;-webkit-transition:all 0.6s;transition:all 0.6s;}
+a.button,.bx_ordercart.bx_blue .bx_ordercart_order_pay_center .checkout{text-shadow:none;max-width:100%;font-size:16px;color:#111;text-transform:none;text-align:center;text-decoration:none;border: solid 2px #feee35;-moz-border-radius: 0px;-webkit-border-radius: 0px;border-radius: 0px;-moz-transition:all 0.6s;-webkit-transition:all 0.6s;transition:all 0.6s;}
 a.button:hover,.bx_ordercart.bx_blue .bx_ordercart_order_pay_center .checkout:hover{background:none;}
 
 
@@ -319,14 +319,14 @@ a.ref {display:block;text-decoration:none;position:absolute;top:0;left:0;width:1
 .glav_cat_div .text {padding:0px 10px 0px 25px;box-sizing:border-box;font-size:0;}
 .glav_cat_div .text p {display:block;font-size: 14px;  text-align: left;  color: #111111;}
 .glav_cat_div .text p a {color:#111111;text-decoration:none;}
-.glav_cat_div .text p.title {/*text-transform:uppercase;*/min-height:62px;font-size:20px;color:#111111;line-height:26px;}
+.glav_cat_div .text p.title {/*text-transform:uppercase;*/min-height:62px;font-size:20px;color:#111111;line-height:26px;margin-bottom: 10px;}
 .glav_cat_div .the_price {display:inline-block;vertical-align:bottom;min-height:38px;padding:0px 0 0px 0;width:117px;}
 .the_content_right_column .glav_cat_div .the_price {width:140px;}
 .glav_cat_div .text .the_price p {display:block;}
 .glav_cat_div .text .the_price p.price {font-size: 24px;line-height:42px;  font-weight: bold;color:#111111;position:relative;}
 .glav_cat_div .text .the_price p.old_price {font-size: 14px;min-height:22px;line-height:22px; text-decoration:line-through;  color: #a1a1a0;}
 
-.glav_cat_div .text a.button {-moz-transition:all 0s;-webkit-transition:all 0s;transition:all 0s;display:inline-block;vertical-align:bottom;width: 75px;background:url(../img/cart1.png) no-repeat center center;  height: 38px;line-height:38px;margin:0 0 3px 48px;font-size: 0px;text-indent:20px;border-width:2px;border-color:#feee35;color: #111111;  border-radius: 0px;  border: solid 2px #feee35;cursor: pointer;}
+.glav_cat_div .text a.button {-moz-transition:all 0s;-webkit-transition:all 0s;transition:all 0s;display:inline-block;vertical-align:bottom;width: 75px;background:url(../img/cart1.png) no-repeat center center;  height: 38px;line-height:38px;margin:0 0 0px 48px;font-size: 0px;text-indent:20px;border-width:2px;border-color:#feee35;color: #111111;  border-radius: 0px;  border: solid 2px #feee35;cursor: pointer;}
 .glav_cat_div .text a.button:hover {background:#feee35 url(../img/cart1.png) no-repeat center center;}
 .glav_cat_div .text a.button.active {margin-left:0;font-size: 12px;width:115px;background-image:url(../img/in_cart_check.png);background-color:#feee35;background-position:13px center;}
 
@@ -336,7 +336,7 @@ a.ref {display:block;text-decoration:none;position:absolute;top:0;left:0;width:1
     width: 100%;
     text-align: center;
     font-size: 12px;
-    line-height: 10px;
+    line-height: 5px;
     padding: 15px 10px;
     border: 2px solid #feee35;
     text-decoration: none;
@@ -700,11 +700,11 @@ a.button.filter_clear_button:hover {border-color:transparent;text-decoration:non
 .mini_img_slider .flex-control-paging li a.flex-active { background: #000; background:#4f5358;border-color:#4f5358;height: 5px;    top: -2px; cursor: default;-webkit-border-radius: 16px; -moz-border-radius: 16px; -o-border-radius: 16px; border-radius: 16px; }
 
 .card_page_specs {padding-top: 25px;width:570px;min-height:565px;box-sizing:border-box;float:right;max-width:100%;position:relative;}
-.card_page_specs .the_price p {display:block;padding-bottom:26px;}
+.card_page_specs .the_price p {display:block;padding-bottom:15px;}
 .card_page_specs .the_price p.price {font-size: 40px;line-height:48px;  font-weight: bold;color:#111111;position:relative;}
 .card_page_specs .the_price p.old_price {font-size: 16px;min-height:30px;line-height:22px; padding-bottom:0;text-decoration:line-through;  color: #a1a1a0;}
 
-.card_page_specs .button_wrap {clear:both;width:100%;max-width:100%;overflow:hidden;padding-bottom:20px;}
+.card_page_specs .button_wrap {clear:both;width:100%;max-width:100%;overflow:hidden;padding-bottom:10px;}
 .card_page_specs .button_wrap a.button {font-size:16px;color:#111;font-weight:bold;margin-bottom:10px;}
 .card_page_specs a.button.add_to_cart_button {
     display: inline-block;
@@ -712,11 +712,12 @@ a.button.filter_clear_button:hover {border-color:transparent;text-decoration:non
     height: 54px;
     line-height: 50px;
     border-color: #feee35;
-    background: #feee35 url(../img/cart1.png) no-repeat 25px center;
+    background: url(../img/cart1.png) no-repeat 15px center;
     text-indent: 15px;
     margin-right: 10px;
 }
-.card_page_specs a.button.add_to_cart_button:hover {background-color:#eede25;border-color:#eede25;}
+.card_page_specs a.button.add_to_cart_button:hover,
+.request-a-price:hover{background-color:#feee35!important;border-color:#feee35!important;}
 .card_page_specs a.button.one_click_button {
     display: inline-block;
     padding-left: 0 !important;
@@ -725,7 +726,7 @@ a.button.filter_clear_button:hover {border-color:transparent;text-decoration:non
     width: 238px;
     line-height: 50px;
 }
-.card_page_specs a.button.one_click_button:hover {background-color:#eede25;border-color:#eede25;}
+.card_page_specs a.button.one_click_button:hover {background-color:#feee35;border-color:#feee35;}
 .in_card_add{background: #feee35 url(../img/check.png) no-repeat !important;background-size: 25px 25px !important;background-position: 15px center !important;}
 
 .card_page_specs a.button.request-a-price {

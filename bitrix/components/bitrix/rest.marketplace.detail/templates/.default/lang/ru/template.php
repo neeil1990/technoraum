@@ -21,6 +21,7 @@ $MESS["MARKETPLACE_APP_SUPPORT_TAB"] = "Поддержка";
 $MESS["MARKETPLACE_APP_INSTALL_TAB"] = "Установка";
 $MESS["MARKETPLACE_APP_VERSION_MESS"] = "Версия";
 $MESS["MARKETPLACE_APP_FREE"] = "Бесплатно";
+$MESS["MARKETPLACE_APP_BY_SUBSCRIPTION"] = "По подписке";
 $MESS["MARKETPLACE_APP_UPDATE_BUTTON"] = "Обновить";
 $MESS["MARKETPLACE_APP_DELETE_CONFIRM"] = "Вы уверены, что хотите удалить приложение?";
 $MESS["MARKETPLACE_APP_DELETE_ERROR"] = "Ошибка! Приложение не было удалено";

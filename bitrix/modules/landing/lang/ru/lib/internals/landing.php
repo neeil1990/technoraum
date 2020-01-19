@@ -1,9 +1,12 @@
 <?php
 $MESS['LANDING_TABLE_FIELD_LANDING_CODE'] = 'Адрес относительно сайта';
+$MESS['LANDING_TABLE_FIELD_LANDING_INITIATOR_APP_CODE'] = 'Код приложения-инициатора';
 $MESS['LANDING_TABLE_FIELD_RULE'] = 'Правило обработки';
 $MESS['LANDING_TABLE_FIELD_LANDING_ACTIVE'] = 'Статус страницы';
 $MESS['LANDING_TABLE_FIELD_LANDING_DELETED'] = 'Страница удалена';
 $MESS['LANDING_TABLE_FIELD_LANDING_PUBLIC'] = 'Публичность';
+$MESS['LANDING_TABLE_FIELD_LANDING_SYSTEM'] = 'Системная страница';
+$MESS['LANDING_TABLE_FIELD_LANDING_VIEWS'] = 'Количество просмотров';
 $MESS['LANDING_TABLE_FIELD_LANDING_TITLE'] = 'Название страницы';
 $MESS['LANDING_TABLE_FIELD_XML_ID'] = 'Внеший код';
 $MESS['LANDING_TABLE_FIELD_DESCRIPTION'] = 'Краткое описание';
@@ -25,3 +28,8 @@ $MESS['LANDING_TABLE_ERROR_ISNOT_FOLDER'] = 'Указанная папкой страница не являет
 $MESS['LANDING_TABLE_ERROR_SUBFOLDER_DISABLED'] = 'Вложенные подпапки не поддерживаются';
 $MESS['LANDING_TABLE_ERROR_PAGE_FOLDER_NOT_EMPTY'] = 'Папка не пуста';
 $MESS['LANDING_TABLE_ERROR_PAGE_LIMIT_REACHED'] = 'Достигнут лимит активных страниц. Пожалуйста, обратитесь в техподдержку.';
+$MESS['LANDING_TABLE_ERROR_LD_ACCESS_DENIED'] = 'Доступ на изменение страницы запрещен.';
+$MESS['LANDING_TABLE_ERROR_LD_ACCESS_DENIED_ADD'] = 'Доступ на создание страницы запрещен.';
+$MESS['LANDING_TABLE_ERROR_LD_ACCESS_DENIED_DELETED'] = 'Доступ на удаление страницы запрещен.';
+$MESS['LANDING_TABLE_ERROR_LD_ACCESS_DENIED_ACTIVE'] = 'Доступ на публикацию страницы запрещен.';
+$MESS['LANDING_TABLE_ERROR_LD_CANT_DELETE_MAIN'] = 'Нельзя удалить страницу, установленную как главную в настройках сайта.';

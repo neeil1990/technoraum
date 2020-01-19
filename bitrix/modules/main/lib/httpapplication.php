@@ -139,8 +139,19 @@ class HttpApplication extends Application
 				}
 			}
 
+			if ($e instanceof \Exception || $e instanceof \Error)
+			{
+				$exceptionHandler = $this->getExceptionHandler();
+				$exceptionHandler->writeToLog($e);
+			}
+
 			$response = $this->buildResponse($result, $errorCollection);
 			$this->clonePreviousHeadersAndCookies($this->context->getResponse(), $response);
+			if (isset($controller))
+			{
+				$controller->finalizeResponse($response);
+			}
+
 			$this->context->setResponse($response);
 
 			global $APPLICATION;

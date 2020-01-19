@@ -62,12 +62,13 @@ class ConditionGroup
 
 		$result = array(0 => true);
 		$i = 0;
+		$joiner = static::JOINER_AND;
+
 		foreach ($this->items as $item)
 		{
 			/** @var Condition $condition */
 			$condition = $item[0];
 			$conditionField = $condition->getField();
-			$joiner = ($item[1] === static::JOINER_OR) ? static::JOINER_OR : static::JOINER_AND;
 
 			$conditionResult = true;
 
@@ -102,6 +103,7 @@ class ConditionGroup
 			{
 				$result[$i] = false;
 			}
+			$joiner = ($item[1] === static::JOINER_OR) ? static::JOINER_OR : static::JOINER_AND;
 		}
 
 		return (count(array_filter($result)) > 0);
@@ -183,7 +185,7 @@ class ConditionGroup
 			$field = $condition->getField();
 			$value = $condition->getValue();
 			$property = isset($documentFields[$field]) ? $documentFields[$field] : null;
-			if ($property)
+			if ($property && !in_array($condition->getOperator(), ['empty', '!empty']))
 			{
 				$valueInternal = $documentService->GetFieldInputValue(
 					$documentType,
@@ -202,13 +204,11 @@ class ConditionGroup
 			$fieldCondition[] = [
 				$field,
 				$condition->getOperator(),
-				$value,
+				self::unConvertExpressions($value, $documentType),
 				$bizprocJoiner
 			];
 			$bizprocJoiner = ($joiner === static::JOINER_OR) ? 1 : 0;
 		}
-
-		Helper::unConvertExpressions($fieldCondition, $documentType);
 
 		$activity = array(
 			'Type' => 'IfElseActivity',
@@ -278,7 +278,7 @@ class ConditionGroup
 				$conditionItem = new Condition(array(
 					'field' => $fieldCondition[0],
 					'operator' => $fieldCondition[1],
-					'value' => Helper::convertExpressions($fieldCondition[2], $documentType),
+					'value' => self::convertExpressions($fieldCondition[2], $documentType),
 				));
 
 				$nextCondition = isset($bizprocConditions[$index + 1]) ? $bizprocConditions[$index + 1] : null;
@@ -291,5 +291,37 @@ class ConditionGroup
 		}
 
 		return $conditionGroup;
+	}
+
+	private static function convertExpressions($value, array $documentType)
+	{
+		if (is_array($value))
+		{
+			foreach ($value as $k => $v)
+			{
+				$value[$k] = self::convertExpressions($v, $documentType);
+			}
+		}
+		else
+		{
+			$value = Helper::convertExpressions($value, $documentType);
+		}
+		return $value;
+	}
+
+	private static function unConvertExpressions($value, array $documentType)
+	{
+		if (is_array($value))
+		{
+			foreach ($value as $k => $v)
+			{
+				$value[$k] = self::unConvertExpressions($v, $documentType);
+			}
+		}
+		else
+		{
+			$value = Helper::unConvertExpressions($value, $documentType);
+		}
+		return $value;
 	}
 }

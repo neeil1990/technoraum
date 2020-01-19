@@ -4,7 +4,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
 	die();
 }
 
-return array(
+return [
 	"css" => "/bitrix/js/ui/notification/ui.notification.css",
 	"js" => [
 		"/bitrix/js/ui/notification/ui.notification.balloon.js",
@@ -13,4 +13,4 @@ return array(
 	],
 	"bundle_js" => "ui_notification",
 	"bundle_css" => "ui_notification"
-);
+];

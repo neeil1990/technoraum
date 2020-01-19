@@ -11,6 +11,8 @@ use Bitrix\Main\Update\Stepper;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\UI;
 
+\Bitrix\Main\UI\Extension::load("ui.fonts.opensans");
+
 UI\Extension::load("socialnetwork.common");
 
 $bodyClass = $APPLICATION->GetPageProperty("BodyClass");
@@ -185,7 +187,11 @@ else
 		)
 	);
 
-	$notEmptyList = ($available && $arResult["Groups"] && $arResult["Groups"]["List"]);
+	$notEmptyList = (
+			$available
+			&& !empty($arResult["Groups"])
+			&& !empty($arResult["Groups"]["List"])
+	);
 
 	?><div id="sonet-groups-content-wrap" class="sonet-groups-content-wrap<?=(!$notEmptyList ? " no-groups" : "")?>">
 		<div class="sonet-groups-content-sort-container"><?
@@ -261,7 +267,7 @@ else
 							?><span class="sonet-groups-group-text"><?
 								?><span class="sonet-groups-group-title<?=($group["IS_EXTRANET"] == "Y" ? " sonet-groups-group-title-extranet" : "")?>"><?
 									?><span class="sonet-groups-group-title-text"><?
-										?><a href="<?=$group["GROUP_URL"]?>" class="sonet-groups-group-link"><?=$group["GROUP_NAME"]?></a><?
+										?><a href="<?=$group["GROUP_URL"]?>" class="sonet-groups-group-link" target="_top"><?=$group["GROUP_NAME"]?></a><?
 										?><?=($group["IS_EXTRANET"] == "Y" && SITE_TEMPLATE_ID != "bitrix24" ? '<span class="sonet-groups-group-signature">'.GetMessage("SONET_C33_T_IS_EXTRANET").'</span>' : '')?><?
 									?></span><?
 
@@ -327,7 +333,7 @@ else
 											&& empty($group['ROLE'])
 										)
 										{
-											?><span id="bx-sonet-groups-request-<?=intval($group['GROUP_ID'])?>" class="popup-window-button"><?=GetMessage('SONET_C33_T_F_DO_REQUEST')?></span><?
+											?><span id="bx-sonet-groups-request-<?=intval($group['GROUP_ID'])?>" class="ui-btn ui-btn-light-border ui-btn-sm"><?=GetMessage('SONET_C33_T_F_DO_REQUEST')?></span><?
 											?><script>
 												BX.bind(BX('bx-sonet-groups-request-<?=intval($group['GROUP_ID'])?>'), 'click', function(e) {
 													var button = BX('bx-sonet-groups-request-<?=intval($group['GROUP_ID'])?>');
@@ -417,6 +423,10 @@ else
 	if (
 		SITE_TEMPLATE_ID === "bitrix24"
 		&& !empty($arResult["SIDEBAR_GROUPS"])
+		&& (
+			empty($_REQUEST['IFRAME'])
+			|| $_REQUEST['IFRAME'] != 'Y'
+		)
 	)
 	{
 		$this->SetViewTarget("sidebar");

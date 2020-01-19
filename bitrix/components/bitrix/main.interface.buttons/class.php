@@ -124,7 +124,7 @@ class CMainInterfaceButtons extends CBitrixComponent
 	protected function prepareContainerId($id)
 	{
 		$id = $this->safeString($id);
-		$id = preg_replace("/[^a-z0-9_]/i", "", $id);
+		$id = preg_replace("/[^a-z0-9_-]/i", "", $id);
 		$id = strtolower($id);
 
 		return $id;

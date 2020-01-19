@@ -26,6 +26,16 @@ if (!function_exists('__SLLogGetIds'))
 		&$arResult, &$arActivity2Log, &$arDiskUFEntity, &$arTmpEventsNew
 	)
 	{
+		if (
+			!empty($arListParams['EMPTY_LIST'])
+			&& $arListParams['EMPTY_LIST'] == 'Y'
+		)
+		{
+			$arResult["arLogTmpID"] = [];
+			$arTmpEventsNew = [];
+			return false;
+		}
+
 		$dbEventsID = CSocNetLog::GetList(
 			$arOrder,
 			$arFilter,
@@ -58,22 +68,25 @@ if (!function_exists('__SLLogGetIds'))
 			}
 
 			if (
-				(
-					!empty($arEventsID["MODULE_ID"])
-					&& !IsModuleInstalled($arEventsID["MODULE_ID"])
-				)
-				||
-				(
-					in_array($arEventsID["EVENT_ID"], array("timeman_entry", "report"))
-					&& !IsModuleInstalled("timeman")
-				)
-				|| (
-					in_array($arEventsID["EVENT_ID"], array("tasks"))
-					&& !IsModuleInstalled("tasks")
-				)
-				|| (
-					in_array($arEventsID["EVENT_ID"], array("lists_new_element"))
-					&& !IsModuleInstalled("lists")
+				!\Bitrix\Main\ModuleManager::isModuleInstalled('bitrix24')
+				&& (
+					(
+						!empty($arEventsID["MODULE_ID"])
+						&& !IsModuleInstalled($arEventsID["MODULE_ID"])
+					)
+					||
+					(
+						in_array($arEventsID["EVENT_ID"], array("timeman_entry", "report"))
+						&& !IsModuleInstalled("timeman")
+					)
+					|| (
+						in_array($arEventsID["EVENT_ID"], array("tasks"))
+						&& !IsModuleInstalled("tasks")
+					)
+					|| (
+						in_array($arEventsID["EVENT_ID"], array("lists_new_element"))
+						&& !IsModuleInstalled("lists")
+					)
 				)
 			)
 			{

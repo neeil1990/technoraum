@@ -377,6 +377,14 @@
 	background-image: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2014%2014%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%0A%3Cpath%20opacity%3D%221%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M-0.0773398%204.07691L3.92223%200.0773398L8.07372%204.22883L5.18177%204.17635L5.179%2013.8687L8.07372%2013.9239L4.07415%2017.9235L-0.0773398%2013.772L2.74004%2013.8273V4.13216L-0.0773398%204.07691Z%22%20transform%3D%22translate%2810.5352%20-2.19141%29%20rotate%2845%29%22%20fill%3D%22%23fff%22/%3E%0A%3C/svg%3E%0A);
 }
 
+.bx-messenger-videocall-panel-icon-sound {
+	background-image: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2218%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M3.868%204.676v-.072a.3.3%200%200%201%20.137-.251l6.65-4.305a.3.3%200%200%201%20.462.252v16.461a.3.3%200%200%201-.463.252L4.005%2012.71a.3.3%200%200%201-.134-.21H.7a.7.7%200%200%201-.7-.7V5.376a.7.7%200%200%201%20.7-.7h3.168z%22%20fill%3D%22%23FFF%22%20fill-rule%3D%22evenodd%22%20opacity%3D%221%22/%3E%3C/svg%3E);
+}
+
+.bx-messenger-videocall-panel-icon-sound-off {
+	background-image: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2217%22%20height%3D%2218%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M6.84%203.488l5.314-3.44a.3.3%200%200%201%20.463.252v8.965L6.84%203.488zm5.777%2012.707v.566a.3.3%200%200%201-.463.252L5.505%2012.71a.3.3%200%200%201-.134-.21H2.2a.7.7%200%200%201-.7-.7V5.376c0-.089.016-.174.047-.252l11.07%2011.07zM.46.46a.65.65%200%200%201%20.919%200l14.876%2014.876a.65.65%200%201%201-.919.92L.46%201.378a.65.65%200%200%201%200-.92z%22%20fill%3D%22%23FFF%22%20fill-rule%3D%22evenodd%22%20opacity%3D%221%22/%3E%3C/svg%3E);
+}
+
 .bx-messenger-videocall-user-list {
 	display: flex;
 	align-items: center;

@@ -6,6 +6,7 @@ use Bitrix\Socialnetwork\LogIndexTable;
 use Bitrix\Socialnetwork\LogRightTable;
 use Bitrix\Socialnetwork\LogTagTable;
 use Bitrix\Socialnetwork\LogSubscribeTable;
+use Bitrix\Socialnetwork\UserContentViewTable;
 
 class CSocNetLog extends CAllSocNetLog
 {
@@ -342,6 +343,7 @@ class CSocNetLog extends CAllSocNetLog
 			"COMMENTS_COUNT" => Array("FIELD" => "L.COMMENTS_COUNT", "TYPE" => "int"),
 			"ENABLE_COMMENTS" => Array("FIELD" => "L.ENABLE_COMMENTS", "TYPE" => "string"),
 			"SOURCE_TYPE" => Array("FIELD" => "L.SOURCE_TYPE", "TYPE" => "string"),
+			"INACTIVE" => Array("FIELD" => "L.INACTIVE", "TYPE" => "string"),
 			"CONTENT" => Array("FIELD" => "LI.CONTENT", "TYPE" => "string", "FROM" => "INNER JOIN b_sonet_log_index LI ON (LI.LOG_ID = L.ID)"),
 			"CONTENT_LOG_UPDATE" => Array("FIELD" => "LI.LOG_UPDATE", "TYPE" => "datetime", "FROM" => "INNER JOIN b_sonet_log_index LI ON (LI.LOG_ID = L.ID)"),
 			"CONTENT_ITEM_TYPE" => Array("FIELD" => "LI.ITEM_TYPE", "TYPE" => "string", "FROM" => "INNER JOIN b_sonet_log_index LI ON (LI.LOG_ID = L.ID)"),
@@ -444,6 +446,16 @@ class CSocNetLog extends CAllSocNetLog
 			{
 				$arSelectFields[] = "FOLLOW";
 			}
+		}
+
+		if (
+			!isset($arFilter["INACTIVE"])
+			&& !isset($arFilter["!INACTIVE"])
+			&& !isset($arFilter["=INACTIVE"])
+			&& !isset($arFilter["!=INACTIVE"])
+		)
+		{
+			$arFilter["!=INACTIVE"] = 'Y';
 		}
 
 		if (array_key_exists("SITE_ID", $arFilter))
@@ -1148,7 +1160,7 @@ class CSocNetLog extends CAllSocNetLog
 			'filter' => array(
 				'ID' => $ID
 			),
-			'select' => array('EVENT_ID', 'SOURCE_ID')
+			'select' => array('EVENT_ID', 'SOURCE_ID', 'RATING_TYPE_ID', 'RATING_ENTITY_ID')
 		));
 		if ($fields = $res->fetch())
 		{
@@ -1157,8 +1169,13 @@ class CSocNetLog extends CAllSocNetLog
 
 		$bSuccess = $DB->Query("DELETE FROM b_sonet_log WHERE ID = ".$ID, true);
 
-		if ($bSuccess)
+		if (
+			$bSuccess
+			&& !empty($logFields)
+		)
 		{
+			$DB->Query("DELETE FROM ".UserContentViewTable::getTableName()." WHERE RATING_TYPE_ID = '".$DB->ForSQL($logFields['RATING_TYPE_ID'])."' AND RATING_ENTITY_ID = ".intval($logFields['RATING_ENTITY_ID']), true);
+
 			$USER_FIELD_MANAGER->Delete("SONET_LOG", $ID);
 
 			$db_events = GetModuleEvents("socialnetwork", "OnSocNetLogDelete");

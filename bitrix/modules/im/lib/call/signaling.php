@@ -45,7 +45,6 @@ class Signaling
 				$pushText = Loc::getMessage('IM_CALL_INVITE', ['#USER_NAME#' => Loc::getMessage('IM_CALL_INVITE_NA')]);
 			}
 
-
 			$push = [
 				'message' => $pushText,
 				'expiry' => 0,
@@ -56,6 +55,7 @@ class Signaling
 							'ID' => $this->call->getId(),
 							'PROVIDER' => $this->call->getProvider()
 						],
+						'video' => $video,
 						'users' => $users,
 						'userData' => $userData,
 						'senderId' => $senderId

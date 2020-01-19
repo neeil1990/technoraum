@@ -19,7 +19,7 @@ class Sku
 	const OFFERS_AVAILABLE = 0x0004;
 
 	protected static $allowUpdateAvailable = 0;
-	protected static $allowPropertyHandler = true;
+	protected static $allowPropertyHandler = 0;
 
 	protected static $productIds = array();
 	protected static $offers = array();
@@ -1452,12 +1452,11 @@ class Sku
 			self::$skuExist[$row['ID']] = true;
 		}
 		unset($row, $iterator);
-		//TODO: change CATALOG_AVAILABLE to PRODUCT.AVAILABLE
 		$offers = \CCatalogSku::getOffersList(
 			$listIds,
 			0,
 			array(),
-			array('ID', 'ACTIVE', 'CATALOG_AVAILABLE')
+			array('ID', 'ACTIVE', 'AVAILABLE')
 		);
 		foreach ($listIds as $id)
 		{
@@ -1471,8 +1470,7 @@ class Sku
 			foreach ($offers[$id] as $offerId => $row)
 			{
 				$allOffers[] = $offerId;
-				//TODO: change CATALOG_AVAILABLE to PRODUCT.AVAILABLE
-				if ($row['ACTIVE'] != 'Y' || $row['CATALOG_AVAILABLE'] != 'Y')
+				if ($row['ACTIVE'] != 'Y' || $row['AVAILABLE'] != 'Y')
 					continue;
 				self::$skuAvailable[$id] = self::OFFERS_AVAILABLE;
 				$availableOffers[] = $offerId;

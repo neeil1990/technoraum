@@ -10,6 +10,7 @@ return array(
 	'block' => array(
 		'name' => Loc::getMessage('LANDING_BLOCK_35.2.FOOTER_LIGHT_NAME'),
 		'section' => array('footer'),
+		'dynamic' => false,
 		'subtype' => 'menu',
 		'subtype_params' => array(
 			'selector' => '.landing-block-node-list-item',
@@ -66,6 +67,10 @@ return array(
 			'name' => Loc::getMessage('LANDING_BLOCK_35.2.FOOTER_LIGHT_STYLE_LANDINGBLOCKNODETITLE'),
 			'type' => 'typo',
 		),
+		'.landing-block-card-contact' => array(
+			'name' => Loc::getMessage('LANDING_BLOCK_35.2.FOOTER_LIGHT_CARDS_LANDINGBLOCKCARDCONTACT'),
+			'type' => 'row-align',
+		),
 		'.landing-block-node-card' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_35.2.FOOTER_LIGHT_STYLE_LANDINGBLOCKNODECARD'),
 			'type' => 'animation',
@@ -84,7 +89,7 @@ return array(
 		),
 		'.landing-block-node-list-item' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_35.2.FOOTER_LIGHT_NODES_LANDINGBLOCKNODELISTITEM'),
-			'type' => 'typo',
+			'type' => 'typo-link',
 		),
 		'.landing-block-node-card-contact-icon-container' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_35.2.FOOTER_LIGHT_NODES_LANDINGBLOCKNODE_CONTACT_ICON'),
@@ -92,7 +97,7 @@ return array(
 		),
 		'.landing-block-node-card-contact-link' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_35.2.FOOTER_LIGHT_STYLE_LANDINGBLOCKNODELINK'),
-			'type' => 'typo',
+			'type' => 'typo-link',
 		),
 	),
 );

@@ -177,7 +177,7 @@ if(!empty($arResult["CommentsResult"]) && is_array($arResult["CommentsResult"]))
 
 			if (preg_match_all("#\\[disk file id=(\\d+)\\]#is".BX_UTF_PCRE_MODIFIER, $comment['POST_TEXT'], $matches))
 			{
-				$commentAttachedObjectId = array_map(function($a) { return intval(substr($a, 1)); }, $matches[1]);
+				$commentAttachedObjectId = array_map(function($a) { return intval($a); }, $matches[1]);
 				$inlineDiskAttachedObjectIdList = array_merge($inlineDiskAttachedObjectIdList, $commentAttachedObjectId);
 			}
 
@@ -208,20 +208,25 @@ if(!empty($arResult["CommentsResult"]) && is_array($arResult["CommentsResult"]))
 		$filter = array(
 			'=OBJECT.TYPE_FILE' => \Bitrix\Disk\TypeFile::IMAGE
 		);
+
+		$subFilter = [];
 		if (!empty($inlineDiskObjectIdList))
 		{
-			$filter['@OBJECT_ID'] = $inlineDiskObjectIdList;
+			$subFilter['@OBJECT_ID'] = $inlineDiskObjectIdList;
 		}
-		if (!empty($inlineDiskAttachedObjectIdList))
+		elseif (!empty($inlineDiskAttachedObjectIdList))
 		{
-			$filter['@ID'] = $inlineDiskAttachedObjectIdList;
+			$subFilter['@ID'] = $inlineDiskAttachedObjectIdList;
 		}
-		if (
-			!empty($inlineDiskObjectIdList)
-			&& !empty($inlineDiskAttachedObjectIdList)
-		)
+
+		if(count($subFilter) > 1)
 		{
-			$filter['LOGIC'] = 'OR';
+			$subFilter['LOGIC'] = 'OR';
+			$filter[] = $subFilter;
+		}
+		else
+		{
+			$filter = array_merge($filter, $subFilter);
 		}
 
 		$res = \Bitrix\Disk\Internals\AttachedObjectTable::getList(array(
@@ -281,21 +286,22 @@ if(!empty($arResult["CommentsResult"]) && is_array($arResult["CommentsResult"]))
 			{
 				$inlineAttachedImagesId = array_merge($inlineAttachedImagesId, array_intersect($commentInlineDiskData[$comment['ID']]['ATTACHED_OBJECT_ID'], array_keys($inlineDiskAttachedObjectIdImageList)));
 			}
-			$inlineAttachedImagesId = array_intersect($inlineAttachedImagesId, $entityAttachedObjectIdList[$comment['ID']]);
+
+			if (is_array($entityAttachedObjectIdList[$comment['ID']]))
+			{
+				$inlineAttachedImagesId = array_intersect($inlineAttachedImagesId, $entityAttachedObjectIdList[$comment['ID']]);
+			}
 
 			if (
-				!empty($mobileComment["UF"])
-				&& !empty($mobileComment["UF"]["UF_BLOG_COMMENT_FILE"])
-				&& !empty($mobileComment["UF"]["UF_BLOG_COMMENT_FILE"]['VALUE'])
+				!empty($arResult["RECORDS"][$comment["ID"]]["UF"])
+				&& !empty($arResult["RECORDS"][$comment["ID"]]["UF"]["UF_BLOG_COMMENT_FILE"])
+				&& !empty($arResult["RECORDS"][$comment["ID"]]["UF"]["UF_BLOG_COMMENT_FILE"]['VALUE'])
 			)
 			{
-				$mobileComment["UF"]["UF_BLOG_COMMENT_FILE"]['VALUE'] = array_diff($mobileComment["UF"]["UF_BLOG_COMMENT_FILE"]['VALUE'], $inlineAttachedImagesId);
-				$arResult["RECORDS"][$comment["ID"]]["MOBILE"] = $mobileComment;
-				$arResult["RECORDS"][$comment["ID"]]["UF"] = array();
+				$arResult["RECORDS"][$comment["ID"]]["UF"]["UF_BLOG_COMMENT_FILE"]['VALUE_INLINE'] = $inlineAttachedImagesId;
 			}
 		}
 	}
-
 }
 else if ($arResult["ajax_comment"] > 0 && $_GET["delete_comment_id"] > 0)
 {

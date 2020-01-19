@@ -12,12 +12,13 @@
 
 
 	BX.Landing.History.Highlight.getInstance = function() {
-		if (!top.BX.Landing.History.Highlight.instance)
+		var rootWindow = BX.Landing.PageObject.getRootWindow();
+		if (!rootWindow.BX.Landing.History.Highlight.instance)
 		{
-			top.BX.Landing.History.Highlight.instance = new BX.Landing.History.Highlight();
+			rootWindow.BX.Landing.History.Highlight.instance = new BX.Landing.History.Highlight();
 		}
 
-		return top.BX.Landing.History.Highlight.instance;
+		return rootWindow.BX.Landing.History.Highlight.instance;
 	};
 
 	BX.Landing.History.Highlight.prototype = {

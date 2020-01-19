@@ -819,13 +819,16 @@ BX.Sale.Input = (function () {
 		var s, size = 5, settings = this.settings;
 
 		if ((s = settings.MIN) && s.toString().length > size)
-			size = s;
+			size = s.toString().length;
 
 		if ((s = settings.MAX) && s.toString().length > size)
-			size = s;
+			size = s.toString().length;
 
 		if ((s = settings.STEP) && s.toString().length > size)
-			size = s;
+			size = s.toString().length;
+
+		if (size > 30)
+			size = 30;
 
 		var element = document.createElement('input');
 		element.type  = 'text';

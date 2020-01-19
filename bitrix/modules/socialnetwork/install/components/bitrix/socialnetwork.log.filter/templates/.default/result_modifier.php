@@ -21,10 +21,7 @@ elseif ($USER->IsAuthorized())
 $arResult["SHOW_VIDEO_TRANSFORM_POPUP"] = CUserOptions::getOption("socialnetwork", "~log_videotransform_popup_show", "N");
 $arResult["ajaxControllerURL"] = $this->GetFolder()."/ajax.php";
 
-if (
-	SITE_TEMPLATE_ID === 'bitrix24'
-	|| $arResult["MODE"] == "AJAX"
-)
+if ($arResult["MODE"] == "AJAX")
 {
 	CJSCore::Init(array('socnetlogdest'));
 

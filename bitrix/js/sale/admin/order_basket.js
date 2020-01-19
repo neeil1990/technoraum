@@ -327,7 +327,7 @@ BX.Sale.Admin.OrderBasket.prototype.productSet = function(product, isReplaceExis
 	//sets
 	if(product.SET_ITEMS && product.SET_ITEMS.length)
 	{
-		for(var i = product.SET_ITEMS.length-1; i>=0; i--)
+		for(var i = 0, l = product.SET_ITEMS.length - 1; i <= l; i++)
 		{
 			product.SET_ITEMS[i].BASKET_CODE = "set_" + product.BASKET_CODE + "_"+product.SET_ITEMS[i].OFFER_ID;
 			this.productSet(product.SET_ITEMS[i], true);
@@ -728,7 +728,7 @@ BX.Sale.Admin.OrderBasket.prototype.createProductCell = function(basketCode, pro
 		tdClass = "",
 		_this = this,
 		isSetItem = (BX.type.isNotEmptyString(product.IS_SET_ITEM) && product.IS_SET_ITEM === 'Y'),
-		isProductEnabled = (BX.type.isNotEmptyString(product.CAN_BUY) && product.CAN_BUY === 'Y');
+		isProductEnabled = (BX.type.isNotEmptyString(product.IS_ENABLED) && product.IS_ENABLED === 'Y');
 
 	switch(fieldId)
 	{
@@ -1527,7 +1527,8 @@ BX.Sale.Admin.OrderBasketEdit.prototype.createSkuSelector = function(basketCode,
 			continue;
 
 		var html,
-			itemId = this.iblocksSkuParams[product.OFFERS_IBLOCK_ID][skuId]["VALUES"][item]["ID"];
+			itemId = this.iblocksSkuParams[product.OFFERS_IBLOCK_ID][skuId]["VALUES"][item]["ID"],
+			name = BX.util.htmlspecialchars(this.iblocksSkuParams[product.OFFERS_IBLOCK_ID][skuId]["VALUES"][item]["NAME"]);
 
 		if(this.iblocksSkuParams[product.OFFERS_IBLOCK_ID][skuId]["VALUES"][item]["PICT"])
 		{
@@ -1536,12 +1537,13 @@ BX.Sale.Admin.OrderBasketEdit.prototype.createSkuSelector = function(basketCode,
 		else
 		{
 			styleType = 'size';
-			html = BX.util.htmlspecialchars(this.iblocksSkuParams[product.OFFERS_IBLOCK_ID][skuId]["VALUES"][item]["NAME"]);
+			html = name;
 		}
 
 		var span = BX.create('span',{
 				props: {
-					className: 'cnt'
+					className: 'cnt',
+					title: name
 				},
 				html: html
 			}),

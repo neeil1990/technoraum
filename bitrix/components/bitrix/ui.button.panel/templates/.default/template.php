@@ -32,11 +32,12 @@ switch ($arParams['ALIGN'])
 		$alignClass = '';
 }
 
+$containerId = $arParams['ID'];
 ?>
 <script type="text/javascript">
 	BX.ready(function () {
 		BX.UI.ButtonPanel.init(<?=Json::encode([
-			'containerId' => 'ui-button-panel',
+			'containerId' => $containerId,
 			'isFrame' => $arParams['FRAME'],
 			'hasHints' => $arResult['HAS_HINTS'],
 			'buttons' => $arResult['LIST']
@@ -44,8 +45,8 @@ switch ($arParams['ALIGN'])
 	});
 </script>
 
-<div id="ui-button-panel" class="ui-button-panel-wrapper ui-pinner ui-pinner-bottom <?=($arParams['FRAME'] ? 'ui-pinner-full-width' : '')?>">
-	<div class="ui-button-panel <?=htmlspecialcharsbx($alignClass)?>">
+<div id="<?=htmlspecialcharsbx($containerId)?>" class="ui-button-panel-wrapper ui-pinner ui-pinner-bottom <?=($arParams['FRAME'] ? 'ui-pinner-full-width' : '')?>">
+	<div class="ui-button-panel <?=htmlspecialcharsbx($alignClass)?> <?=$arParams['CLASS_NAME']?>">
 		<?foreach ($arResult['LIST'] as $item)
 		{
 			$item['CLASS_NAME'] = '';

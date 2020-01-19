@@ -104,9 +104,9 @@ if(strlen($arResult["ERROR"]) <= 0 && $saleModulePermissions >= "W" && check_bit
 
 			/** @var \Bitrix\Sale\Delivery\Restrictions\Base $className*/
 
-			if(!is_subclass_of($className, 'Bitrix\Sale\Delivery\Restrictions\Base'))
+			if(!is_subclass_of($className, 'Bitrix\Sale\Services\Base\Restriction'))
 			{
-				throw new \Bitrix\Main\SystemException($className.' is not a child of Bitrix\Sale\Delivery\Restrictions\Base'.' ('.get_parent_class($className).')');
+				throw new \Bitrix\Main\SystemException($className.' is not a child of Bitrix\Sale\Services\Base\Restriction'.' ('.get_parent_class($className).')');
 			}
 
 			foreach($className::getParamsStructure() as $key => $rParams)

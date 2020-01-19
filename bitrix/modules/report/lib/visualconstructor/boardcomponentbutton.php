@@ -86,7 +86,7 @@ class BoardComponentButton extends BoardButton
 		$this->flush();
 		$componentContent = ob_get_clean();
 
-		$this->collectAssetsPathList();
+		//$this->collectAssetsPathList();
 
 
 		$this->setHtml($componentContent);

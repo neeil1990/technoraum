@@ -276,7 +276,7 @@ class SaleOrderPaymentChange extends \CBitrixComponent
 		{
 			return;
 		}
-		$registry = Sale\Registry::getInstance(Sale\Order::getRegistryType());
+		$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
 		$orderClassName = $registry->getOrderClassName();
 		$this->order = $orderClassName::loadByAccountNumber($this->arParams['ACCOUNT_NUMBER']);
 
@@ -486,7 +486,7 @@ class SaleOrderPaymentChange extends \CBitrixComponent
 					"ORDER_DATE" => $this->order->getDateInsert()->toString(),
 					"PAYMENT_ID" => $payment->getField("ACCOUNT_NUMBER"),
 					"PAY_SYSTEM_NAME" => $payment->getField("PAY_SYSTEM_NAME"),
-					"IS_CASH" => $paySystemObject->isCash(),
+					"IS_CASH" => $paySystemObject->isCash() || $paySystemObject->getField("ACTION_FILE") === 'cash',
 					"NAME_CONFIRM_TEMPLATE" => $this->arParams['NAME_CONFIRM_TEMPLATE']
 				);
 

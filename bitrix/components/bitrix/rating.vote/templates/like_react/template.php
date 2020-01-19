@@ -80,12 +80,22 @@ $APPLICATION->SetAdditionalCSS("/bitrix/components/bitrix/rating.vote/templates/
 		}
 	}
 
-	$topUsersMessage = Bitrix\Main\Localization\Loc::getMessage('RATING_LIKE_TOP_TEXT2_'.($you ? 'YOU_' : '').($topCount).($more > 0 ? '_MORE' : ''), array(
-		"#OVERFLOW_START#" => ($arParams['MOBILE'] == 'Y' ? '<span class="feed-post-emoji-text-item-overflow">' : ''),
-		"#OVERFLOW_END#" => ($arParams['MOBILE'] == 'Y' ? '</span>' : ''),
-		"#MORE_START#" => ($arParams['MOBILE'] == 'Y' ? '<span class="feed-post-emoji-text-item-more">' : '&nbsp;'),
-		"#MORE_END#" => ($arParams['MOBILE'] == 'Y' ? '</span>' : '')
-	));
+	if (
+		!$you
+		&& $topCount <= 0
+	)
+	{
+		$topUsersMessage = "";
+	}
+	else
+	{
+		$topUsersMessage = Bitrix\Main\Localization\Loc::getMessage('RATING_LIKE_TOP_TEXT2_'.($you ? 'YOU_' : '').($topCount).($more > 0 ? '_MORE' : ''), array(
+			"#OVERFLOW_START#" => ($arParams['MOBILE'] == 'Y' ? '<span class="feed-post-emoji-text-item-overflow">' : ''),
+			"#OVERFLOW_END#" => ($arParams['MOBILE'] == 'Y' ? '</span>' : ''),
+			"#MORE_START#" => ($arParams['MOBILE'] == 'Y' ? '<span class="feed-post-emoji-text-item-more">' : '&nbsp;'),
+			"#MORE_END#" => ($arParams['MOBILE'] == 'Y' ? '</span>' : '')
+		));
+	}
 
 	$usersData = array(
 		'TOP' => array(),

@@ -31,9 +31,10 @@ $elementCode = $classBlock->get('ELEMENT_CODE');
 			'PATH_TO_ORDER' => '#system_order',
 			'SHOW_EMPTY_VALUES' => 'N',
 			'PATH_TO_AUTHORIZE' => '#system_personal?SECTION=private',
-			'POSITION_HORIZONTAL' => 'left',
-			'POSITION_VERTICAL' => 'bottom',
-			'HIDE_ON_BASKET_PAGES' => 'Y'
+			'POSITION_HORIZONTAL' => $classBlock->get('CART_POSITION_HORIZONTAL'),
+			'POSITION_VERTICAL' => $classBlock->get('CART_POSITION_VERTICAL'),
+			'HIDE_ON_BASKET_PAGES' => 'Y',
+			'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID')
 		),
 		false
 	);?>
@@ -51,7 +52,8 @@ $elementCode = $classBlock->get('ELEMENT_CODE');
 			'ACTION_VARIABLE' => 'action',
 			'PRODUCT_ID_VARIABLE' => 'id',
 			'POSITION_FIXED' => 'Y',
-			'POSITION' => 'top left'
+			'POSITION' => 'top left',
+			'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID')
 		),
 		false
 	);?>
@@ -141,7 +143,7 @@ $elementCode = $classBlock->get('ELEMENT_CODE');
 						'PRICE_VAT_SHOW_VALUE' => 'N',
 						'CONVERT_CURRENCY' => 'N',
 						'BASKET_URL' => '#system_cart',
-						'ACTION_VARIABLE' => 'action',
+						'ACTION_VARIABLE' => $classBlock->get('ACTION_VARIABLE'),
 						'PRODUCT_ID_VARIABLE' => 'id',
 						'PRODUCT_QUANTITY_VARIABLE' => 'quantity',
 						'ADD_PROPERTIES_TO_BASKET' => 'N',
@@ -254,6 +256,7 @@ $elementCode = $classBlock->get('ELEMENT_CODE');
 						'DATA_LAYER_NAME' => $classBlock->get('DATA_LAYER_NAME'),
 						'BRAND_PROPERTY' => $classBlock->get('BRAND_PROPERTY'),
 						'CUSTOM_SITE_ID' => $classBlock->get('SITE_ID'),
+						'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID'),
 						'SECTIONS_CHAIN_START_FROM' => 1
 					),
 					false

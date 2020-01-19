@@ -223,3 +223,24 @@ $MESS["MAIN_MAIL_CONFIRM_EVENT_TYPE_DESC"] = "
 #EMAIL_TO# - Email-адрес для подтверждения
 #MESSAGE_SUBJECT# - Тема сообщения
 #CONFIRM_CODE# - Код подтверждения";
+$MESS["main_install_sms_event_confirm_name"] = "Подтверждение номера телефона по СМС";
+$MESS["main_install_sms_event_confirm_descr"] = "#USER_PHONE# - номер телефона
+#CODE# - код подтверждения
+";
+$MESS["main_install_sms_event_restore_name"] = "Восстановление пароля через СМС";
+$MESS["main_install_sms_event_restore_descr"] = "#USER_PHONE# - номер телефона
+#CODE# - код для восстановления
+";
+$MESS["main_install_sms_template_confirm_mess"] = "Код подтверждения #CODE#";
+$MESS["main_install_sms_template_restore_mess"] = "Код для восстановления пароля #CODE#";
+$MESS["MAIN_DEFAULT_LANGUAGE_SHORT_DATE_FORMAT"] = "d.m.Y";
+$MESS["MAIN_DEFAULT_LANGUAGE_MEDIUM_DATE_FORMAT"] = "j M Y";
+$MESS["MAIN_DEFAULT_LANGUAGE_LONG_DATE_FORMAT"] = "j F Y";
+$MESS["MAIN_DEFAULT_LANGUAGE_FULL_DATE_FORMAT"] = "l, j F Y";
+$MESS["MAIN_DEFAULT_LANGUAGE_DAY_MONTH_FORMAT"] = "j F";
+$MESS["MAIN_DEFAULT_LANGUAGE_SHORT_TIME_FORMAT"] = "H:i";
+$MESS["MAIN_DEFAULT_LANGUAGE_LONG_TIME_FORMAT"] = "H:i:s";
+$MESS["MAIN_DEFAULT_LANGUAGE_AM_VALUE"] = "am";
+$MESS["MAIN_DEFAULT_LANGUAGE_PM_VALUE"] = "pm";
+$MESS["MAIN_DEFAULT_LANGUAGE_NUMBER_THOUSANDS_SEPARATOR"] = " ";
+$MESS["MAIN_DEFAULT_LANGUAGE_NUMBER_DECIMAL_SEPARATOR"] = ",";

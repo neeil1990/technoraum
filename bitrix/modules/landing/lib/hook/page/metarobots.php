@@ -40,11 +40,34 @@ class MetaRobots extends \Bitrix\Landing\Hook\Page
 	}
 
 	/**
+	 * Exec or not hook in edit mode.
+	 * @return boolean
+	 */
+	public function enabledInEditMode()
+	{
+		return false;
+	}
+
+	/**
+	 * Exec or not hook in intranet mode.
+	 * @return boolean
+	 */
+	public function enabledInIntranetMode()
+	{
+		return false;
+	}
+
+	/**
 	 * Exec hook.
 	 * @return void
 	 */
 	public function exec()
 	{
+		if ($this->execCustom())
+		{
+			return;
+		}
+
 		if (\Bitrix\Landing\Landing::getPreviewMode())
 		{
 			$use = 'N';

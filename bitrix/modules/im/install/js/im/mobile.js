@@ -163,7 +163,6 @@ BX.ImMobile = function(params)
 		'desktopClass': this.desktop,
 		'phoneEnabled': params.webrtc && params.webrtc.phoneEnabled || false,
 		'mobileSupport': params.webrtc && params.webrtc.mobileSupport || false,
-		'phoneSipAvailable': params.webrtc && params.webrtc.phoneSipAvailable || 0,
 		'phoneDeviceActive': params.webrtc && params.webrtc.phoneDeviceActive || 'N',
 		'phoneDeviceCall': params.webrtc && params.webrtc.phoneDeviceCall || 'Y',
 		'phoneCrm': params.phoneCrm && params.phoneCrm || {},
@@ -2076,7 +2075,7 @@ BX.ImMessengerMobile.prototype.dialogStatusRedrawDelay = function(params)
 				}
 				if (this.chat[chatId].owner == this.BXIM.userId)
 				{
-					items.push({ icon: 'pause', name: BX.message(session.pin == "Y"? "IM_M_OL_PAUSE_OFF": "IM_M_OL_PAUSE_ON"), action:BX.delegate(function() {  this.linesTogglePinMode(); }, this)});
+					items.push({ icon: 'pause', name: BX.message(session.pin == "Y"? "IM_M_OL_ASSIGN_OFF": "IM_M_OL_ASSIGN_ON"), action:BX.delegate(function() {  this.linesTogglePinMode(); }, this)});
 					if (session.crm != 'Y')
 					{
 						items.push({ name: BX.message('IM_M_OL_ADD_LEAD'), action:BX.delegate(function() {  this.linesCreateLead(); }, this)});
@@ -3384,7 +3383,7 @@ BX.ImDiskManagerMobile.prototype.chatDialogInit = function()
 BX.ImDiskManagerMobile.prototype.uploadFromMobile = function(image, text)
 {
 	var dataBlob = BX.UploaderUtils.dataURLToBlob("data:image/jpg;base64,"+image);
-	dataBlob.name = 'mobile_'+BX.date.format("Ymd_His")+'.jpg';
+	dataBlob.name = 'mobile_'+BX.Main.Date.format("Ymd_His")+'.jpg';
 	this.formAgents['imDialog'].messageText = text? text: '';
 	this.formAgents['imDialog'].onChange([dataBlob]);
 };
@@ -3401,7 +3400,7 @@ BX.ImDiskManagerMobile.prototype.uploadFromDisk = function(selected, text)
 	{
 		this.files[chatId]['disk'+fileId] = {
 			'id': 'disk'+fileId,
-			'tempId': 'disk'+fileId,
+			'templateId': 'disk'+fileId,
 			'chatId': chatId,
 			'date': new Date(selected[fileId].modifyDateInt*1000),
 			'type': 'file',
@@ -3570,7 +3569,7 @@ BX.ImDiskManagerMobile.prototype.diskChatDialogFileInited = function(id, file, a
 
 	this.files[chatId][id] = {
 		'id': id,
-		'tempId': id,
+		'templateId': id,
 		'chatId': chatId,
 		'date': new Date(),
 		'type': file.isImage? 'image': 'file',
@@ -3665,7 +3664,6 @@ BX.ImWebRTCMobile = function(rootObject, params)
 	this.turnServerPassword = params.turnServerPassword;
 
 	this.phoneEnabled = params.phoneEnabled;
-	this.phoneSipAvailable = params.phoneSipAvailable;
 	this.phoneDeviceActive = params.phoneDeviceActive == 'Y';
 	this.phoneCallerID = '';
 	this.phoneLogin = "";

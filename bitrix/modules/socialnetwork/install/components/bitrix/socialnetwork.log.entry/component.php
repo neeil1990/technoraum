@@ -59,6 +59,16 @@ if (empty($arParams["COMMENT_PROPERTY"]))
 	$arParams["COMMENT_PROPERTY"][] = "UF_SONET_COM_URL_PRV";
 }
 
+if (empty($arParams["PATH_TO_LOG_TAG"]))
+{
+	$folderUsers = COption::GetOptionString("socialnetwork", "user_page", false, SITE_ID);
+	$arParams["PATH_TO_LOG_TAG"] = $folderUsers."log/?TAG=#tag#";
+	if (SITE_TEMPLATE_ID == 'bitrix24')
+	{
+		$arParams["PATH_TO_LOG_TAG"] .= "&apply_filter=Y";
+	}
+}
+
 CSocNetLogComponent::processDateTimeFormatParams($arParams);
 
 if (isset($arParams["CURRENT_PAGE_DATE"]))
@@ -86,6 +96,7 @@ $arResult["bTasksAvailable"] = (
 		!Loader::includeModule('bitrix24')
 		|| CBitrix24BusinessTools::isToolAvailable($USER->getId(), "tasks")
 	)
+	&& CSocNetFeaturesPerms::CurrentUserCanPerformOperation(SONET_ENTITY_USER, $USER->getId(), "tasks", "create_tasks")
 );
 
 $arResult["Event"] = false;

@@ -11,6 +11,8 @@ class CIBlockPropertyDirectory
 {
 	const TABLE_PREFIX = 'b_hlbd_';
 
+	const USER_TYPE = 'directory';
+
 	protected static $arFullCache = array();
 	protected static $arItemCache = array();
 	protected static $directoryMap = array();
@@ -26,13 +28,13 @@ class CIBlockPropertyDirectory
 	{
 		return array(
 			'PROPERTY_TYPE' => 'S',
-			'USER_TYPE' => 'directory',
+			'USER_TYPE' => self::USER_TYPE,
 			'DESCRIPTION' => Loc::getMessage('HIBLOCK_PROP_DIRECTORY_DESCRIPTION'),
 			'GetSettingsHTML' => array(__CLASS__, 'GetSettingsHTML'),
 			'GetPropertyFieldHtml' => array(__CLASS__, 'GetPropertyFieldHtml'),
 			'GetPropertyFieldHtmlMulty' => array(__CLASS__, 'GetPropertyFieldHtmlMulty'),
 			'PrepareSettings' => array(__CLASS__, 'PrepareSettings'),
-			'GetOptionsData' => array(__CLASS__, 'GetOptionsData'),
+			'GetOptionsData' => array(__CLASS__, 'GetOptionsData'), //TODO: remove this row after iblock 19.0.0 will be stabled
 			'GetAdminListViewHTML' => array(__CLASS__, 'GetAdminListViewHTML'),
 			'GetPublicViewHTML' => array(__CLASS__, 'GetPublicViewHTML'),
 			'GetPublicEditHTML' => array(__CLASS__, 'GetPublicEditHTML'),
@@ -40,7 +42,8 @@ class CIBlockPropertyDirectory
 			'GetAdminFilterHTML' => array(__CLASS__, 'GetAdminFilterHTML'),
 			'GetExtendedValue' => array(__CLASS__, 'GetExtendedValue'),
 			'GetSearchContent' => array(__CLASS__, 'GetSearchContent'),
-			'AddFilterFields' => array(__CLASS__, 'AddFilterFields')
+			'AddFilterFields' => array(__CLASS__, 'AddFilterFields'),
+			'GetUIFilterProperty' => array(__CLASS__, 'GetUIFilterProperty')
 		);
 	}
 
@@ -331,7 +334,7 @@ function getDirectoryTableHead(e)
 	<td>$directoryName</td>
 	<td>
 		<input type="hidden" value="0" id="hlb_directory_row_number">
-		<input type="text" name="HLB_NEW_TITLE" size="30" id="hlb_directory_table_name" onblur="getDirectoryTableHead(this);">
+		<input type="text" name="HLB_NEW_TITLE" size="30" id="hlb_directory_table_name" onchange="getDirectoryTableHead(this);">
 	</td>
 </tr>
 <tr id="hlb_directory_table_tr">
@@ -787,6 +790,24 @@ HIBSELECT;
 		$name = substr(self::TABLE_PREFIX.$name, 0, 30);
 		return $name;
 	}
+
+	/**
+	 * @param array $property
+	 * @param array $strHTMLControlName
+	 * @param array &$field
+	 * @return void
+	 */
+	public static function GetUIFilterProperty($property, $strHTMLControlName, &$field)
+	{
+		unset($field['value']);
+		$field['type'] = 'list';
+		$field['items'] = self::GetOptionsData($property);
+		$field['params'] = ['multiple' => 'Y'];
+		$field['operators'] = [
+			'default' => '='
+		];
+	}
+
 	/**
 	 * Returns entity data.
 	 *

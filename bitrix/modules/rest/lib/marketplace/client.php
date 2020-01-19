@@ -160,15 +160,20 @@ class Client
 		return $categoriesList;
 	}
 
-	public static function getCategory($code, $page = false)
+	public static function getCategory($code, $page = false, $pageSize = false)
 	{
 		$queryFields = Array(
 			"code" => $code
 		);
 		$page = intval($page);
+		$pageSize = intval($pageSize);
 		if($page > 0)
 		{
 			$queryFields["page"] = $page;
+		}
+		if($pageSize > 0)
+		{
+			$queryFields["onPageSize"] = $pageSize;
 		}
 
 		return Transport::instance()->call(
@@ -367,6 +372,22 @@ class Client
 		$tag[] = $placement;
 
 		return $tag;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isSubscriptionAvailable()
+	{
+		return \Bitrix\Main\Config\Option::get("bitrix24", "~mp24_paid", "N") === "Y";
+	}
+
+	/**
+	 * @return \Bitrix\Main\Type\Date
+	 */
+	public static function getSubscriptionFinalDate()
+	{
+		return new \Bitrix\Main\Type\Date(\Bitrix\Main\Config\Option::get("bitrix24", "~mp24_paid_date"));
 	}
 
 }

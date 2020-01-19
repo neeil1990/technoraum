@@ -27,7 +27,7 @@
 		this.itemsNode = BX.create('span');
 		this.inputBoxNode = BX.create('span', {
 			attrs: {
-				className: 'feed-add-destination-input-box'
+				className: 'bizproc-type-control-user-input-box'
 			}
 		});
 
@@ -36,7 +36,7 @@
 				type: 'text'
 			},
 			attrs: {
-				className: 'feed-add-destination-inp'
+				className: 'bizproc-type-control-user-input',
 			}
 		});
 
@@ -44,7 +44,7 @@
 
 		this.tagNode = BX.create('a', {
 			attrs: {
-				className: 'feed-add-destination-link'
+				className: 'bizproc-type-control-user-link'
 			}
 		});
 
@@ -395,10 +395,10 @@
 		setValue: function(item, type)
 		{
 			var id = this.getValueId(item, type);
-			var name = BX.util.htmlspecialcharsback(item['name']);
-			name = name.replace(/,/g, '');
-
 			var value = id;
+			var name = BX.util.htmlspecialcharsback(item['name']);
+
+			name = name.replace(/[,\.\-\_\>\<\"\']/g, '');
 
 			if (type === 'users')
 			{

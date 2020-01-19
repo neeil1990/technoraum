@@ -128,3 +128,19 @@
 .main-grid-ear-right.show {
 	margin-right: 0;
 }
+
+.chfilter-field-money .report-filter-vcc { white-space: nowrap; }
+.chfilter-field-money .report-filter-vcc .money-editor input[type=text] {
+	height: 16px;
+	width: 125px;
+	vertical-align: top;
+}
+.chfilter-field-money .report-filter-vcc .money-editor select {
+	border-width: 1px;
+	height: 22px;
+	margin: 0 0 0 2px;
+	width: 119px;
+	vertical-align: top;
+}
+
+.filter-field-hidden { display: none; }

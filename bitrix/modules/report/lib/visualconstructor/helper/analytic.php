@@ -12,12 +12,16 @@ class Analytic
 	 * @TODO maybe need to add some logic of access for different analytic pages
 	 *
 	 * @return bool
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
 	 */
 	public static function isEnable()
 	{
-		Loader::includeModule('crm');
-		return Option::get("report", '~analytics_enabled', 'N') === 'Y' && \CCrmPerms::IsAccessEnabled();
+		if (Loader::includeModule('crm'))
+		{
+			return \CCrmPerms::IsAccessEnabled();
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

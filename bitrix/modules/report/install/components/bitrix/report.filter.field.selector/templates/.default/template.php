@@ -65,6 +65,21 @@ foreach ($arResult['SELECTOR_ITEMS'] as $selectorConfig)
 		BX.Report.FilterFieldSelectorManager.addSelector(<?=CUtil::PhpToJSObject($selectorConfig)?>);
 <?php
 				break;
+			case "money":
+				if (!isset($initActions['money']) || !$initActions['money'])
+				{
+					$initActions['money'] = true;
+
+					CJSCore::Init(array('decl', 'core_money_editor'));
+
+					Bitrix\Main\Page\Asset::getInstance()->addJs(
+						'/bitrix/components/bitrix/currency.money.input/templates/.default/script.js'
+					);
+				}
+?>
+		BX.Report.FilterFieldSelectorManager.addSelector(<?=CUtil::PhpToJSObject($selectorConfig)?>);
+<?php
+				break;
 		}
 	}
 }

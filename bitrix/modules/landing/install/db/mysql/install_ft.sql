@@ -1,0 +1,1 @@
+create fulltext index IX_B_BLOCK_SEARCH on b_landing_block (SEARCH_CONTENT);

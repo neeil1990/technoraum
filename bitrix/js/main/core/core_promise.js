@@ -9,10 +9,6 @@
 	{
 		window.BX = {};
 	}
-	else if (window.BX.Promise)
-	{
-		return;
-	}
 
 	var BX = window.BX;
 

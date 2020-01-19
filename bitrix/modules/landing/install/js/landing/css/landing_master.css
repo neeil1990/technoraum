@@ -32,6 +32,8 @@ body {
 .block-wrapper {
     position: relative;
 	box-sizing: border-box;
+	border-bottom: 1px solid transparent;
+	margin-bottom: -1px;
 }
 
 .block-wrapper::after {
@@ -223,7 +225,8 @@ main .landing-footer:not(.landing-empty):not(:hover) .landing-ui-panel-create-ac
 
 
 .landing-ui-panel-content-action,
-.landing-ui-panel-block-action {
+.landing-ui-panel-block-action,
+.landing-ui-panel-sidebar-actions {
 	background-color: #ffffff;
     top: 40px;
     left: 16px;
@@ -243,6 +246,13 @@ main .landing-footer:not(.landing-empty):not(:hover) .landing-ui-panel-create-ac
 .block-wrapper:hover .landing-ui-panel-block-action,
 .block-wrapper.landing-ui-hover .landing-ui-panel-block-action {
 	opacity: 1;
+}
+
+.landing-sidebar .block-wrapper:hover .landing-ui-panel-content-action,
+.landing-sidebar .block-wrapper.landing-ui-hover .landing-ui-panel-content-action,
+.landing-sidebar .block-wrapper:hover .landing-ui-panel-block-action,
+.landing-sidebar .block-wrapper.landing-ui-hover .landing-ui-panel-block-action {
+	display: none!important;
 }
 
 body[style*="cursor: move;"] .landing-ui-panel-content-action,
@@ -392,11 +402,82 @@ body[style*="cursor: move;"] .landing-ui-panel-block-card-action {
 	justify-content: flex-end;
 }
 
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] {
+	height: 32px !important;
+	position: relative;
+	margin-top: 8px;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-button-text {
+	display: block;
+	height: 100%;
+	border: 1px solid #e4e5e7;
+	padding: 0 9px;
+	border-radius: 2px;
+	transition: border-color .2s ease;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align {
+	width: 16px;
+	height: 3px;
+	background: #333;
+	margin-top: 6px;
+	display: flex;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-center {
+	margin-top: 12px;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-end {
+	margin-top: 19px;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"].landing-ui-active .landing-ui-button-text {
+	border-color: #2fc6f6;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align:before,
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align:after {
+	position: absolute;
+	width: 9px;
+	height: 6px;
+	background: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%229%22%20height%3D%226%22%3E%3Cpath%20fill%3D%22%23333%22%20fill-rule%3D%22evenodd%22%20d%3D%22M1.341%205.937L4.008%203.27l.659-.662.672.662%202.666%202.667.941-.941L4.673.723.401%204.996z%22/%3E%3C/svg%3E);
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-start:before,
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-end:after {
+	content: none;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-start:after {
+	top: 12px;
+	left: 14px;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-center:before {
+	top: 6px;
+	transform: rotate(180deg);
+	left: 18px;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-center:after {
+	top: 17px;
+	left: 17.5px;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] .landing-ui-align-items-end:before {
+	top: 11px;
+	transform: rotate(180deg);
+	left: 18px;
+}
+
 .landing-ui-form-style .landing-ui-button[data-id^="g-text-"],
 .landing-ui-form-style .landing-ui-button[data-id^="font-"],
 .landing-ui-form-style .landing-ui-button[data-id^="text-"],
 .landing-ui-form-style .landing-ui-button[data-id^="justify-content"],
-.landing-ui-form-style .landing-ui-button[data-id^="u-navbar-align"] {
+.landing-ui-form-style .landing-ui-button[data-id^="u-navbar-align"],
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] {
 	background: none!important;
 	border: none!important;
 	box-shadow: none!important;
@@ -405,8 +486,7 @@ body[style*="cursor: move;"] .landing-ui-panel-block-card-action {
 }
 
 .landing-ui-form-style .landing-ui-button[data-id^="g-text-"],
-.landing-ui-form-style .landing-ui-button[data-id^="font-"]
-{
+.landing-ui-form-style .landing-ui-button[data-id^="font-"] {
 	padding-left: 14px;
 	padding-right: 14px;
 	padding-top: 2px !important;
@@ -421,7 +501,9 @@ body[style*="cursor: move;"] .landing-ui-panel-block-card-action {
 .landing-ui-form-style .landing-ui-button[data-id^="justify-content-"].landing-ui-active,
 .landing-ui-form-style .landing-ui-button[data-id^="justify-content-"]:hover,
 .landing-ui-form-style .landing-ui-button[data-id^="u-navbar-align-"].landing-ui-active,
-.landing-ui-form-style .landing-ui-button[data-id^="u-navbar-align-"]:hover{
+.landing-ui-form-style .landing-ui-button[data-id^="u-navbar-align-"]:hover,
+.landing-ui-form-style .landing-ui-button[data-id^="align-"].landing-ui-active,
+.landing-ui-form-style .landing-ui-button[data-id^="align-"]:hover {
 	opacity: 1;
 }
 
@@ -431,19 +513,28 @@ body[style*="cursor: move;"] .landing-ui-panel-block-card-action {
 	padding-left: 14px;
 	padding-right: 14px;
 }
+
 .landing-ui-form-style .landing-ui-button[data-id^="u-navbar-align-"]:first-child,
 .landing-ui-form-style .landing-ui-button[data-id^="justify-content-"]:first-child,
-.landing-ui-form-style .landing-ui-button[data-id^="text-"]:first-child {
+.landing-ui-form-style .landing-ui-button[data-id^="text-"]:first-child,
+.landing-ui-form-style .landing-ui-button[data-id^="align-"]:first-child {
 	padding-left: 0;
 }
+
 .landing-ui-form-style .landing-ui-button[data-id^="u-navbar-align-"]:last-child,
 .landing-ui-form-style .landing-ui-button[data-id^="justify-content-"]:last-child,
-.landing-ui-form-style .landing-ui-button[data-id^="text-"]:last-child {
+.landing-ui-form-style .landing-ui-button[data-id^="text-"]:last-child,
+.landing-ui-form-style .landing-ui-button[data-id^="align-"]:last-child {
 	padding-right: 0;
 }
 
 .landing-ui-form-style .landing-ui-align.landing-ui-active {
 	background: none;
+}
+
+.landing-ui-form-style .landing-ui-button[data-id^="align-"] {
+	padding-left: 4px;
+	padding-right: 4px;
 }
 
 .landing-ui-disabled {
@@ -601,19 +692,41 @@ body[style*="cursor: move;"] .landing-ui-panel-block-card-action {
 }
 
 
+/*for preview*/
 .l-d-lg-none,
 .l-d-md-none,
 .l-d-xs-none {
 	position: relative;
 }
 
+/* xl
+   Large devices more than 992px. In editor - show always
+ */
 @media (min-width: 992px) {
 	.l-d-lg-none {
 		display: block!important;
 	}
-
+	
 	.l-d-lg-none.g-flex-centered {
 		display: flex!important;
+	}
+}
+
+/* md
+   Medium devices less than 1200px and more than 576px
+*/
+@media (max-width: 991px) and (min-width: 576px) {
+	.block-wrapper .l-d-md-none {
+		display: none !important;
+	}
+}
+
+/* xs
+   Extra small devices less than 576px
+ */
+@media (max-width: 575px) {
+	.block-wrapper .l-d-xs-none {
+		display: none !important;
 	}
 }
 
@@ -730,6 +843,7 @@ main.landing-edit-mode.landing-ui-overlay::after {
 
 .landing-layout-flex {
 	overflow: visible!important;
+	min-height: 100vh;
 }
 
 .landing-ui-panel-create-action {
@@ -787,6 +901,11 @@ only screen and (min-resolution: 2dppx) {
 
 .bx-ie.bx-ie11 body {
 	overflow: hidden;
+}
+
+.bx-ie.bx-ie11 .g-upper-show,
+.bx-ie.bx-ie11 .template-bitrix24 {
+	overflow-y: auto;
 }
 
 .landing-ui-block-selectable-overlay {

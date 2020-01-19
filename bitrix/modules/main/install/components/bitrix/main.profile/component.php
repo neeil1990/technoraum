@@ -29,6 +29,12 @@ if(!($arParams['CHECK_RIGHTS'] == 'N' || $USER->CanDoOperation('edit_own_profile
 	return;
 }
 
+$arResult["PHONE_REGISTRATION"] = (COption::GetOptionString("main", "new_user_phone_auth", "N") == "Y");
+$arResult["PHONE_REQUIRED"] = ($arResult["PHONE_REGISTRATION"] && COption::GetOptionString("main", "new_user_phone_required", "N") == "Y");
+$arResult["EMAIL_REGISTRATION"] = (COption::GetOptionString("main", "new_user_email_auth", "Y") <> "N");
+$arResult["EMAIL_REQUIRED"] = ($arResult["EMAIL_REGISTRATION"] && COption::GetOptionString("main", "new_user_email_required", "Y") <> "N");
+$arResult["PHONE_CODE_RESEND_INTERVAL"] = CUser::PHONE_CODE_RESEND_INTERVAL;
+
 $strError = '';
 
 if($_SERVER["REQUEST_METHOD"]=="POST" && ($_REQUEST["save"] <> '' || $_REQUEST["apply"] <> '') && check_bitrix_sessid())
@@ -106,6 +112,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST" && ($_REQUEST["save"] <> '' || $_REQUEST["
 			"WORK_PROFILE",
 			"WORK_NOTES",
 			"TIME_ZONE",
+			"PHONE_NUMBER",
 		);
 
 		$arFields = array();
@@ -149,8 +156,45 @@ if($_SERVER["REQUEST_METHOD"]=="POST" && ($_REQUEST["save"] <> '' || $_REQUEST["
 
 		$USER_FIELD_MANAGER->EditFormAddFields("USER", $arFields);
 	
-		if(!$obUser->Update($arResult["ID"], $arFields))
+		if($obUser->Update($arResult["ID"], $arFields))
+		{
+			if($arResult["PHONE_REGISTRATION"] == true && $arFields["PHONE_NUMBER"] <> '')
+			{
+				if(!($phone = \Bitrix\Main\UserPhoneAuthTable::getRowById($arResult["ID"])))
+				{
+					$phone = ["PHONE_NUMBER" => "", "CONFIRMED" => "N"];
+				}
+
+				$arFields["PHONE_NUMBER"] = \Bitrix\Main\UserPhoneAuthTable::normalizePhoneNumber($arFields["PHONE_NUMBER"]);
+
+				if($arFields["PHONE_NUMBER"] <> $phone["PHONE_NUMBER"] || $phone["CONFIRMED"] <> 'Y')
+				{
+					//added or updated the phone number for the user, now sending a confirmation SMS
+					list($code, $phoneNumber) = CUser::GeneratePhoneCode($arResult["ID"]);
+
+					$sms = new \Bitrix\Main\Sms\Event(
+						"SMS_USER_CONFIRM_NUMBER",
+						[
+							"USER_PHONE" => $phoneNumber,
+							"CODE" => $code,
+						]
+					);
+					$smsResult = $sms->send(true);
+
+					if(!$smsResult->isSuccess())
+					{
+						$strError .= implode("<br />", $smsResult->getErrorMessages());
+					}
+
+					$arResult["SHOW_SMS_FIELD"] = true;
+					$arResult["SIGNED_DATA"] = \Bitrix\Main\Controller\PhoneAuth::signData(['phoneNumber' => $phoneNumber]);
+				}
+			}
+		}
+		else
+		{
 			$strError .= $obUser->LAST_ERROR;
+		}
 	}
 
 	if($strError == '')
@@ -287,10 +331,41 @@ if($_SERVER["REQUEST_METHOD"]=="POST" && ($_REQUEST["save"] <> '' || $_REQUEST["
 	}
 }
 
+// verify phone code
+if ($_SERVER["REQUEST_METHOD"] == "POST" && $_REQUEST["code_submit_button"] <> '' && check_bitrix_sessid())
+{
+	if($_REQUEST["SIGNED_DATA"] <> '')
+	{
+		if(($params = \Bitrix\Main\Controller\PhoneAuth::extractData($_REQUEST["SIGNED_DATA"])) !== false)
+		{
+			if(($userId = CUser::VerifyPhoneCode($params['phoneNumber'], $_REQUEST["SMS_CODE"])))
+			{
+				$bOk = true;
+			}
+			else
+			{
+				$strError .= GetMessage("main_profile_sms_error")."<br />";
+				$arResult["SHOW_SMS_FIELD"] = true;
+				$arResult["SMS_CODE"] = $_REQUEST["SMS_CODE"];
+				$arResult["SIGNED_DATA"] = $_REQUEST["SIGNED_DATA"];
+			}
+		}
+	}
+}
+
 $rsUser = CUser::GetByID($arResult["ID"]);
 if(!$arResult["arUser"] = $rsUser->GetNext(false))
 {
 	$arResult["ID"] = 0;
+}
+
+$arResult["arUser"]["PHONE_NUMBER"] = "";
+if($arResult["PHONE_REGISTRATION"])
+{
+	if($phone = \Bitrix\Main\UserPhoneAuthTable::getRowById($arResult["ID"]))
+	{
+		$arResult["arUser"]["PHONE_NUMBER"] = htmlspecialcharsbx($phone["PHONE_NUMBER"]);
+	}
 }
 
 if (CModule::IncludeModule("blog"))
@@ -431,8 +506,6 @@ if($bOk)
 $arResult["TIME_ZONE_ENABLED"] = CTimeZone::Enabled();
 if($arResult["TIME_ZONE_ENABLED"])
 	$arResult["TIME_ZONE_LIST"] = CTimeZone::GetZones();
-
-$arResult["EMAIL_REQUIRED"] = (COption::GetOptionString("main", "new_user_email_required", "Y") <> "N");
 
 //secure authorization
 $arResult["SECURE_AUTH"] = false;

@@ -52,6 +52,7 @@ $arClasses = array(
 	"CBitrixServiceTransport" => "classes/general/bitrixservice.php",
 	"CBitrixSeoOAuthInterface" => "classes/general/bitrixseo.php",
 	"CBitrixSeoTransport" => "classes/general/bitrixseo.php",
+	"CSocServMailRu2" => "classes/general/mailru2.php",
 );
 
 CModule::AddAutoloadClasses("socialservices", $arClasses);
@@ -74,7 +75,7 @@ CJSCore::RegisterExt('socserv_timeman', $arJSDescription);
 
 class CSocServEventHandlers
 {
-	function OnFillSocNetLogEvents(&$arSocNetLogEvents)
+	public static function OnFillSocNetLogEvents(&$arSocNetLogEvents)
 	{
 		$arSocNetLogEvents["twitter"] = array(
 			"ENTITIES" =>	array(

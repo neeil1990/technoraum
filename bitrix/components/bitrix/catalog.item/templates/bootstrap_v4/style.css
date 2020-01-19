@@ -10,6 +10,8 @@
 	width: 100%;
 	border: 1px solid transparent;
 	border-radius: 2px;
+	background: #fff;
+	box-shadow: 0 0 0 0 rgba(0, 0, 0, .19);
 }
 
 .product-item-big-card .product-item,
@@ -24,7 +26,6 @@
 	padding: 15px 15px 0;
 	width: auto;
 	border-color: transparent;
-	background: #fff;
 	box-shadow: 0 7px 15px 0 rgba(0, 0, 0, .19);
 }
 
@@ -42,28 +43,40 @@
 @-webkit-keyframes product-item-hover {
 	0% {
 		position: absolute;
-		left: -15px;
-		right: -15px;
+		left: 0;
+		right: 0;
 		border: 1px solid transparent;
 		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+		padding-left:0;
+		padding-right:0;
 	}
 	100% {
 		border: 1px solid transparent;
 		box-shadow: 0 7px 15px 0 rgba(0, 0, 0, .19);
+		left: -15px;
+		right: -15px;
+		padding-left:15px;
+		padding-right:15px;
 	}
 }
 
 @keyframes product-item-hover {
 	0% {
 		position: absolute;
-		left: -15px;
-		right: -15px;
+		left: 0;
+		right: 0;
 		border: 1px solid transparent;
 		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+		padding-left:0;
+		padding-right:0;
 	}
 	100% {
 		border: 1px solid transparent;
 		box-shadow: 0 7px 15px 0 rgba(0, 0, 0, .19);
+		left: -15px;
+		right: -15px;
+		padding-left:15px;
+		padding-right:15px;
 	}
 }
 
@@ -435,12 +448,6 @@
 	font-weight: normal;
 	font-size: 14px;
 	text-align: center;
-}
-
-.bx-touch .product-item-title,
-.product-item-container.hover .product-item-title {
-	overflow: auto;
-	white-space: normal;
 }
 
 .product-item-title a {

@@ -8,3 +8,4 @@ $MESS["SALE_SHIPMENT_ITEM_BASKET_ITEM_ID_EMPTY"] = "Создание элемента отгрузки н
 $MESS["SALE_SHIPMENT_ITEM_BASKET_WRONG_BASKET_ITEM"] = "Некорректный объект корзины";
 $MESS["SALE_SHIPMENT_ITEM_BASKET_ITEM_NOT_FOUND"] = "Отсутствует связанная с элементом отгрузки ##SHIPMENT_ID# позиция в корзине ##BASKET_ITEM_ID#.";
 $MESS["SALE_SHIPMENT_ITEM_ERR_QUANTITY_EMPTY"] = "Количество #BASKET_ITEM_NAME# не может быть меньше или равны 0";
+$MESS["SALE_SHIPMENT_ITEM_MARKING_CODE_LESS_ITEM_QUANTITY"] = "Для товара \"#PRODUCT_NAME#\" не указаны все маркировочные коды";

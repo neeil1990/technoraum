@@ -33,6 +33,7 @@ $MESS["T_IBLOCK_DESC_KEYWORDS"] = "Установить ключевые слова страницы из свойств
 $MESS["T_IBLOCK_DESC_DESCRIPTION"] = "Установить описание страницы из свойства";
 $MESS["CP_BCE_ADD_SECTIONS_CHAIN"] = "Включать раздел в цепочку навигации";
 $MESS["CP_BCE_ADD_ELEMENT_CHAIN"] = "Включать название элемента в цепочку навигации";
+$MESS["CP_BCE_ALLOW_SEO_DATA"] = "Устанавливать seo-теги и заголовок страницы";
 $MESS["CP_BCE_SET_BROWSER_TITLE"] = "Устанавливать заголовок окна браузера";
 $MESS["CP_BCE_BROWSER_TITLE"] = "Установить заголовок окна браузера из свойства";
 $MESS["CP_BCE_SET_META_KEYWORDS"] = "Устанавливать ключевые слова страницы";
@@ -138,4 +139,5 @@ $MESS["SGP_MAIN_PRODUCT_PARAMS_BLOCK_TITLE"] = "Текст заголовка \"Товары к подар
 $MESS["SGB_MAIN_PRODUCT_PARAMS_BLOCK_TITLE_DEFAULT"] = "Выберите один из товаров, чтобы получить подарок";
 $MESS["GIFTS_DETAIL_PAGE_ELEMENT_COUNT_TIP"] = "Количество элементов, выводимых в строке может быть от 1 до 5";
 $MESS["GIFTS_MAIN_PRODUCT_DETAIL_PAGE_ELEMENT_COUNT_TIP"] = "Количество элементов, выводимых в строке может быть от 1 до 5";
+$MESS["ALLOW_SEO_DATA_TIP"] = "При отмеченной опции будут установлены: заголовок окна браузера, заголовок, ключевые слова и описание страницы";
 ?>

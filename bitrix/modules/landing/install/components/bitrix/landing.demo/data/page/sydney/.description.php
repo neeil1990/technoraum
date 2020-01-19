@@ -9,6 +9,7 @@ use \Bitrix\Main\Localization\Loc;
 Loc::loadLanguageFile(__FILE__);
 
 return array(
+	'active' => false,	// dbg: not actual, remove if all OK
 	'parent' => 'sydney',
 	'code' => 'sydney',
 	'name' => Loc::getMessage('LANDING_DEMO_B24SYD_TITLE'),
@@ -447,7 +448,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -551,7 +552,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -720,7 +721,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -806,7 +807,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -887,7 +888,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -968,7 +969,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -1107,7 +1108,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -1220,7 +1221,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -1351,7 +1352,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -1473,7 +1474,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -1865,7 +1866,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -2291,7 +2292,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -2442,7 +2443,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',
@@ -2591,7 +2592,7 @@ return array(
 			),
 			'style' => array(
 				'.landing-block-node-card' => array(
-					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40  col-lg-4',
+					0 => 'landing-block-node-card js-animation fadeInUp col-md-6 g-mb-40 col-lg-4 g-mb-0--last',
 				),
 				'.landing-block-node-card-text' => array(
 					0 => 'landing-block-node-card-text g-font-size-default mb-0 g-color-white g-font-size-18',

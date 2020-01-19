@@ -2,29 +2,21 @@
 
 $arThemes = array();
 
-$arThemes["site"] = GetMessage("F_THEME_SITE");
-
 $arThemesMessages = array(
+	"site" => GetMessage("F_THEME_SITE"),
 	"blue" => GetMessage("F_THEME_BLUE"),
 	"yellow" => GetMessage("F_THEME_YELLOW"),
 	"green" => GetMessage("F_THEME_GREEN"),
+	"white" => GetMessage("F_THEME_LIGHT"),
 	"red" => GetMessage("F_THEME_RED")
 );
-$dir = trim(preg_replace("'[\\\\/]+'", "/", dirname(__FILE__)."/themes/"));
-if (is_dir($dir) && $directory = opendir($dir))
-{
-	while (($file = readdir($directory)) !== false)
-	{
-		if ($file != "." && $file != ".." && is_dir($dir.$file))
-			$arThemes[$file] = (!empty($arThemesMessages[$file]) ? $arThemesMessages[$file] : strtoupper(substr($file, 0, 1)).strtolower(substr($file, 1)));
-	}
-	closedir($directory);
-}
+
+
 $arTemplateParameters = array(
 	"MENU_THEME"=>array(
 		"NAME" => GetMessage("MENU_THEME"),
 		"TYPE" => "LIST",
-		"VALUES" => $arThemes,
+		"VALUES" => $arThemesMessages,
 		"PARENT" => "BASE",
 	)
 );

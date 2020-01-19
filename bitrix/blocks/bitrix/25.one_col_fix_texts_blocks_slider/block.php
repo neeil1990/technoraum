@@ -5,7 +5,7 @@
 
                 <div class="js-carousel"
                      data-infinite="true"
-                     data-arrows-classes="u-arrow-v1 g-pos-abs g-absolute-centered--y--md g-top-0 g-top-50x--md g-width-50 g-height-50 g-font-size-default g-color-primary g-bg-gray-dark-v1 g-opacity-0_8--hover g-transition-0_2 g-transition--ease-in"
+                     data-arrows-classes="u-arrow-v1 g-pos-abs g-absolute-centered--y--lg g-top-0 g-top-50x--md g-width-50 g-height-50 g-font-size-default g-color-primary g-bg-gray-dark-v1 g-opacity-0_8--hover g-transition-0_2 g-transition--ease-in"
                      data-arrow-left-classes="fa fa-arrow-left g-left-0 g-ml-30--md"
                      data-arrow-right-classes="fa fa-arrow-right g-right-0 g-mr-30--md">
                     <div class="landing-block-card-slider-element js-slide">

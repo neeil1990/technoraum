@@ -8,20 +8,23 @@
 		 * @param {string} selector
 		 * @return {HTMLElement|Element|Node}
 		 */
-		Element.prototype.closest = function(selector) {
-			var node = this;
+		Object.defineProperty(Element.prototype, 'closest', {
+			enumerable: false,
+			value: function(selector) {
+				var node = this;
 
-			while (node)
-			{
-				if (node.matches(selector))
+				while (node)
 				{
-					return node;
+					if (node.matches(selector))
+					{
+						return node;
+					}
+
+					node = node.parentElement;
 				}
 
-				node = node.parentElement;
-			}
-
-			return null;
-		};
+				return null;
+			},
+		});
 	}
 })();

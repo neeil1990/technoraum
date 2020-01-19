@@ -33,6 +33,7 @@
 		this.isChanged = false;
 		this.isDisabled = BX.prop.getBoolean(options, "isDisabled", false);
 		this.enableCreation = BX.prop.getBoolean(options, "enableCreation", false);
+		this.enableCreationOnBlur = BX.prop.getBoolean(options, "enableCreationOnBlur", true);
 
 		this.documentClickHandler = BX.delegate(this.onDocumentClick, this);
 
@@ -49,29 +50,32 @@
 			this.init();
 		}
 	};
-
 	BX.UI.Dropdown.prototype =
 		{
 			init: function ()
 			{
-				BX.bind(this.targetElement, "input", function()
-				{
-                    if (this.isDisabled)
-                    {
-                        return;
-                    }
-
-					if (this.targetElement.value.length === 0)
+				setTimeout(function() {
+					BX.bind(this.targetElement, "input", function()
 					{
-						this.enableTargetElement();
-						return;
-					}
+						if (this.isDisabled)
+						{
+							return;
+						}
 
-					this.getPopupWindow().show();
+						if (this.targetElement.value.length === 0)
+						{
+							this.enableTargetElement();
+							return;
+						}
 
-				}.bind(this));
-				this.targetElement.addEventListener("click", function()
+						this.getPopupWindow().show();
+
+					}.bind(this));
+				}.bind(this), 100);
+				this.targetElement.addEventListener("click", function(e)
 				{
+					this.destroyPopupWindow();
+
                     if (this.isDisabled)
                     {
                         return;
@@ -89,33 +93,34 @@
 
 					if(this.popupWindow)
 					{
-						BX.PreventDefault();
+						BX.PreventDefault(e);
 					}
 
 					this.getPopupWindow().show();
 				}.bind(this), true);
 
-				this.targetElement.addEventListener("focus", function()
-				{
-                    if (this.isDisabled)
-                    {
-                        return;
-                    }
-
-					this.getPopupWindow().show();
-
-					if(!this.popupAlertContainer)
+				setTimeout(function() {
+					this.targetElement.addEventListener("focus", function()
 					{
-						return;
-					}
-				}.bind(this), true);
+						if (this.isDisabled)
+						{
+							return;
+						}
+
+						this.getPopupWindow().show();
+
+						if(!this.popupAlertContainer)
+						{
+							return;
+						}
+					}.bind(this), true);
+				}.bind(this), 100);
 
 				BX.bind(
 					this.targetElement,
 					"keyup",
 					BX.throttle(
 						function(e) {
-
                             if (this.isDisabled)
                             {
                                 return;
@@ -138,7 +143,7 @@
 									this.getPopupWindow().show();
 								}
 								else {
-									BX.PreventDefault();
+									BX.PreventDefault(e);
 								}
 							}
 						}.bind(this),
@@ -272,7 +277,19 @@
 					|| (!this.CurrentItem && this.targetElement.value.length > 0)
 				)
 				{
-					this.onEmptyValueEvent();
+					if(!this.enableCreationOnBlur)
+					{
+						this.resetInputValue();
+						this.setItems(this.getDefaultItems());
+						BX.cleanNode(this.popupAlertContainer);
+						this.newAlertContainer = null;
+						
+						return;
+					}
+					else
+					{
+						this.onEmptyValueEvent();
+					}
 				}
 			},
 			getDefaultItems: function()
@@ -291,11 +308,6 @@
 			{
 				this.setDefaultItems(items);
 				this.setItems(items);
-				for (var i = 0; i < items.length; i++)
-				{
-					items[i].searchField = items[i].title + items[i].subtitle + items[i].phone + items[i].email;
-					items[i].searchField = items[i].searchField.toLowerCase();
-				}
 			},
 			setItems: function(items)
 			{
@@ -322,7 +334,7 @@
 					this.setItems(this.getDefaultItems());
 					loader.classList.remove('ui-dropdown-loader-active');
 					BX.cleanNode(this.popupAlertContainer);
-					this.alertEmptyContainer = null;
+					this.newAlertContainer = null;
 
 					BX.onCustomEvent(this, "BX.UI.Dropdown:onReset", [this]);
 				}
@@ -332,14 +344,9 @@
 					this.searchItemsByStr(this.targetElement.value).then(
 						function (items)
 						{
-                            if (this.isDisabled)
-                            {
-                                return;
-                            }
-
-							if(!this.alertEmptyContainer)
+							if(!this.newAlertContainer && this.enableCreation)
 							{
-								this.popupAlertContainer.appendChild(this.getAlertEmptyContainer(items));
+								this.popupAlertContainer.appendChild(this.getNewAlertContainer(items));
 								BX.bind(document, "click", this.documentClickHandler);
 							}
 							this.setItems(items);
@@ -355,12 +362,12 @@
 			{
 				return BX.ajax.runAction(
 					this.searchAction,
-					{ data: { search: target, options: this.searchOptions } }
+					{ data: { searchQuery: target, options: this.searchOptions } }
 				).then(this.onSearchRequestSuccess.bind(this));
 			},
 			onSearchRequestSuccess: function(results)
 			{
-				return BX.prop.getArray(results, "data", []);
+				return BX.prop.getArray(BX.prop.getObject(results, "data", {}), "items", []);
 			},
 			getFooterItems: function()
 			{
@@ -390,7 +397,7 @@
 								this.popupWindow = null;
 								this.itemListContainer = null;
 								this.itemListInnerContainer = null;
-								this.alertEmptyContainer = null;
+								this.newAlertContainer = null;
 								this.popupAlertContainer = null;
 							}.bind(this)
 						}
@@ -421,7 +428,7 @@
 
 							this.setItems(this.getDefaultItems());
 							BX.cleanNode(this.popupAlertContainer);
-							this.alertEmptyContainer = null;
+							this.newAlertContainer = null;
 						}
 						else
 						{
@@ -465,7 +472,6 @@
 			},
 			getPopupAlertContainer: function()
 			{
-
 				if(!this.popupAlertContainer)
 				{
 					this.popupAlertContainer = BX.create("div", {
@@ -475,24 +481,24 @@
 
 				return this.popupAlertContainer;
 			},
-			getAlertEmptyContainer: function(items)
+			getNewAlertContainer: function(items)
 			{
-				if(!this.alertEmptyContainer)
+				if(!this.newAlertContainer)
 				{
-					this.alertEmptyContainer = BX.create('div', {
+					this.newAlertContainer = BX.create('div', {
 						props: {
-							className: 'ui-dropdown-alert-new'
+							className: 'ui-dropdown-alert'
 						},
 						events: {
 							click: this.onEmptyValueEvent.bind(this)
 						},
 						children: [
-							this.alertEmptyContainerValue = BX.create('div', {
-								attrs: { className: 'ui-dropdown-alert-new-name' },
+							this.alertContainerValue = BX.create('div', {
+								attrs: { className: 'ui-dropdown-alert-name' },
 								text: this.targetElement.value
 							}),
 							BX.create('div', {
-								attrs: { className: 'ui-dropdown-alert-new-text' },
+								attrs: { className: 'ui-dropdown-alert-text' },
 								text: BX.prop.getString(this.messages, this.enableCreation ? "creationLegend" : "notFound", "")
 							})
 						]
@@ -500,28 +506,28 @@
 
 					this.targetElement.addEventListener("input", function()
 					{
-						this.alertEmptyContainerValue.innerHTML = this.targetElement.value;
+						this.alertContainerValue.textContent = this.targetElement.value;
 					}.bind(this));
 
 					if(!this.enableCreation)
 					{
 						this.targetElement.addEventListener("input", function()
 						{
-							this.alertEmptyContainerValue.style.display = "none";
+							this.alertContainerValue.style.display = "none";
 						}.bind(this));
 					}
 				}
 
 				if(items.length > 0 && !this.enableCreation)
 				{
-					this.alertEmptyContainer.style.display = "none";
+					this.newAlertContainer.style.display = "none";
 				}
 				else
 				{
-					this.alertEmptyContainer.style.display = "";
+					this.newAlertContainer.style.display = "";
 				}
 
-				return this.alertEmptyContainer;
+				return this.newAlertContainer;
 			},
 			getItemsListContainer: function()
 			{
@@ -553,16 +559,13 @@
 
 				this.getItems().forEach(function(item)
 				{
-					var email;
-					var phone;
+					var attrs = BX.prop.getObject(item, "attributes", {});
 
-					if(Array.isArray(item.email)) {
-						email = item.email[0].value;
-					}
+					var phones = BX.prop.getArray(attrs, "phone", []);
+					var emails = BX.prop.getArray(attrs, "email", []);
 
-					if(Array.isArray(item.phone)) {
-						phone = item.phone[0].value;
-					}
+					var phone = phones.length > 0 ? phones[0].value : "";
+					var email = emails.length > 0 ? emails[0].value : "";
 
 					item.node = BX.create('div', {
 						attrs: {
@@ -580,24 +583,24 @@
 								attrs: {
 									className: 'ui-dropdown-item-subname'
 								},
-								text: item.subtitle
+								text: item.subTitle || ''
 							}),
 							BX.create('div', {
 								attrs: {
 									className: 'ui-dropdown-contact-info'
 								},
 								children: [
-									item.phone ? BX.create('div', {
+									phone !== "" ? BX.create('div', {
 										attrs: {
 											className: 'ui-dropdown-contact-info-item ui-dropdown-item-phone'
 										},
-										text: phone ? phone : item.phone
+										text: phone
 									}) : null,
-									item.email ? BX.create('div', {
+									email !== "" ? BX.create('div', {
 										attrs: {
 											className: 'ui-dropdown-contact-info-item ui-dropdown-item-email'
 										},
-										text: email ? email : item.email
+										text: email
 									}) : null
 								]
 							})
@@ -683,7 +686,7 @@
 			},
 			handleUpArrow: function()
 			{
-				if(this.alertEmptyContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+				if(this.newAlertContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 				{
 					if (this.items && this.items.length > 0)
 					{
@@ -723,14 +726,14 @@
 			{
 				var highlightElementIndex = this.getHighlightItemIndex();
 
-				if(this.alertEmptyContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+				if(this.newAlertContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 				{
 					return;
 				}
 
 				if (!this.items || this.items.length === 0)
 				{
-					if(this.alertEmptyContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+					if(this.newAlertContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 					{
 						this.popupAlertContainer.classList.add('ui-dropdown-item-highlight');
 					}
@@ -740,7 +743,7 @@
 
 				if(highlightElementIndex === this.items.length - 1)
 				{
-					if(this.alertEmptyContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+					if(this.newAlertContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 					{
 						this.cleanHighlightingItem();
 						this.popupAlertContainer.classList.add('ui-dropdown-item-highlight');
@@ -810,7 +813,6 @@
 				}
 				return result;
 			},
-
 			getItemIndex: function(item)
 			{
 				var items = this.getItems();
@@ -842,6 +844,7 @@
 
 				return items[items.length - 1];
 			},
+
 			getItemByIndex: function(index)
 			{
 				var items = this.getItems();
@@ -850,21 +853,6 @@
 					return items[index];
 				}
 				return null;
-			},
-			setNewItemsForTest: function()
-			{
-				var newItems = [
-					{ title: "Pasha", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" },
-					{ title: "Lesha", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" },
-					{ title: "Kolya", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" },
-					{ title: "UserName", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" },
-					{ title: "UserName", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" },
-					{ title: "UserName", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" },
-					{ title: "UserName", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" },
-					{ title: "UserName", subtitle: "developer", phone: "+7 965 954-64-24,", email: "rosros@mail.ru" }
-				];
-				this.updateItemsList(newItems);
-				return this.getItems();
 			},
 
 			handleItemClick: function(item, event)
@@ -911,7 +899,7 @@
 						}
 						else
 						{
-							BX.PreventDefault();
+							BX.PreventDefault(e);
 						}
 					}
 
@@ -980,6 +968,3 @@
 		};
 
 })();
-
-// var cl = BX.getClass("BX.Crm.ClientEditorEntityPanel");
-// var obj = new cl({});

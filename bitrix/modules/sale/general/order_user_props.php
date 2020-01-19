@@ -81,7 +81,7 @@ class CAllSaleOrderUserProps
 				$arIDs[$arUserPropsValue["ORDER_PROPS_ID"]] = $arUserPropsValue["ID"];
 		}
 
-		if (!is_array($orderProps))
+		if (!is_array($orderProps) && (int)$orderProps > 0)
 		{
 			$dbOrderPropsValues = CSaleOrderPropsValue::GetList(
 				array(),
@@ -94,17 +94,14 @@ class CAllSaleOrderUserProps
 			while ($arOrderPropsValue = $dbOrderPropsValues->Fetch())
 				$orderProps[$arOrderPropsValue["ORDER_PROPS_ID"]] = $arOrderPropsValue["VALUE"];
 		}
-		/*
-		TRANSLATION_CUT_OFF
-		else
+
+		if (empty($orderProps))
 		{
-			// map location ID to CODE, if taken from parameters
-			static::TranslateLocationPropertyValues($personTypeId, $orderProps);
+			/**
+			 * Returned profile ID instead of error for compatibility
+			 */
+			return $profileId;
 		}
-		*/
-
-		$utilPropertyList = array();
-
 
 		$dbOrderProperties = CSaleOrderProps::GetList(
 			array(),
@@ -115,22 +112,28 @@ class CAllSaleOrderUserProps
 		);
 		while ($arOrderProperty = $dbOrderProperties->Fetch())
 		{
-			if ($arOrderProperty['UTIL'] == "Y")
+			if (isset($orderProps[$arOrderProperty["ID"]]))
 			{
-				$utilPropertyList[] = $arIDs[$arOrderProperty["ID"]];
+				$curVal = $orderProps[$arOrderProperty["ID"]];
 			}
 
-			$curVal = $orderProps[$arOrderProperty["ID"]];
 			if (($arOrderProperty["TYPE"] == "MULTISELECT") && is_array($curVal))
+			{
 				$curVal = implode(",", $curVal);
+			}
 
 			if (($arOrderProperty["TYPE"] == "FILE") && is_array($curVal))
 			{
 				$fileList = array();
+
 				foreach ($curVal as $fileDat)
 				{
-					$fileList[] = $fileDat['ID'];
+					if (!empty($fileDat['ID']))
+					{
+						$fileList[] = $fileDat['ID'];
+					}
 				}
+
 				$curVal = serialize($fileList);
 			}
 
@@ -139,7 +142,7 @@ class CAllSaleOrderUserProps
 				$curVal = serialize($curVal);
 			}
 
-			if (strlen($curVal) > 0)
+			if (isset($curVal))
 			{
 				if ($profileId <= 0)
 				{
@@ -174,14 +177,7 @@ class CAllSaleOrderUserProps
 					CSaleOrderUserPropsValue::Add($arFields);
 				}
 			}
-		}
-
-		foreach ($arIDs as $id)
-		{
-			if (!empty($utilPropertyList) && in_array($id, $utilPropertyList))
-				continue;
-
-			CSaleOrderUserPropsValue::Delete($id);
+			unset($curVal);
 		}
 
 		return $profileId;

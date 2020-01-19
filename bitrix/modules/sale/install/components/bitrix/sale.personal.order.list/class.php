@@ -13,7 +13,6 @@ use Bitrix\Main,
 	Bitrix\Main\Loader,
 	Bitrix\Main\Data,
 	Bitrix\Sale,
-	Bitrix\Sale\OrderStatus,
 	Bitrix\Sale\Cashbox\CheckManager;
 
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
@@ -185,17 +184,17 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 	{
 		global $APPLICATION;
 
-		$this->tryParseInt($arParams["CACHE_TIME"], 3600, true);
+		self::tryParseInt($arParams["CACHE_TIME"], 3600, true);
 
 		$arParams['CACHE_GROUPS'] = trim($arParams['CACHE_GROUPS']);
 		if ('N' != $arParams['CACHE_GROUPS'])
 			$arParams['CACHE_GROUPS'] = 'Y';
 
-		$this->tryParseString($arParams["PATH_TO_DETAIL"], $APPLICATION->GetCurPage()."?"."ID=#ID#");
-		$this->tryParseString($arParams["PATH_TO_COPY"], $APPLICATION->GetCurPage()."?"."ID=#ID#");
-		$this->tryParseString($arParams["PATH_TO_CANCEL"], $APPLICATION->GetCurPage()."?"."ID=#ID#");
-		$this->tryParseString($arParams["PATH_TO_BASKET"], "basket.php");
-		$this->tryParseString($arParams["PATH_TO_PAYMENT"], "/personal/order/payment/");
+		self::tryParseString($arParams["PATH_TO_DETAIL"], $APPLICATION->GetCurPage()."?"."ID=#ID#");
+		self::tryParseString($arParams["PATH_TO_COPY"], $APPLICATION->GetCurPage()."?"."ID=#ID#");
+		self::tryParseString($arParams["PATH_TO_CANCEL"], $APPLICATION->GetCurPage()."?"."ID=#ID#");
+		self::tryParseString($arParams["PATH_TO_BASKET"], "basket.php");
+		self::tryParseString($arParams["PATH_TO_PAYMENT"], "/personal/order/payment/");
 
 		if ($arParams["SAVE_IN_SESSION"] != "N")
 			$arParams["SAVE_IN_SESSION"] = "Y";
@@ -205,10 +204,10 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 
 		$arParams["NAV_TEMPLATE"] = (strlen($arParams["NAV_TEMPLATE"]) ? $arParams["NAV_TEMPLATE"] : "");
 
-		$this->tryParseInt($arParams["ORDERS_PER_PAGE"], 20);
-		$this->tryParseString($arParams["ACTIVE_DATE_FORMAT"], "d.m.Y");
+		self::tryParseInt($arParams["ORDERS_PER_PAGE"], 20);
+		self::tryParseString($arParams["ACTIVE_DATE_FORMAT"], "d.m.Y");
 
-		$this->tryParseBoolean($arParams['AUTH_FORM_IN_TEMPLATE']);
+		self::tryParseBoolean($arParams['AUTH_FORM_IN_TEMPLATE']);
 
 		if (empty($arParams['REFRESH_PRICES']))
 		{
@@ -298,7 +297,7 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 	 */
 	protected function getOptions()
 	{
-		$this->options['USE_ACCOUNT_NUMBER'] = \Bitrix\Sale\Integration\Numerator\NumeratorOrder::isUsedNumeratorForOrder();
+		$this->options['USE_ACCOUNT_NUMBER'] = Sale\Integration\Numerator\NumeratorOrder::isUsedNumeratorForOrder();
 	}
 
 	/**
@@ -516,18 +515,20 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 			'order' => array("ID"=>"DESC")
 		);
 
+		/** @var Sale\Order $orderClass */
+		$orderClass = $this->registry->getOrderClassName();
 
 		if ($this->options['USE_ACCOUNT_NUMBER'])
 		{
 			$filter['filter']['ACCOUNT_NUMBER'] = $id;
-			$orderList = Sale\Order::getList($filter);
+			$orderList = $orderClass::getList($filter);
 			$orderResult = $orderList->fetch();
 		}
 
 		if (!$orderResult)
 		{
 			$filter['filter']['ID'] = $id;
-			$orderList = Sale\Order::getList($filter);
+			$orderList = $orderClass::getList($filter);
 			$orderResult = $orderList->fetch();
 		}
 
@@ -571,7 +572,10 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 			'order' => array("SORT" => "ASC")
 		);
 
-		$basketList = Sale\Basket::getList($filter);
+		/** @var Sale\Basket $basketClass */
+		$basketClass = $this->registry->getBasketClassName();
+
+		$basketList = $basketClass::getList($filter);
 
 		while ($basket = $basketList->fetch())
 		{
@@ -591,7 +595,7 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 	 */
 	protected function doAfterOrderCopyed()
 	{
-		LocalRedirect($this->arParams["PATH_TO_BASKET"]);
+		LocalRedirect($this->arParams["PATH_TO_BASKET"], true);
 	}
 
 	/**
@@ -726,7 +730,7 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 				}
 
 				$cachedData['DELIVERY'] = array();
-				$dbDelivery = \Bitrix\Sale\Delivery\Services\Table::getList();
+				$dbDelivery = Sale\Delivery\Services\Table::getList();
 
 				$deliveryService = array();
 				while ($delivery = $dbDelivery->fetch())
@@ -858,7 +862,7 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 		if ($this->sortBy == 'STATUS')
 		{
 			$getListParams['runtime'] = array(
-				new \Bitrix\Main\Entity\ReferenceField(
+				new Main\Entity\ReferenceField(
 					'STATUS',
 					'\Bitrix\Sale\Internals\StatusTable',
 					array(
@@ -876,38 +880,34 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 			$getListParams['order'] = array($this->sortBy => $this->sortOrder);
 		}
 
-		if (class_exists('LandingPubComponent') && method_exists('LandingPubComponent', 'getMainInstance'))
+		if (isset($this->arParams['CONTEXT_SITE_ID']) && $this->arParams['CONTEXT_SITE_ID'] > 0)
 		{
-			$currentLandingInstance = \LandingPubComponent::getMainInstance();
-			if ((int)($currentLandingInstance['SITE_ID']) > 0)
+			$code = \Bitrix\Sale\TradingPlatform\Landing\Landing::getCodeBySiteId($this->arParams['CONTEXT_SITE_ID']);
+			$platformId = \Bitrix\Sale\TradingPlatform\Landing\Landing::getInstanceByCode($code)->getId();
+			if ((int)$platformId > 0)
 			{
-				$code = \Bitrix\Sale\TradingPlatform\Landing\Landing::getCodeBySiteId((int)$currentLandingInstance['SITE_ID']);
-				$platformId = \Bitrix\Sale\TradingPlatform\Landing\Landing::getInstanceByCode($code)->getId();
-				if ((int)$platformId > 0)
-				{
-					$getListParams['runtime'][] = new \Bitrix\Main\Entity\ReferenceField(
-						'TRADING_BINDING',
-						'\Bitrix\Sale\TradingPlatform\OrderTable',
-						array(
-							'=this.ID' => 'ref.ORDER_ID',
-							'=ref.TRADING_PLATFORM_ID' => new \Bitrix\Main\DB\SqlExpression('?i', $platformId)
-						),
-						array(
-							"join_type" => 'inner'
-						)
-					);
-					$getListParams['runtime'][] = new \Bitrix\Main\Entity\ReferenceField(
-						'TRADING',
-						'\Bitrix\Sale\TradingPlatformTable',
-						array(
-							'=this.TRADING_BINDING.TRADING_PLATFORM_ID' => 'ref.ID',
-							'=ref.CLASS' => new \Bitrix\Main\DB\SqlExpression('?', "\\".\Bitrix\Sale\TradingPlatform\Landing\Landing::class)
-						),
-						array(
-							"join_type" => 'inner'
-						)
-					);
-				}
+				$getListParams['runtime'][] = new Main\ORM\Fields\Relations\Reference(
+					'TRADING_BINDING',
+					'\Bitrix\Sale\TradingPlatform\OrderTable',
+					array(
+						'=this.ID' => 'ref.ORDER_ID',
+						'=ref.TRADING_PLATFORM_ID' => new Main\DB\SqlExpression('?i', $platformId)
+					),
+					array(
+						"join_type" => 'inner'
+					)
+				);
+				$getListParams['runtime'][] = new Main\ORM\Fields\Relations\Reference(
+					'TRADING',
+					'\Bitrix\Sale\TradingPlatformTable',
+					array(
+						'=this.TRADING_BINDING.TRADING_PLATFORM_ID' => 'ref.ID',
+						'=ref.CLASS' => new Main\DB\SqlExpression('?', "\\".Sale\TradingPlatform\Landing\Landing::class)
+					),
+					array(
+						"join_type" => 'inner'
+					)
+				);
 			}
 		}
 
@@ -937,14 +937,18 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 			$getListParams['limit'] = $navyParams['SIZEN'];
 			$getListParams['offset'] = $navyParams['SIZEN']*($navyParams['PAGEN']-1);
 
+			$countParams = [
+				"filter"=>$getListParams['filter'],
+				"select"=> [new Main\ORM\Fields\ExpressionField('CNT', 'COUNT(1)')]
+			];
+
+			if (!empty($getListParams['runtime']))
+			{
+				$countParams["runtime"] = $getListParams['runtime'];
+			}
+
 			/** @var Main\DB\Result $countQuery */
-			$countQuery = $orderClassName::getList(
-				array(
-					"filter"=>$getListParams['filter'],
-					"runtime"=>$getListParams['runtime'],
-					"select"=>array(new \Bitrix\Main\Entity\ExpressionField('CNT', 'COUNT(1)'))
-				)
-			);
+			$countQuery = $orderClassName::getList($countParams);
 
 			$totalCount = $countQuery->fetch();
 			$totalCount = (int)$totalCount['CNT'];
@@ -1071,10 +1075,12 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 		
 		while ($payment = $listPayments->fetch())
 		{
+			$paySystemFields = $this->dbResult['PAYSYS'][$payment['PAY_SYSTEM_ID']];
 			$payment['PAY_SYSTEM_NAME'] = htmlspecialcharsbx($payment['PAY_SYSTEM_NAME']);
 			$payment["FORMATED_SUM"] = SaleFormatCurrency($payment["SUM"], $payment["CURRENCY"]);
-			$payment['IS_CASH'] = $this->dbResult['PAYSYS'][$payment['PAY_SYSTEM_ID']]['IS_CASH'];
-			$payment['NEW_WINDOW'] = $this->dbResult['PAYSYS'][$payment['PAY_SYSTEM_ID']]['NEW_WINDOW'];
+			$payment['IS_CASH'] = $paySystemFields['IS_CASH'];
+			$payment['NEW_WINDOW'] = $paySystemFields['NEW_WINDOW'];
+			$payment['ACTION_FILE'] = $paySystemFields['ACTION_FILE'];
 			$payment["PSA_ACTION_FILE"] =  htmlspecialcharsbx($this->arParams["PATH_TO_PAYMENT"]).'?ORDER_ID='.urlencode(urlencode($listOrders[$payment["ORDER_ID"]]['ACCOUNT_NUMBER'])).'&PAYMENT_ID='.$payment['ACCOUNT_NUMBER'];
 			$paymentList[$payment['ID']] = $payment;
 			$paymentIdList[] = $payment['ID'];
@@ -1293,7 +1299,7 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 	 */
 	protected function setRegistry()
 	{
-		$this->registry = Sale\Registry::getInstance(Sale\Order::getRegistryType());
+		$this->registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
 	}
 
 	/**
@@ -1391,7 +1397,7 @@ class CBitrixPersonalOrderListComponent extends CBitrixComponent
 	/**
 	 * Function return data stored in cache
 	 * @throws Main\SystemException
-	 * @return void|mixed[] Data from cache
+	 * @return bool|mixed[] Data from cache
 	 */
 	final protected function getCacheData()
 	{

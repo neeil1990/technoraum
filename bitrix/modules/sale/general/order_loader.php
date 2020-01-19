@@ -635,9 +635,13 @@ class CSaleOrderLoader
 				CSaleOrderChange::AddRecord($orderId, "ORDER_1C_IMPORT");
 				if($arOrder["XML_1C_DOCUMENT_ID"] != $orderInfo["ID_1C"])
 					$arOrderFields["ID_1C"] = $arOrder["XML_1C_DOCUMENT_ID"];
-				//$arOrderFields["VERSION_1C"] = $arOrder["VERSION_1C"];
 
-				$order = \Bitrix\Sale\Order::load($orderId);
+				$registry = \Bitrix\Sale\Registry::getInstance(\Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER);
+
+				/** @var \Bitrix\Sale\Order $orderClass */
+				$orderClass = $registry->getOrderClassName();
+
+				$order = $orderClass::load($orderId);
 
 				if(
 						($orderInfo["PAYED"] != "Y" || is_set($this->getPaymentCompatible1CByOrder($order)))
@@ -2106,6 +2110,11 @@ class CSaleOrderLoader
 					{
 						$this->logMessage("OperationType: ".$arDocument['OPERATION_TYPE']);
 
+						$registry = \Bitrix\Sale\Registry::getInstance(\Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER);
+
+						/** @var \Bitrix\Sale\Order $orderClass */
+						$orderClass = $registry->getOrderClassName();
+
 						switch($arDocument['OPERATION_TYPE'])
 						{
 							case 'order_operation':
@@ -2127,7 +2136,7 @@ class CSaleOrderLoader
 										$this->updateOrderWithoutShipmentsPayments($arDocument);
 										if(strlen($this->strErrorDocument)<=0)
 										{
-											$order = \Bitrix\Sale\Order::load($arDocument["ID"]);
+											$order = $orderClass::load($arDocument["ID"]);
 
 											$this->updateEntityCompatible1C($order, $arDocument);
 
@@ -2147,7 +2156,7 @@ class CSaleOrderLoader
 
 										if(intval($arOrder['ID'])>0)
 										{
-											$order = \Bitrix\Sale\Order::load($arOrder["ID"]);
+											$order = $orderClass::load($arOrder["ID"]);
 											if(strlen($this->strErrorDocument)<=0)
 											{
 												$this->createEntityCompatible1C($order, $arDocument);
@@ -2191,7 +2200,7 @@ class CSaleOrderLoader
 
 									if($arDocument['ORDER_ID'] !== false)
 									{
-										if($order = \Bitrix\Sale\Order::load($arDocument['ORDER_ID']))
+										if($order = $orderClass::load($arDocument['ORDER_ID']))
 										{
 											if (!$order->isCanceled())
 											{
@@ -2306,7 +2315,7 @@ class CSaleOrderLoader
 									if($arDocument['ORDER_ID'] !== false)
 									{
 										/** @var Bitrix\Sale\Order $order */
-										if($order = \Bitrix\Sale\Order::load($arDocument['ORDER_ID']))
+										if($order = $orderClass::load($arDocument['ORDER_ID']))
 										{
 											if ($order->getField("STATUS_ID") != "F")
 											{
@@ -2394,7 +2403,7 @@ class CSaleOrderLoader
 											$arOrder = $this->addOrderWithoutShipmentsPayments($arDocument);
 											if($arOrder['ID']>0)
 											{
-												$order = \Bitrix\Sale\Order::load($arOrder['ID']);
+												$order = $orderClass::load($arOrder['ID']);
 												$shipment = $this->addShipmentFromDocumentByOrder($arDocument, $order);
 
 												if(strlen($this->strErrorDocument)<=0)
@@ -3671,7 +3680,7 @@ class CSaleOrderLoader
 						$arAditFields["DELIVERY_DOC_DATE"] = $arAditFields["DATE_ALLOW_DELIVERY"];
 
 						if(strlen($this->arParams["FINAL_STATUS_ON_DELIVERY"])>0 && $orderInfo["STATUS_ID"] != "F" && $orderInfo["STATUS_ID"] != $this->arParams["FINAL_STATUS_ON_DELIVERY"])
-							$parentEntity::StatusOrder($orderInfo["ID"], $this->arParams["FINAL_STATUS_ON_DELIVERY"]);
+							static::setStatus($orderInfo["ID"], $this->arParams["FINAL_STATUS_ON_DELIVERY"], $isInvoice);
 						if(strlen($arOrder["TRAITS"][GetMessage("CC_BSC1_1C_DELIVERY_NUM")])>0)
 							$arAditFields["DELIVERY_DOC_NUM"] = $arOrder["TRAITS"][GetMessage("CC_BSC1_1C_DELIVERY_NUM")];
 						$arAditFields["UPDATED_1C"] = "Y";
@@ -3683,7 +3692,7 @@ class CSaleOrderLoader
 				{
 					if($orderInfo["STATUS_ID"] != $arOrder["TRAITS"][GetMessage("CC_BSC1_1C_STATUS_ID")])
 					{
-						$parentEntity::StatusOrder($orderInfo["ID"], $arOrder["TRAITS"][GetMessage("CC_BSC1_1C_STATUS_ID")]);
+						static::setStatus($orderInfo["ID"], $arOrder["TRAITS"][GetMessage("CC_BSC1_1C_STATUS_ID")], $isInvoice);
 						$arAditFields["UPDATED_1C"] = "Y";
 					}
 				}
@@ -3969,6 +3978,20 @@ class CSaleOrderLoader
 			{
 				$this->strError .= "\n".GetMessage("CC_BSC1_ORDER_NO_AGENT_ID", Array("#ID#" => $arOrder["ID_1C"]));
 			}
+		}
+	}
+
+	static public function setStatus($id, $statusId, $isInvoice)
+	{
+		if($isInvoice)
+		{
+			$invoice = new \CCrmInvoice(false);
+			$invoice->SetStatus($id, $statusId);
+		}
+		else
+		{
+			$order = new CSaleOrder();
+			$order->StatusOrder($id, $statusId);
 		}
 	}
 }

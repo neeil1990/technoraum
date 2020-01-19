@@ -35,7 +35,7 @@ abstract class BaseObject
 	{
 		global $USER;
 		$this->errorCollection = new ErrorCollection();
-		$this->setUser($userId ?: $USER->getId());
+		$this->setUser($userId > 0 ? $userId : ($USER instanceof \CUser ? $USER->getId() : 0));
 		$this->setForum($forumId);
 		$this->setEntity($entity);
 		$this->setTopic();

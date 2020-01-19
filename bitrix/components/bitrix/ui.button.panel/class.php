@@ -40,6 +40,8 @@ class UiButtonPanel extends CBitrixComponent
 			$this->arParams['~BUTTONS'] = [];
 		}
 
+		$this->arParams['ID'] = isset($this->arParams['ID']) ? $this->arParams['ID'] : 'ui-button-panel';
+
 		$aligns = [self::ALIGN_AUTO, self::ALIGN_LEFT, self::ALIGN_RIGHT, self::ALIGN_CENTER];
 		$this->arParams['ALIGN'] = (isset($this->arParams['ALIGN']) && in_array($this->arParams['ALIGN'], $aligns))
 			?

@@ -21,6 +21,24 @@ $tableId = "b_sale_order_payment";
 $curPage = Application::getInstance()->getContext()->getCurrent()->getRequest()->getRequestUri();
 $lang    = Application::getInstance()->getContext()->getLanguage();
 
+$arUserGroups = $USER->GetUserGroupArray();
+
+$arAccessibleSites = array();
+$dbAccessibleSites = CSaleGroupAccessToSite::GetList(
+	array(),
+	array("GROUP_ID" => $arUserGroups),
+	false,
+	false,
+	array("SITE_ID")
+);
+while ($arAccessibleSite = $dbAccessibleSites->Fetch())
+{
+	if (!in_array($arAccessibleSite["SITE_ID"], $arAccessibleSites))
+	{
+		$arAccessibleSites[] = $arAccessibleSite["SITE_ID"];
+	}
+}
+
 $sAdmin = new CAdminSorting($tableId, "ORDER_ID", "DESC");
 $lAdmin = new CAdminList($tableId, $sAdmin);
 
@@ -60,8 +78,17 @@ if ($filter_order_id_from > 0 && $filter_order_id_to > 0)
 	$arFilter['><ORDER_ID'] = array($filter_order_id_from, $filter_order_id_to);
 if (strlen($filter_order_paid) > 0 && $filter_order_paid != 'NOT_REF')
 	$arFilter['PAID'] = $filter_order_paid;
-if (strlen($filter_site_id) > 0 && $filter_site_id != 'NOT_REF')
+if (strlen($filter_site_id) > 0
+	&& $filter_site_id != 'NOT_REF'
+	&& ($saleModulePermissions >= "W" || in_array($filter_site_id, $arAccessibleSites))
+)
+{
 	$arFilter['ORDER.LID'] = $filter_site_id;
+}
+elseif ($saleModulePermissions < "W")
+{
+	$arFilter['ORDER.LID'] = $arAccessibleSites;
+}
 if (is_array($filter_pay_system_id) && count($filter_pay_system_id) > 0 && $filter_pay_system_id[0] != 'NOT_REF')
 	$arFilter['PAY_SYSTEM_ID'] = $filter_pay_system_id;
 if (strlen($filter_company_id) > 0 && $filter_company_id != 'NOT_REF')
@@ -158,8 +185,13 @@ if (($ids = $lAdmin->GroupAction()) && !$bReadOnly)
 		if ($item['ID'] <= 0 || $item['ORDER_ID'] <= 0)
 			continue;
 
+		$registry = \Bitrix\Sale\Registry::getInstance(\Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER);
+
+		/** @var Order $orderClass */
+		$orderClass = $registry->getOrderClassName();
+
 		/** @var \Bitrix\Sale\Order $currentOrder */
-		$currentOrder = Order::load($item['ORDER_ID']);
+		$currentOrder = $orderClass::load($item['ORDER_ID']);
 
 		/** @var \Bitrix\Sale\PaymentCollection $paymentCollection */
 		$paymentCollection = $currentOrder->getPaymentCollection();
@@ -565,7 +597,12 @@ $oFilter->Begin();
 	$res = CSite::GetList($bySite="sort", $orderSite="asc");
 	$siteInfo = array();
 	while ($site = $res->Fetch())
-		$siteInfo[$site['ID']] = $site['SITE_NAME'];
+	{
+		if ($saleModulePermissions >= "W" || in_array($site['ID'], $arAccessibleSites))
+		{
+			$siteInfo[$site['ID']] = $site['SITE_NAME'];
+		}
+	}
 ?>
 <tr>
 	<td><?=GetMessage("PAYMENT_SITE_ID");?>:</td>
@@ -606,7 +643,7 @@ $oFilter->Begin();
 				$dbRestRes = \Bitrix\Sale\Services\PaySystem\Restrictions\Manager::getList(array(
 					'select' => array('PARAMS'),
 					'filter' => array(
-						'=CLASS_NAME' => '\Bitrix\Sale\Services\PaySystem\Restrictions\PersonType',
+						'=CLASS_NAME' => '\\'.\Bitrix\Sale\Services\PaySystem\Restrictions\PersonType::class,
 						'SERVICE_ID' => $paySystem['ID']
 					)
 				));

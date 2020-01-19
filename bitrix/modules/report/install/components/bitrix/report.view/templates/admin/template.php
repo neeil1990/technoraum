@@ -11,6 +11,8 @@ if (!empty($arResult['ERROR']))
 // calendar
 CJSCore::Init(array('date','access'));
 
+$isPeriodHidden = isset($arResult['settings']['period']['hidden']) && $arResult['settings']['period']['hidden'] === 'Y';
+
 $arPeriodTypes = array(
 	"month" => GetMessage("TASKS_THIS_MONTH"),
 	"month_ago" => GetMessage("TASKS_PREVIOUS_MONTH"),
@@ -36,7 +38,11 @@ $aMenu = array(
 		"LINK" => $APPLICATION->GetCurPageParam("EXCEL=Y"),
 	)
 );
-if ($arResult['MARK_DEFAULT'] > 0)
+if ($arResult['SHOW_EDIT_BUTTON'] == false)
+{
+	// do nothing
+}
+else if ($arResult['MARK_DEFAULT'] > 0)
 {
 	$aMenu[] = array(
 		"TEXT" => GetMessage("REPORT_COPY"),
@@ -90,6 +96,7 @@ $context->Show();
 	.adm-filter-box-sizing { width: auto; min-width: 300px;}
 	.adm-filter-content .adm-select-wrap { max-width: none; }
 	.adm-workarea .adm-input-wrap .adm-input { min-width: 110px; }
+	.filter-field-hidden { display: none; }
 </style>
 
 <!-- filter form -->
@@ -98,6 +105,13 @@ $context->Show();
 <input type="hidden" name="ID" value="<?=htmlspecialcharsbx($arParams['REPORT_ID'])?>" />
 <input type="hidden" name="sort_id" value="<?=htmlspecialcharsbx($arResult['sort_id'])?>" />
 <input type="hidden" name="sort_type" value="<?=htmlspecialcharsbx($arResult['sort_type'])?>" />
+<? if(isset($_REQUEST['publicSidePanel']) && $_REQUEST['publicSidePanel'] == 'Y'): ?>
+	<input type="hidden" name="publicSidePanel" value="Y" />
+<? endif ?>
+<? if(isset($_REQUEST['IFRAME']) && $_REQUEST['IFRAME'] == 'Y'): ?>
+	<input type="hidden" name="IFRAME" value="Y" />
+	<input type="hidden" name="IFRAME_TYPE" value="SIDE_SLIDER" />
+<? endif ?>
 <?
 // prepare info
 $info = array();
@@ -253,7 +267,7 @@ foreach($arResult['changeableFilters'] as $chFilter)
 						<? endif; ?>
 
 						<!-- period -->
-						<tr>
+						<tr<? echo $isPeriodHidden ? ' class="filter-field-hidden"' : ''; ?>>
 							<td class="adm-filter-item-left"><?=GetMessage('REPORT_PERIOD').':'?></td>
 							<td class="adm-filter-item-center">
 								<div class="adm-filter-alignment adm-calendar-block">

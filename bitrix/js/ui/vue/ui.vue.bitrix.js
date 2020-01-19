@@ -236,7 +236,7 @@ class BitrixVue
 	 */
 	version()
 	{
-		return Vue.version();
+		return Vue.version;
 	}
 
 	/**

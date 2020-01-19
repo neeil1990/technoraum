@@ -340,7 +340,7 @@ class SaleAccountPay extends \CBitrixComponent
 	 */
 	protected function setRegistry()
 	{
-		$this->registry = Sale\Registry::getInstance(Sale\Order::getRegistryType());
+		$this->registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
 	}
 
 	/**
@@ -395,15 +395,14 @@ class SaleAccountPay extends \CBitrixComponent
 		$basketItem = $basket->createItem('sale', $productId);
 
 		$productFields = array(
-			"PRICE" => $requestValue,
+			"BASE_PRICE" => $requestValue,
 			"CURRENCY" => $this->arParams["SELL_CURRENCY"],
 			"QUANTITY" => 1,
 			"LID" => SITE_ID,
 			"DELAY" => "N",
 			"CAN_BUY" => "Y",
 			"NAME" => str_replace("#SUM#", SaleFormatCurrency($requestValue, $this->arParams["SELL_CURRENCY"]), Loc::getMessage("SAP_BASKET_NAME", array('#NAME#' => 'NAME'))),
-			"PRODUCT_PROVIDER_CLASS" => $this->arParams["PRODUCT_PROVIDER_CLASS"],
-			"CUSTOM_PRICE" => "Y"
+			"PRODUCT_PROVIDER_CLASS" => $this->arParams["PRODUCT_PROVIDER_CLASS"]
 		);
 
 		$result = $basketItem->setFields($productFields);
@@ -457,6 +456,22 @@ class SaleAccountPay extends \CBitrixComponent
 
 		$this->initOrderShipment($order);
 
+		if (
+			isset($this->arParams['CONTEXT_SITE_ID'])
+			&& $this->arParams['CONTEXT_SITE_ID'] > 0
+			&& Loader::includeModule('landing')
+		)
+		{
+			$code = \Bitrix\Sale\TradingPlatform\Landing\Landing::getCodeBySiteId($this->arParams['CONTEXT_SITE_ID']);
+
+			$platform = \Bitrix\Sale\TradingPlatform\Landing\Landing::getInstanceByCode($code);
+			if ($platform->isInstalled())
+			{
+				$collection = $order->getTradeBindingCollection();
+				$collection->createItem($platform);
+			}
+		}
+
 		return $order;
 	}
 
@@ -484,7 +499,7 @@ class SaleAccountPay extends \CBitrixComponent
 
 			$fields = array(
 				"PRODUCT_ID" => $productId,
-				"PRICE" => $price,
+				"BASE_PRICE" => $price,
 				"CURRENCY" => $currency,
 				"QUANTITY" => 1,
 				"LID" => SITE_ID,
@@ -701,7 +716,7 @@ class SaleAccountPay extends \CBitrixComponent
 				"ORDER_ID"=>$order->getId(),
 				"ORDER_DATE"=>$order->getDateInsert()->toString(),
 				"PAYMENT_ID"=>$payment->getId(),
-				"IS_CASH" => $paySystemObject->isCash(),
+				"IS_CASH" => $paySystemObject->isCash() || $paySystemObject->getField("ACTION_FILE") === 'cash',
 				"NAME_CONFIRM_TEMPLATE"=>$this->arParams['NAME_CONFIRM_TEMPLATE']
 			);
 

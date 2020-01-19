@@ -24,7 +24,7 @@ return array(
 		'.landing-block-node-img' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_31.4.TWO_COLS_TEXT_IMG_FIX_NODES_LANDINGBLOCKNODEIMG'),
 			'type' => 'img',
-			'dimensions' => array('width' => 540, 'height' => 960),
+			'dimensions' => array('width' => 540),
 		),
 	),
 	'style' => array(
@@ -43,6 +43,10 @@ return array(
 		'.landing-block-node-img' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_31.4.TWO_COLS_TEXT_IMG_FIX_NODES_LANDINGBLOCKNODEIMG'),
 			'type' => 'animation',
+		),
+		'.landing-block-node-block' => array(
+			'name' => Loc::getMessage('LANDING_BLOCK_31.4.TWO_COLS_TEXT_IMG_FIX_NODES_LANDINGBLOCKNODEBLOCK'),
+			'type' => 'align-items',
 		),
 	),
 );

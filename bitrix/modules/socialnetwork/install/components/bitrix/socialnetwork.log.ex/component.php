@@ -73,14 +73,19 @@ if (
 }
 
 if(defined("DisableSonetLogFollow") && DisableSonetLogFollow === true)
+{
 	$arParams["USE_FOLLOW"] = "N";
+}
 
 if(!$USER->IsAuthorized())
 {
 	$arParams["USE_FOLLOW"] = "N";
 }
 
-if(isset($arParams["DISPLAY"]))
+if(
+	isset($arParams["DISPLAY"])
+	&& in_array($arParams["DISPLAY"], [ 'my', 'mine', 'forme' ])
+)
 {
 	$arParams["USE_FOLLOW"] = "N";
 }
@@ -158,7 +163,10 @@ $arParams["PATH_TO_VIDEO_CALL"] = (array_key_exists("PATH_TO_VIDEO_CALL", $arPar
 $arParams["PATH_TO_SMILE"] = (array_key_exists("PATH_TO_SMILE", $arParams) && strlen(trim($arParams["PATH_TO_SMILE"])) > 0 ? trim($arParams["PATH_TO_SMILE"]) : $pathToSmile);
 
 $arResult["PATH_TO_LOG_TAG"] = $folderUsers."log/?TAG=#tag#";
-if (SITE_TEMPLATE_ID == 'bitrix24')
+if (
+	defined('SITE_TEMPLATE_ID')
+	&& SITE_TEMPLATE_ID == 'bitrix24'
+)
 {
 	$arResult["PATH_TO_LOG_TAG"] .= "&apply_filter=Y";
 }
@@ -308,6 +316,7 @@ $arResult["bReload"] = ($arResult["AJAX_CALL"] && $_REQUEST["RELOAD"] == "Y");
 $arResult["SHOW_UNREAD"] = $arParams["SHOW_UNREAD"] = (
 	$USER->IsAuthorized()
 	&& $arParams["LOG_ID"] <= 0
+	&& $arParams["MODE"] != 'LANDING'
 		? "Y"
 		: "N"
 );
@@ -317,10 +326,19 @@ $arParams["SET_LOG_COUNTER"] = (
 		!$arResult["AJAX_CALL"]
 		|| $arResult["bReload"]
 	)
-	? "Y"
-	: "N"
+	&& (
+		empty($_POST["action"])
+		|| $_POST["action"] != "SBPE_get_full_form"
+	)
+		? "Y"
+		: "N"
 );
-$arParams["SET_LOG_PAGE_CACHE"] = ($arParams["LOG_ID"] <= 0 ? "Y" : "N");
+$arParams["SET_LOG_PAGE_CACHE"] = (
+	$arParams["LOG_ID"] <= 0
+	&& $arParams["MODE"] != 'LANDING'
+		? "Y"
+		: "N"
+);
 
 $arParams["COMMENT_PROPERTY"] = array("UF_SONET_COM_FILE");
 if (IsModuleInstalled("webdav") || IsModuleInstalled("disk"))
@@ -505,7 +523,6 @@ else
 		$arParams["LOG_DATE_TO"] = trim($_REQUEST["flt_date_to"]);
 }
 
-$arParams["LOG_CNT"] = (array_key_exists("LOG_CNT", $arParams) && intval($arParams["LOG_CNT"]) > 0 ? $arParams["LOG_CNT"] : 0);
 $arParams["AUTH"] = ((StrToUpper($arParams["AUTH"]) == "Y") ? "Y" : "N");
 
 $arPrevPageLogID = false;
@@ -522,12 +539,6 @@ if (array_key_exists("pplogid", $_REQUEST))
 		}
 		$arPrevPageLogID = array_unique($arPrevPageLogID);
 	}
-}
-
-$arParams["PAGE_SIZE"] = intval($arParams["PAGE_SIZE"]);
-if($arParams["PAGE_SIZE"] <= 0)
-{
-	$arParams["PAGE_SIZE"] = 20;
 }
 
 $arParams["PAGER_TITLE"] = trim($arParams["PAGER_TITLE"]);
@@ -744,11 +755,15 @@ if (IsModuleInstalled("photogallery"))
 $bCurrentUserIsAdmin = CSocNetUser::IsCurrentUserModuleAdmin();
 
 $arResult["TZ_OFFSET"] = CTimeZone::GetOffset();
-$arResult["FILTER_ID"] = "LIVEFEED".(!empty($arParams["GROUP_ID"]) ? '_SG'.$arParams["GROUP_ID"] : '');
+$arResult["FILTER_ID"] = (
+	!empty($arParams["FILTER_ID"])
+		? $arParams["FILTER_ID"]
+		: "LIVEFEED".(!empty($arParams["GROUP_ID"]) ? '_SG'.$arParams["GROUP_ID"] : '')
+);
 
 CSocNetTools::InitGlobalExtranetArrays();
 
-$arListParams = array();
+$arListParams = [];
 
 if (
 	$USER->IsAuthorized()
@@ -863,6 +878,15 @@ if (
 					$arFilter["!USER_ID"] =  $matches[1];
 				}
 			}
+		}
+
+		if (
+			$arParams["MODE"] == 'LANDING'
+			&& !empty($arParams['DESTINATION_AUTHOR_ID'])
+			&& intval($arParams['DESTINATION_AUTHOR_ID']) > 0
+		) // landing author filter
+		{
+			$arFilter["USER_ID"] =  intval($arParams['DESTINATION_AUTHOR_ID']);
 		}
 	}
 	elseif (intval($arParams["GROUP_ID"]) > 0)
@@ -982,7 +1006,6 @@ if (
 			$arParams["SET_LOG_COUNTER"] = $arParams["SET_LOG_PAGE_CACHE"] = "N";
 			$arResult["SHOW_UNREAD"] = $arParams["SHOW_UNREAD"] = "N";
 			$arParams["USE_FOLLOW"] = "N";
-			$arResult["SHOW_FOLLOW_CONTROL"] = "N";
 		}
 	}
 	elseif ($arParams["EVENT_ID"])
@@ -1028,7 +1051,9 @@ if (
 	}
 
 	if ($arParams["FLT_ALL"] == "Y")
+	{
 		$arFilter["ALL"] = "Y";
+	}
 
 	if (
 		!$arFilter["EVENT_ID"]
@@ -1042,7 +1067,7 @@ if (
 	{
 		$arFilter["SITE_ID"] = $arParams["FILTER_SITE_ID"];
 	}
-	else
+	elseif ($arParams["MODE"] != "LANDING")
 	{
 		$arFilter["SITE_ID"] = (
 			$arResult["isExtranetSite"]
@@ -1089,7 +1114,8 @@ if (
 	}
 
 	if (
-		SITE_TEMPLATE_ID === 'bitrix24'
+		defined('SITE_TEMPLATE_ID')
+		&& SITE_TEMPLATE_ID === 'bitrix24'
 		&& isset($_REQUEST['useBXMainFilter'])
 		&& $_REQUEST['useBXMainFilter'] == 'Y'
 		&& intval($arParams["LOG_ID"]) <= 0
@@ -1106,14 +1132,6 @@ if (
 		{
 			$filtered = true;
 			$arFilter["USER_ID"] = intval($matches[1]);
-
-			if (intval($matches[1]) > 0)
-			{
-				\Bitrix\Main\FinderDestTable::merge(array(
-					"CONTEXT" => "FEED_FILTER_CREATED_BY",
-					"CODE" => 'U'.intval($matches[1])
-				));
-			}
 		}
 
 		if (!empty($filterData["TO"]))
@@ -1140,14 +1158,6 @@ if (
 			}
 
 			$filtered = !empty($arFilter["LOG_RIGHTS"]);
-
-			if (!empty($arFilter["LOG_RIGHTS"]))
-			{
-				\Bitrix\Main\FinderDestTable::merge(array(
-					"CONTEXT" => "FEED_FILTER_TO",
-					"CODE" => $arFilter["LOG_RIGHTS"]
-				));
-			}
 		}
 
 		if (
@@ -1264,7 +1274,10 @@ if (
 			$arResult["IS_FILTERED"] = true;
 		}
 	}
-	elseif (SITE_TEMPLATE_ID === 'bitrix24')
+	elseif (
+		(defined('SITE_TEMPLATE_ID') && SITE_TEMPLATE_ID === 'bitrix24')
+		|| $arParams['MODE'] == 'LANDING'
+	)
 	{
 		$filterOption = new \Bitrix\Main\UI\Filter\Options($arResult["FILTER_ID"]);
 		$filterOption->reset();
@@ -1319,7 +1332,7 @@ if (
 		}
 
 		$arNavStartParams = array(
-			"nPageSize" => (intval($_REQUEST["pagesize"]) > 0 ? intval($_REQUEST["pagesize"]) : $arParams["PAGE_SIZE"]),
+			"nPageSize" => $arParams["PAGE_SIZE"],
 			"bShowAll" => false,
 			"iNavAddRecords" => 1,
 			"bSkipPageReset" => true,
@@ -1327,10 +1340,14 @@ if (
 		);
 	}
 
-	if ($bGetComments)
+	if (!empty($arParams["ORDER"]))
+	{
+		$arOrder = $arParams["ORDER"];
+	}
+	elseif ($bGetComments)
 	{
 		$arOrder = (!empty($filterContent) ? array("CONTENT_LOG_UPDATE" => "DESC") : array("LOG_UPDATE" => "DESC"));
-//		$arOrder = (!empty($filterContent) ? array() : array("LOG_UPDATE" => "DESC"));
+		$arOrder = (!empty($filterContent) ? array() : array("LOG_UPDATE" => "DESC"));
 	}
 	elseif ($arParams["USE_FOLLOW"] == "Y")
 	{
@@ -1343,7 +1360,7 @@ if (
 	}
 	else
 	{
-		$arOrder = array("LOG_DATE"	=> "DESC");
+		$arOrder = array("LOG_DATE" => "DESC");
 	}
 	$arOrder["ID"] = "DESC";
 
@@ -1472,11 +1489,12 @@ if (
 		}
 
 		$arListParams = array_merge($arListParams, array(
-			"CHECK_RIGHTS" => "Y"
+			"CHECK_RIGHTS" => ($arParams["MODE"] != "LANDING" ? "Y" : "N")
 		));
 
 		if (
-			$arParams["LOG_ID"] <= 0
+			$arParams["MODE"] != 'LANDING'
+			&& $arParams["LOG_ID"] <= 0
 			&& (
 				empty($filterData)
 				|| empty($filterData['EVENT_ID'])
@@ -1608,6 +1626,8 @@ if (
 		}
 	}
 
+	$arFilter = \Bitrix\Socialnetwork\Component\LogList::setFilter($arFilter, $arResult);
+
 	if ($bCurrentUserIsAdmin)
 	{
 		$arListParams["USER_ID"] = "A";
@@ -1642,10 +1662,7 @@ if (
 		$arSelectFields[] = "FAVORITES_USER_ID";
 	}
 
-	if ($DB->type == "MYSQL")
-	{
-		$arSelectFields[] = "LOG_DATE_TS";
-	}
+	$arSelectFields[] = "LOG_DATE_TS";
 
 	$arTmpEventsNew = array();
 	$arResult["arLogTmpID"] = array();
@@ -1656,23 +1673,34 @@ if (
 		"SONET_LOG" => array()
 	);
 
-	$dbEventsID = __SLLogGetIds(
-		$arOrder, $arFilter, $arNavStartParams, $arSelectFields, $arListParams, $bFirstPage,
-		$arResult, $arActivity2Log, $arDiskUFEntity, $arTmpEventsNew
-	);
-
-	if (
-		count($arResult["arLogTmpID"]) <= 0
-		&& $bNeedSetLogPage // no log pages for user
-	)
+	if (empty($arResult['RETURN_EMPTY_LIST']))
 	{
-		unset($dateLastPageStart);
-		unset($arFilter[">=LOG_UPDATE"]);
+		if (
+			!empty($arParams['EMPTY_EXPLICIT'])
+			&& $arParams['EMPTY_EXPLICIT'] == 'Y'
+		)
+		{
+			$arListParams['EMPTY_LIST'] = 'Y';
+		}
 
 		$dbEventsID = __SLLogGetIds(
 			$arOrder, $arFilter, $arNavStartParams, $arSelectFields, $arListParams, $bFirstPage,
 			$arResult, $arActivity2Log, $arDiskUFEntity, $arTmpEventsNew
 		);
+
+		if (
+			count($arResult["arLogTmpID"]) <= 0
+			&& $bNeedSetLogPage // no log pages for user
+		)
+		{
+			unset($dateLastPageStart);
+			unset($arFilter[">=LOG_UPDATE"]);
+
+			$dbEventsID = __SLLogGetIds(
+				$arOrder, $arFilter, $arNavStartParams, $arSelectFields, $arListParams, $bFirstPage,
+				$arResult, $arActivity2Log, $arDiskUFEntity, $arTmpEventsNew
+			);
+		}
 	}
 
 	if (
@@ -1751,26 +1779,6 @@ if (
 			{
 				unset($arActivity2Log[$arActivity["ID"]]);
 			}
-		}
-	}
-
-	if ($bFirstPage)
-	{
-		$last_date = $arTmpEventsNew[count($arTmpEventsNew)-1][($arParams["USE_FOLLOW"] == "Y" ? "DATE_FOLLOW" : "LOG_UPDATE")];
-	}
-	elseif (
-		$dbEventsID
-		&& $dbEventsID->navContinue()
-		&& $arEvents = $dbEventsID->getNext()
-	)
-	{
-		$next_page_date = ($arParams["USE_FOLLOW"] == "Y" ? $arEvents["DATE_FOLLOW"] : $arEvents["LOG_UPDATE"]);
-		if (
-			$USER->IsAuthorized()
-			&& ($arResult["LAST_LOG_TS"] < MakeTimeStamp($next_page_date))
-		)
-		{
-			$next_page_date = $arResult["LAST_LOG_TS"];
 		}
 	}
 
@@ -1867,23 +1875,36 @@ if (
 		: array()
 	);
 
-	if ($arTmpEvent["DATE_FOLLOW"])
-	{
-		$arResult["dateLastPageTS"] = MakeTimeStamp($arTmpEvent["DATE_FOLLOW"], CSite::GetDateFormat("FULL"));
-	}
-	elseif ($arParams["USE_FOLLOW"] == "N")
+	$arResult["LAST_ENTRY_DATE_TS"] = 0;
+	if ($arParams["USE_FOLLOW"] == "N")
 	{
 		if (
 			!empty($arOrder["LOG_DATE"])
 			&& $arTmpEvent["LOG_DATE"]
 		)
 		{
-			$arResult["dateLastPageTS"] = MakeTimeStamp($arTmpEvent["LOG_DATE"], CSite::GetDateFormat("FULL"));
+			$arResult["LAST_ENTRY_DATE_TS"] = MakeTimeStamp($arTmpEvent["LOG_DATE"], CSite::GetDateFormat("FULL"));
 		}
 		elseif ($arTmpEvent["LOG_UPDATE"])
 		{
-			$arResult["dateLastPageTS"] = MakeTimeStamp($arTmpEvent["LOG_UPDATE"], CSite::GetDateFormat("FULL"));
+			$arResult["LAST_ENTRY_DATE_TS"] = MakeTimeStamp($arTmpEvent["LOG_UPDATE"], CSite::GetDateFormat("FULL"));
 		}
+	}
+
+	if (
+		empty($arResult["LAST_ENTRY_DATE_TS"])
+		&& $arTmpEvent["DATE_FOLLOW"]
+	)
+	{
+		$arResult["LAST_ENTRY_DATE_TS"] = MakeTimeStamp($arTmpEvent["DATE_FOLLOW"], CSite::GetDateFormat("FULL"));
+	}
+
+	if (
+		isset($arParams["SET_LOG_PAGE_CACHE"])
+		&& $arParams["SET_LOG_PAGE_CACHE"] != 'N'
+	)
+	{
+		$arResult["dateLastPageTS"] = $arResult["LAST_ENTRY_DATE_TS"];
 	}
 
 	if (!empty($arResult["dateLastPageTS"]))
@@ -1921,7 +1942,7 @@ if (
 
 	if (
 		$USER->IsAuthorized()
-		&& IsModuleInstalled('tasks')
+		&& $arParams['USE_TASKS'] == 'Y'
 	)
 	{
 		$arResult["EXPERT_MODE"] = "N";
@@ -1980,7 +2001,7 @@ if (
 
 		if (
 			$arResult["PAGE_NUMBER"] == 1
-			&& IsModuleInstalled('tasks')
+			&& $arParams['USE_TASKS'] == 'Y'
 			&& $arResult["EXPERT_MODE"] != "Y"
 		)
 		{

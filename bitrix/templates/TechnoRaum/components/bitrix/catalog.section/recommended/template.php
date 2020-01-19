@@ -62,17 +62,13 @@ $this->setFrameMode(true);
                         </p>
                         <div class="the_price">
                             <?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
-                                <p class="price" old_price="<?=$item["PRICES"]["price"]["PRINT_DISCOUNT_VALUE"]?>" style="font-size: 14px;">По запросу</p>
+								<a class="fancy request-a-price" old_price="<?=$item["PRICES"]["price"]["PRINT_DISCOUNT_VALUE"]?>" data-name="<?=$item['NAME']?>" href="#request-a-price">Запросить</a>
                             <?else:?>
                                 <p class="price"><?=$item["PRICES"]["price"]["PRINT_DISCOUNT_VALUE"]?></p>
                             <?endif;?>
                         </div>
-
-
                         <a class="button to_cart_button" data-href="<?=$item["BUY_URL"]?>">В корзине</a>
-                        <?if(checkPrice($item['IBLOCK_ID'], $item['ID'])):?>
-                            <a class="fancy request-a-price" data-name="<?=$item['NAME']?>" href="#request-a-price">Запросить</a>
-                        <?endif;?>
+                        
                     </div>
                 </div>
             </li>

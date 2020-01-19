@@ -218,7 +218,7 @@ else
 				&& intval($arEvent["EVENT"]["ENTITY_ID"]) > 0
 			)
 			{
-				?> sonet-log-item-where-<?=$arEvent["EVENT"]["ENTITY_TYPE"]?>-<?=intval($arEvent["EVENT"]["ENTITY_ID"])?>-all <?
+				?> sonet-log-item-where-<?=$arEvent["EVENT"]["ENTITY_TYPE"]?>-<?=intval($arEvent["EVENT"]["ENTITY_ID"])?>-all<?
 				if (
 					array_key_exists("EVENT_ID", $arEvent["EVENT"])
 					&& strlen($arEvent["EVENT"]["EVENT_ID"]) > 0
@@ -229,6 +229,7 @@ else
 					if (
 						array_key_exists("EVENT_ID_FULLSET", $arEvent["EVENT"])
 						&& strlen($arEvent["EVENT"]["EVENT_ID_FULLSET"]) > 0
+						&& $arEvent["EVENT"]["EVENT_ID_FULLSET"] != $arEvent["EVENT"]["EVENT_ID"]
 					)
 					{
 						?> sonet-log-item-where-<?=$arEvent["EVENT"]["ENTITY_TYPE"]?>-<?=intval($arEvent["EVENT"]["ENTITY_ID"])?>-<?=str_replace("_", '-', $arEvent["EVENT"]["EVENT_ID_FULLSET"])?> <?
@@ -565,13 +566,27 @@ else
 
 				// body
 
-/*
-				elseif (in_array($EVENT_ID, array("timeman_entry", "report")))
-				{
-					$contentViewXmlId = "TIMEMAN".$EVENT_ID.'-'.intval($arEvent["EVENT"]["SOURCE_ID"]);
-				}
-*/
+				$stub = false;
 				if (
+					array_key_exists("EVENT_FORMATTED", $arEvent)
+					&& array_key_exists("STUB", $arEvent["EVENT_FORMATTED"])
+					&& $arEvent["EVENT_FORMATTED"]["STUB"]
+				)
+				{
+					$stub = true;
+					?><?$APPLICATION->IncludeComponent(
+						"bitrix:socialnetwork.log.entry.stub",
+						"",
+						array(
+							"EVENT" => $arEvent['EVENT'],
+						),
+						$component,
+						array(
+							"HIDE_ICONS" => "Y"
+						)
+					);?><?
+				}
+				elseif (
 					array_key_exists("EVENT_FORMATTED", $arEvent)
 					&& array_key_exists("IS_IMPORTANT", $arEvent["EVENT_FORMATTED"])
 					&& $arEvent["EVENT_FORMATTED"]["IS_IMPORTANT"]
@@ -626,11 +641,18 @@ else
 							?></div><?
 							?><script>
 								BX.ready(function() {
-									oLF.arMoreButtonID.push({
-										bodyBlockID: 'log_entry_body_<?=$arEvent["EVENT"]["ID"]?>',
-										moreButtonBlockID: 'log_entry_more_<?=$arEvent["EVENT"]["ID"]?>',
-										informerBlockID: 'log_entry_inform_<?=$arEvent["EVENT"]["ID"]?>'
-									});
+									if (
+										typeof oLF != 'undefined'
+										&& BX.type.isNotEmptyObject(oLF)
+										&& BX.type.isArray(oLF.arMoreButtonID)
+									)
+									{
+										oLF.arMoreButtonID.push({
+											bodyBlockID: 'log_entry_body_<?=$arEvent["EVENT"]["ID"]?>',
+											moreButtonBlockID: 'log_entry_more_<?=$arEvent["EVENT"]["ID"]?>',
+											informerBlockID: 'log_entry_inform_<?=$arEvent["EVENT"]["ID"]?>'
+										});
+									}
 								});
 							</script><?
 						}
@@ -917,11 +939,18 @@ else
 							?></div><?
 							?><script>
 								BX.ready(function() {
-									oLF.arMoreButtonID.push({
-										bodyBlockID : 'log_entry_body_<?=$arEvent["EVENT"]["ID"]?>',
-										moreButtonBlockID : 'log_entry_more_<?=$arEvent["EVENT"]["ID"]?>',
-										informerBlockID: 'log_entry_inform_<?=$arEvent["EVENT"]["ID"]?>'
-									});
+									if (
+										typeof oLF != 'undefined'
+										&& BX.type.isNotEmptyObject(oLF)
+										&& BX.type.isArray(oLF.arMoreButtonID)
+									)
+									{
+										oLF.arMoreButtonID.push({
+											bodyBlockID : 'log_entry_body_<?=$arEvent["EVENT"]["ID"]?>',
+											moreButtonBlockID : 'log_entry_more_<?=$arEvent["EVENT"]["ID"]?>',
+											informerBlockID: 'log_entry_inform_<?=$arEvent["EVENT"]["ID"]?>'
+										});
+									}
 								});
 							</script><?
 						}
@@ -958,6 +987,27 @@ else
 					{
 						RemoveEventHandler('main', 'system.field.view.file', $eventHandlerID);
 					}
+				}
+
+				if (
+					$arEvent["EVENT"]["EVENT_ID"] != 'tasks'
+					&& !empty($arEvent["TAGS"])
+					&& is_array($arEvent["TAGS"])
+				)
+				{
+					?><div class="feed-com-tags-block"><noindex>
+						<div class="feed-com-files-title"><?=Loc::getMessage("SONET_C30_TAGS")?></div>
+						<div class="feed-com-files-cont" id="logentry-tags-<?=intval($arEvent["EVENT"]["ID"])?>"><?
+							$i=0;
+							foreach($arEvent["TAGS"] as $v)
+							{
+								if($i!=0)
+									echo ",";
+								?> <a href="<?=$v["URL"]?>" rel="nofollow" class="feed-com-tag" bx-tag-value="<?=htmlspecialcharsbx($v["NAME"])?>"><?=htmlspecialcharsEx($v["NAME"])?></a><?
+								$i++;
+							}
+							?></div>
+					</noindex></div><?
 				}
 
 				// Used to display some HTML before informers
@@ -1068,7 +1118,7 @@ else
 						?><a
 							href="#"
 							data-log-entry-url="<?=$strLogEntryURL?>"
-							data-log-entry-createtask="<?=($arResult["canGetPostContent"]) ? 'Y' : 'N'?>"
+							data-log-entry-createtask="<?=($arResult["canGetPostContent"]) && $arResult["bTasksAvailable"] && !$stub ? 'Y' : 'N'?>"
 							data-log-entry-entity-type="<?=(!empty($arResult["POST_CONTENT_TYPE_ID"]) ? htmlspecialcharsbx($arResult["POST_CONTENT_TYPE_ID"]) : "")?>"
 							data-log-entry-entity-id="<?=(!empty($arResult["POST_CONTENT_ID"]) ? intval($arResult["POST_CONTENT_ID"]) : "")?>"
 							data-log-entry-log-id="<?=intval($arEvent["EVENT"]["ID"])?>"

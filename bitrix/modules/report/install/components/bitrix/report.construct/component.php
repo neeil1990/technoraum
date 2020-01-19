@@ -59,17 +59,17 @@ if ($arParams['USE_CHART'])
 		array('id' => 'line', 'name' => GetMessage('REPORT_CHART_TYPE_LINE1'), 'value_types' => array(
 			/*'boolean', 'date', 'datetime', */
 			'float', 'integer'/*, 'string', 'text', 'enum', 'file', 'disk_file', 'employee', 'crm', 'crm_status',
-			'iblock_element', 'iblock_section'*/
+			'iblock_element', 'iblock_section', 'money'*/
 		)),
 		array('id' => 'bar', 'name' => GetMessage('REPORT_CHART_TYPE_BAR1'), 'value_types' => array(
 			/*'boolean', 'date', 'datetime', */
 			'float', 'integer'/*, 'string', 'text', 'enum', 'file', 'disk_file', 'employee', 'crm', 'crm_status',
-			'iblock_element', 'iblock_section'*/
+			'iblock_element', 'iblock_section', 'money'*/
 		)),
 		array('id' => 'pie', 'name' => GetMessage('REPORT_CHART_TYPE_PIE'), 'value_types' => array(
 			/*'boolean', 'date', 'datetime', */
 			'float', 'integer'/*, 'string', 'text', 'enum', 'file', 'disk_file', 'employee', 'crm', 'crm_status',
-			'iblock_element', 'iblock_section'*/
+			'iblock_element', 'iblock_section', 'money'*/
 		))
 	);
 }
@@ -251,6 +251,7 @@ try
 		// </editor-fold>
 
 		// <editor-fold defaultstate="collapsed" desc="preapre period">
+		$period = [];
 		if (!empty($_POST['F_DATE_TYPE']) && in_array($_POST['F_DATE_TYPE'], $periodTypes, true))
 		{
 			$period = array('type' => $_POST['F_DATE_TYPE']);
@@ -293,6 +294,10 @@ try
 		else
 		{
 			$period = array('type' => 'month', 'value' => null);
+		}
+		if (isset($_POST['period_hidden']))
+		{
+			$period['hidden'] = ($_POST['period_hidden'] === 'Y' ? 'Y' : 'N');
 		}
 		// </editor-fold>
 

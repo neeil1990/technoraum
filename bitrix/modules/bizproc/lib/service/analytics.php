@@ -32,7 +32,7 @@ class Analytics extends \CBPRuntimeService
 		$module = 'bizproc:'. $documentId[0];
 
 		$this->writeToFile(
-			$this->prepareFileContent($date, $host, $module, $action, $tag)
+			$this->prepareFileContent($date, $host, $module, $action, $tag, $documentId[1])
 		);
 	}
 

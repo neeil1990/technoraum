@@ -140,10 +140,15 @@ class Dialog
 					|| \Bitrix\Im\User::getInstance($dialogId)->isExtranet()
 				)
 				{
-					if (!\Bitrix\Im\Integration\Socialnetwork\Extranet::isUserInGroup($dialogId, $userId))
+					if (
+						!\Bitrix\Im\User::getInstance($userId)->isExtranet()
+						&& \Bitrix\Im\User::getInstance($dialogId)->isNetwork()
+					)
 					{
-						return false;
+						return true;
 					}
+
+					return \Bitrix\Im\Integration\Socialnetwork\Extranet::isUserInGroup($dialogId, $userId);
 				}
 				else
 				{
@@ -189,12 +194,36 @@ class Dialog
 			$chatId = self::getChatId($dialogId);
 
 			$chat = new \CIMChat($userId);
-			$chat->SetReadMessage($chatId, $messageId);
+			$result = $chat->SetReadMessage($chatId, $messageId);
 		}
 		else
 		{
 			$CIMMessage = new \CIMMessage($userId);
-			$CIMMessage->SetReadMessage($dialogId, $messageId);
+			$result = $CIMMessage->SetReadMessage($dialogId, $messageId);
+		}
+
+		return $result;
+	}
+
+	public static function unread($dialogId, $messageId = null, $userId = null)
+	{
+		$userId = \Bitrix\Im\Common::getUserId($userId);
+		if (!$userId)
+		{
+			return false;
+		}
+
+		if (\Bitrix\Im\Common::isChatId($dialogId))
+		{
+			$chatId = self::getChatId($dialogId);
+
+			$chat = new \CIMChat($userId);
+			$chat->SetUnReadMessage($chatId, $messageId);
+		}
+		else
+		{
+			$CIMMessage = new \CIMMessage($userId);
+			$CIMMessage->SetUnReadMessage($dialogId, $messageId);
 		}
 
 		return false;

@@ -161,9 +161,9 @@ Loader::registerAutoLoadClasses(
 		'CCatalogProductSettings' => 'general/step_operations.php',
 		'CCatalogTools' => 'general/tools.php',
 		'CCatalogResult' => 'general/result.php',
+		'CProductQueryBuilder' => 'general/querybuilder.php',
 
 		'\Bitrix\Catalog\Compatible\EventCompatibility' => 'lib/compatible/eventcompatibility.php',
-		'\Bitrix\Catalog\Config\Configuration' => 'lib/config/state.php', // deprecated, temporary
 		'\Bitrix\Catalog\Config\Feature' => 'lib/config/feature.php',
 		'\Bitrix\Catalog\Config\State' => 'lib/config/state.php',
 		'\Bitrix\Catalog\Discount\DiscountManager' => 'lib/discount/discountmanager.php',
@@ -191,6 +191,7 @@ Loader::registerAutoLoadClasses(
 		'\Bitrix\Catalog\Product\Search' => 'lib/product/search.php',
 		'\Bitrix\Catalog\Product\Sku' => 'lib/product/sku.php',
 		'\Bitrix\Catalog\Product\SubscribeManager' => 'lib/product/subscribemanager.php',
+		'\Bitrix\Catalog\Product\SystemField' => 'lib/product/systemfield.php',
 		'\Bitrix\Catalog\Product\Viewed' => 'lib/product/viewed.php',
 		'\Bitrix\Catalog\Update\AdminFilterOption' => 'lib/update/adminfilteroption.php',
 		'\Bitrix\Catalog\Update\AdminGridOption' => 'lib/update/admingridoption.php',
@@ -1508,7 +1509,7 @@ function Add2Basket($PRICE_ID, $QUANTITY = 1, $arRewriteFields = array(), $arPro
 
 /**
  * @deprecated deprecated since catalog 17.5.9
- * @see \Bitrix\Catalog\Product\Basket::add
+ * @see \Bitrix\Catalog\Product\Basket::addProduct
  *
  * @param int $productId
  * @param float|int $quantity
@@ -2016,7 +2017,7 @@ function CatalogGetPriceTableEx($ID, $filterQauntity = 0, $arFilterType = array(
 		$arPrice['VAT_RATE'] = $fVatRate;
 
 		CCatalogDiscountSave::Disable();
-		$arDiscounts = CCatalogDiscount::GetDiscount($ID, $arProduct["IBLOCK_ID"], $arPrice["CATALOG_GROUP_ID"], $arUserGroups, "N", SITE_ID, array());
+		$arDiscounts = CCatalogDiscount::GetDiscount($ID, $arProduct["IBLOCK_ID"], array($arPrice["CATALOG_GROUP_ID"]), $arUserGroups, "N", SITE_ID, array());
 		CCatalogDiscountSave::Enable();
 
 		$discountPrice = CCatalogProduct::CountPriceWithDiscount($arPrice["PRICE"], $arPrice["CURRENCY"], $arDiscounts);
@@ -2151,7 +2152,7 @@ function CatalogGetPriceTable($ID)
 	while ($arPrice = $dbPrice->Fetch())
 	{
 		CCatalogDiscountSave::Disable();
-		$arDiscounts = CCatalogDiscount::GetDiscount($ID, $arPrice["ELEMENT_IBLOCK_ID"], $arPrice["CATALOG_GROUP_ID"], $USER->GetUserGroupArray(), "N", SITE_ID, array());
+		$arDiscounts = CCatalogDiscount::GetDiscount($ID, $arPrice["ELEMENT_IBLOCK_ID"], array($arPrice["CATALOG_GROUP_ID"]), $USER->GetUserGroupArray(), "N", SITE_ID, array());
 		CCatalogDiscountSave::Enable();
 
 		$discountPrice = CCatalogProduct::CountPriceWithDiscount($arPrice["PRICE"], $arPrice["CURRENCY"], $arDiscounts);

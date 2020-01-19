@@ -83,7 +83,7 @@ if ($arParams["ALLOW_UPLOAD"] != "N")
 		</div>
 		<div class="file-selector">
 			<?=GetMessage('BFDND_DROPHERE');?><br />
-			<span class="file-uploader"><span class="file-but-text"><?=GetMessage('BFDND_SELECT_EXIST');?></span><input class="file-fileUploader <?=$addClass?>" id="file-fileUploader-<?=$uid?>" type="file" multiple='multiple' size='1' /></span>
+			<span class="file-uploader"><span class="file-but-text"><?=GetMessage('BFDND_SELECT_EXIST');?></span><input class="file-fileUploader <?=$addClass?>" id="file-fileUploader-<?=$uid?>" type="file" <?=$arParams["MULTIPLE"] === 'Y' ? ' multiple="multiple"' : ''?> size='1' /></span>
 			<div class="file-load-img"></div>
 		</div>
 	</div>
@@ -107,7 +107,7 @@ if ($arParams["ALLOW_UPLOAD"] != "N")
 				</tbody>
 			</table>
 		</div>
-		<div class="file-selector"><span class="file-uploader"><span class="file-uploader-left"></span><span class="file-but-text"><?=GetMessage('BFDND_SELECT_LOCAL');?></span><span class="file-uploader-right"></span><input class="file-fileUploader <?=$addClass?>" id="file-fileUploader-<?=$uid?>" type="file" <?/*multiple='multiple'*/?> size='1' /></span></div></div>
+		<div class="file-selector"><span class="file-uploader"><span class="file-uploader-left"></span><span class="file-but-text"><?=GetMessage('BFDND_SELECT_LOCAL');?></span><span class="file-uploader-right"></span><input class="file-fileUploader <?=$addClass?>" id="file-fileUploader-<?=$uid?>" type="file" <?=$arParams["MULTIPLE"] === 'Y' ? ' multiple="multiple"' : ''?> size='1' /></span></div></div>
 	<script>
 	BX.ready(function(){
 		BX.message({

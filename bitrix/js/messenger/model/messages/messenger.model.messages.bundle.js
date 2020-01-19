@@ -502,6 +502,12 @@
 	    value: function decodeBbCode(textElement) {
 	      var textOnly = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 	      var enableBigSmile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+	      var codeReplacement = [];
+	      textElement = textElement.replace(/\[CODE\]\n?([\0-\uFFFF]*?)\[\/CODE\]/ig, function (whole, text) {
+	        var id = codeReplacement.length;
+	        codeReplacement.push(text);
+	        return '####REPLACEMENT_MARK_' + id + '####';
+	      });
 	      textElement = textElement.replace(/\[LIKE\]/ig, '<span class="bx-smile bx-im-smile-like"></span>');
 	      textElement = textElement.replace(/\[DISLIKE\]/ig, '<span class="bx-smile bx-im-smile-dislike"></span>');
 	      textElement = textElement.replace(/\[USER=([0-9]{1,})\](.*?)\[\/USER\]/ig, function (whole, userId, text) {
@@ -635,6 +641,9 @@
 	        }
 
 	        return '<img class="bx-smile bx-icon" ' + attributes + '>';
+	      });
+	      codeReplacement.forEach(function (code, index) {
+	        textElement = textElement.replace('####REPLACEMENT_MARK_' + index + '####', !textOnly ? '<div class="bx-im-message-content-code">' + code + '</div>' : code);
 	      });
 	      return textElement;
 	    }

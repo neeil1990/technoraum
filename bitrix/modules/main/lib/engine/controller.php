@@ -3,6 +3,7 @@
 namespace Bitrix\Main\Engine;
 
 
+use Bitrix\Main\Component\ParameterSigner;
 use Bitrix\Main\Config\Configuration;
 use Bitrix\Main\Diag\ExceptionHandlerFormatter;
 use Bitrix\Main\Engine\AutoWire\Parameter;
@@ -20,6 +21,8 @@ use Bitrix\Main\EventResult;
 use Bitrix\Main\HttpResponse;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Request;
+use Bitrix\Main\Response;
+use Bitrix\Main\Security\Sign\BadSignatureException;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Web\PostDecodeFilter;
 
@@ -57,6 +60,7 @@ class Controller implements Errorable, Controllerable
 	private $filePath;
 	/** @var array */
 	private $sourceParametersList;
+	private $unsignedParameters;
 
 	/**
 	 * Returns the fully qualified name of this class.
@@ -143,6 +147,54 @@ class Controller implements Errorable, Controllerable
 	}
 
 	/**
+	 * @return mixed
+	 */
+	final public function getUnsignedParameters()
+	{
+		return $this->unsignedParameters;
+	}
+
+	final protected function processUnsignedParameters()
+	{
+		foreach ($this->getSourceParametersList() as $source)
+		{
+			if (isset($source['signedParameters']) && is_string($source['signedParameters']))
+			{
+				try
+				{
+					$this->unsignedParameters = ParameterSigner::unsignParameters(
+						$this->getSaltToUnsign(),
+						$source['signedParameters']
+					);
+				}
+				catch (BadSignatureException $exception)
+				{}
+
+
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Tries to find salt from request. It's "c" (component name) in general.
+	 *
+	 * @return string|null
+	 */
+	protected function getSaltToUnsign()
+	{
+		foreach ($this->getSourceParametersList() as $source)
+		{
+			if (isset($source['c']) && is_string($source['c']))
+			{
+				return $source['c'];
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * @return CurrentUser
 	 */
 	final public function getCurrentUser()
@@ -169,7 +221,7 @@ class Controller implements Errorable, Controllerable
 	{
 		return $this->converter->process($data);
 	}
-	
+
 	/**
 	 * Returns list of all
 	 * @return array
@@ -266,6 +318,18 @@ class Controller implements Errorable, Controllerable
 	}
 
 	/**
+	 * @param array $sourceParametersList
+	 *
+	 * @return Controller
+	 */
+	final public function setSourceParametersList($sourceParametersList)
+	{
+		$this->sourceParametersList = $sourceParametersList;
+
+		return $this;
+	}
+
+	/**
 	 * @param       $actionName
 	 * @param array $sourceParametersList
 	 *
@@ -281,7 +345,8 @@ class Controller implements Errorable, Controllerable
 
 		try
 		{
-			$this->sourceParametersList = $sourceParametersList;
+			$this->setSourceParametersList($sourceParametersList);
+			$this->processUnsignedParameters();
 
 			$action = $this->create($actionName);
 			if (!$action)
@@ -439,6 +504,17 @@ class Controller implements Errorable, Controllerable
 	 * @return HttpResponse|mixed|void
 	 */
 	protected function processAfterAction(Action $action, $result)
+	{}
+
+	/**
+	 * Finalizes response.
+	 * The method will be invoked when HttpApplication will be ready to send response to client.
+	 * It's a final place where Controller can interact with response.
+	 *
+	 * @param Response $response
+	 * @return void
+	 */
+	public function finalizeResponse(Response $response)
 	{}
 
 	final protected function triggerOnAfterAction(Action $action, $result)

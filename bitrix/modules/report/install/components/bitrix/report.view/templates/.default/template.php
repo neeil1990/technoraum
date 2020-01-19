@@ -11,6 +11,8 @@ global $APPLICATION;
 
 $resultTableId = 'report-result-table';
 
+$isPeriodHidden = isset($arResult['settings']['period']['hidden']) && $arResult['settings']['period']['hidden'] === 'Y';
+
 /**
  * @param CBitrixComponentTemplate &$component
  * @param mixed &$arParams[]
@@ -86,8 +88,7 @@ function reportViewShowTopButtons(&$component, &$arParams, &$arResult)
 </script>
 
 <button class="ui-btn ui-btn-light-border ui-btn-icon-setting ui-btn-themes" data-role="action-report"></button>
-<a class="ui-btn ui-btn-primary ui-btn-icon-back" href="<?=CComponentEngine::MakePathFromTemplate($arParams["PATH_TO_REPORT_LIST"], array());?>">
-	<?=GetMessage('REPORT_RETURN_TO_LIST')?></a>
+<a class="ui-btn ui-btn-primary ui-btn-icon-back" href="<?=CComponentEngine::MakePathFromTemplate($arParams["PATH_TO_REPORT_LIST"], array());?>"><?=GetMessage('REPORT_RETURN_TO_LIST')?></a>
 
 <?php
 	$component->EndViewTarget();
@@ -339,6 +340,7 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 									case 'crm_status':
 									case 'iblock_element':
 									case 'iblock_section':
+									case 'money':
 										if ($nValue === 0)
 											$dataValue = $cvInfo['value'];
 										else
@@ -416,20 +418,20 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 	{
 		$err = 0;
 		$chartXValueTypes = array('boolean', 'date', 'datetime', 'float', 'integer', 'string', 'text', 'enum', 'file',
-			'disk_file', 'employee', 'crm', 'crm_status', 'iblock_element', 'iblock_section');
+			'disk_file', 'employee', 'crm', 'crm_status', 'iblock_element', 'iblock_section', 'money');
 		$chartTypes = array(
 			array('id' => 'line', 'name' => GetMessage('REPORT_CHART_TYPE_LINE1'), 'value_types' => array(
 				/*'boolean', 'date', 'datetime', */
 				'float', 'integer'/*, 'string', 'text', 'enum', 'file', 'disk_file', 'employee', 'crm', 'crm_status',
-				'iblock_element', 'iblock_section'*/)),
+				'iblock_element', 'iblock_section', 'money'*/)),
 			array('id' => 'bar', 'name' => GetMessage('REPORT_CHART_TYPE_BAR1'), 'value_types' => array(
 				/*'boolean', 'date', 'datetime', */
 				'float', 'integer'/*, 'string', 'text', 'enum', 'file', 'disk_file', 'employee', 'crm', 'crm_status',
-				'iblock_element', 'iblock_section'*/)),
+				'iblock_element', 'iblock_section', 'money'*/)),
 			array('id' => 'pie', 'name' => GetMessage('REPORT_CHART_TYPE_PIE'), 'value_types' => array(
 				/*'boolean', 'date', 'datetime', */
 				'float', 'integer'/*, 'string', 'text', 'enum', 'file', 'disk_file', 'employee', 'crm', 'crm_status',
-				'iblock_element', 'iblock_section'*/)),
+				'iblock_element', 'iblock_section', 'money'*/)),
 		);
 
 		// check meta
@@ -534,6 +536,7 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 											case 'crm_status':
 											case 'iblock_element':
 											case 'iblock_section':
+											case 'money':
 												$dataValue = (string)$dataValue;
 												break;
 											default:
@@ -731,7 +734,7 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 						foreach ($arCounting as $k => $v)
 						{
 							$arCounting[$k] = $v * 100 / $sumAll;
-							$sumAllPrcnt =+ $arCounting[$k];
+							$sumAllPrcnt += $arCounting[$k];
 						}
 						if (arsort($arCounting, SORT_NUMERIC))
 						{
@@ -858,6 +861,25 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 			var chartType = amChartData["type"];
 			var valueFields = amChartData["valueFields"];
 			var valueColors = amChartData["valueColors"];
+
+			var i, value;
+			if (BX.type.isNotEmptyString(amChartData['categoryField'])
+				&& amChartData['categoryType'] === 'money'
+				&& BX.type.isArray(amChartData['data']))
+			{
+				var ta = BX.create('TEXTAREA');
+				for (i = 0; i < amChartData['data'].length; i++)
+				{
+					value = amChartData['data'][i][amChartData['categoryField']];
+					if (BX.type.isNotEmptyString(value))
+					{
+						ta.innerHTML = value;
+						amChartData['data'][i][amChartData['categoryField']] = ta.textContent;
+					}
+				}
+				ta = null;
+			}
+			i = value = null;
 
 			// CHART
 			var chart = null;
@@ -1321,6 +1343,10 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 		<label class="filter-field-title">%TITLE% "%COMPARE%"</label>
 	</div>
 
+	<div class="filter-field filter-field-money chfilter-field-money">
+		<label class="filter-field-title">%TITLE% "%COMPARE%"</label>
+	</div>
+
 	<div class="filter-field filter-field-employee chfilter-field-employee" callback="RTFilter_chooseUser">
 		<label for="user-email" class="filter-field-title">%TITLE% "%COMPARE%"</label>
 		<span class="webform-field-textbox-inner">
@@ -1399,7 +1425,7 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 			<?=$APPLICATION->GetViewContent("report_view_prefilter")?>
 
 			<!-- period -->
-			<div class="filter-field">
+			<div class="filter-field<? echo $isPeriodHidden ? ' filter-field-hidden' : ''; ?>">
 				<label for="task-interval-filter" class="filter-field-title"><?=GetMessage('REPORT_PERIOD')?></label>
 				<select class="filter-dropdown" style="margin-bottom: 0;" onchange="OnTaskIntervalChange(this)" id="task-interval-filter" name="F_DATE_TYPE">
 					<?php foreach ($arPeriodTypes as $key => $type): ?>
@@ -1446,7 +1472,13 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 
 					function OnTaskIntervalChange(select)
 					{
-						select.parentNode.className = "filter-field filter-field-date-combobox " + "filter-field-date-combobox-" + select.value;
+						var isPeriodHidden = <? echo ($isPeriodHidden ? 'true' : 'false'); ?>;
+						var periodSelect = BX('task-interval-filter');
+						var hide = isPeriodHidden && periodSelect && periodSelect === select;
+						select.parentNode.className = "filter-field" +
+							((hide) ? " filter-field-hidden" : "") +
+							" filter-field-date-combobox" +
+							" filter-field-date-combobox-" + select.value;
 
 						var dateInterval = BX.findNextSibling(select, { "tag": "span", 'className': "filter-date-interval" });
 						var dayInterval = BX.findNextSibling(select, { "tag": "span", 'className': "filter-day-interval" });
@@ -1539,11 +1571,17 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 				foreach ($arResult['changeableFilters'] as $chFilter)
 				{
 					if (isset($chFilter['isUF']) && $chFilter['isUF'] === true && isset($chFilter['data_type'])
-						&& ($chFilter['data_type'] === 'enum'
-							||$chFilter['data_type'] === 'crm'
-							|| $chFilter['data_type'] === 'crm_status'
-							|| $chFilter['data_type'] === 'iblock_element'
-							|| $chFilter['data_type'] === 'iblock_section')
+						&& in_array(
+								$chFilter['data_type'],
+								[
+									'enum',
+									'crm',
+									'crm_status',
+									'iblock_element',
+									'iblock_section',
+									'money'
+								],
+								true)
 						&& isset($chFilter['ufId']) && isset($chFilter['ufName'])
 						&& is_array($arResult['ufInfo'][$chFilter['ufId']][$chFilter['ufName']]))
 					{
@@ -1611,7 +1649,8 @@ function getResultColumnDataType(&$viewColumnInfo, &$customColumnTypes, $helperC
 						ufId = info[i]["UF_ID"];
 						ufName = info[i]["UF_NAME"];
 						if (fieldType === 'enum' ||fieldType === 'crm' || fieldType === 'crm_status'
-							|| fieldType === 'iblock_element' || fieldType === 'iblock_section')
+							|| fieldType === 'iblock_element' || fieldType === 'iblock_section'
+							|| fieldType === 'money')
 						{
 							tipicalControl = false;
 						}

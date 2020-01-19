@@ -2,6 +2,7 @@
 
 use Bitrix\Sale\BusinessValue;
 use Bitrix\Sale\BusinessValueConsumer1C;
+use Bitrix\Sale;
 
 IncludeModuleLangFile(__FILE__);
 
@@ -168,7 +169,12 @@ class CSaleExport
 
 	static protected function load($id)
 	{
-		return \Bitrix\Sale\Order::load($id);
+		$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
+
+		/** @var Sale\Order $orderClass */
+		$orderClass = $registry->getOrderClassName();
+
+		return $orderClass::load($id);
 	}
 
 	static public function getParentEntityTable()
@@ -1024,8 +1030,9 @@ class CSaleExport
 				continue;
 			}
 
-			$xml .= $export->proccess(['ORDER_ID'=>$orderFields['ID']])
-                ->getData()[0];
+			$r = $export->proccess(['ORDER_ID'=>$orderFields['ID']]);
+			if($r->isSuccess())
+                $xml .= $r->getData()[0];
 
 			static::saveExportParams($orderFields);
 
@@ -1556,7 +1563,7 @@ class CSaleExport
 		ob_start();
 		?><<?=CSaleExport::getTagName("SALE_EXPORT_ITEMS")?>><?
 
-		$select = array("ID", "NOTES", "PRODUCT_XML_ID", "CATALOG_XML_ID", "NAME", "PRICE", "QUANTITY", "DISCOUNT_PRICE", "VAT_RATE", "MEASURE_CODE", "SET_PARENT_ID", "TYPE");
+		$select = array("ID", "NOTES", "PRODUCT_XML_ID", "CATALOG_XML_ID", "NAME", "PRICE", "QUANTITY", "DISCOUNT_PRICE", "VAT_RATE", "MEASURE_CODE", "SET_PARENT_ID", "TYPE", "VAT_INCLUDED");
 		if(count($arSelect)>0)
 		    $select = array_merge($arSelect, $select);
 
@@ -1660,7 +1667,7 @@ class CSaleExport
 					<<?=CSaleExport::getTagName("SALE_EXPORT_TAXES")?>>
 						<<?=CSaleExport::getTagName("SALE_EXPORT_TAX")?>>
 							<<?=CSaleExport::getTagName("SALE_EXPORT_ITEM_NAME")?>><?=CSaleExport::getTagName("SALE_EXPORT_VAT")?></<?=CSaleExport::getTagName("SALE_EXPORT_ITEM_NAME")?>>
-							<<?=CSaleExport::getTagName("SALE_EXPORT_IN_PRICE")?>>true</<?=CSaleExport::getTagName("SALE_EXPORT_IN_PRICE")?>>
+							<<?=CSaleExport::getTagName("SALE_EXPORT_IN_PRICE")?>><?=$arBasket["VAT_INCLUDED"]=="Y"?'true':'false'?></<?=CSaleExport::getTagName("SALE_EXPORT_IN_PRICE")?>>
 							<<?=CSaleExport::getTagName("SALE_EXPORT_AMOUNT")?>><?=roundEx($basketVatSum, 2)?></<?=CSaleExport::getTagName("SALE_EXPORT_AMOUNT")?>>
 						</<?=CSaleExport::getTagName("SALE_EXPORT_TAX")?>>
 					</<?=CSaleExport::getTagName("SALE_EXPORT_TAXES")?>>
@@ -2942,7 +2949,7 @@ class CSaleExport
 								$mapping1C['TYPE'] = $mapping['PROVIDER_KEY'];
 								break;
 
-							default: continue; // other types aren't present in old version
+							default: continue 2; // other types aren't present in old version
 						}
 
 						if (isset($code['CODE_INDEX']))
@@ -3160,7 +3167,7 @@ class CSaleExport
 						$mapping['PROVIDER_KEY'] = $mapping1C['TYPE'];
 						break;
 
-					default: continue; // other types should not be there
+					default: continue 2; // other types should not be there
 				}
 
 				$r = BusinessValueConsumer1C::setMapping($codeKey, $personTypeId, $mapping);
@@ -3225,7 +3232,7 @@ class CSaleExport
 		}
 	}
 
-	function CheckFields($ACTION, &$arFields, $ID = 0)
+	static function CheckFields($ACTION, &$arFields, $ID = 0)
 	{
 		if ((is_set($arFields, "PERSON_TYPE_ID") || $ACTION=="ADD") && IntVal($arFields["PERSON_TYPE_ID"]) <= 0)
 		{
@@ -3252,9 +3259,9 @@ class CSaleExport
 		return True;
 	}
 
-	function Add($arFields)
+	static function Add($arFields)
 	{
-		if (! CSaleExport::CheckFields('ADD', $arFields))
+		if (! static::CheckFields('ADD', $arFields))
 			return false;
 
 		foreach ($arFields as $key => $value)
@@ -3274,11 +3281,11 @@ class CSaleExport
 		return $arFields['PERSON_TYPE_ID'];
 	}
 
-	function Update($ID, $arFields)
+	static function Update($ID, $arFields)
 	{
 		$ID = IntVal($ID);
 
-		if (! CSaleExport::CheckFields('UPDATE', $arFields, $ID))
+		if (! static::CheckFields('UPDATE', $arFields, $ID))
 			return false;
 
 		foreach ($arFields as $key => $value)

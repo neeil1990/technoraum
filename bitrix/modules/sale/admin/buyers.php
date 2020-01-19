@@ -172,14 +172,37 @@ $lAdmin->AddFilter($filterFields, $arFilter);
 if (isset($arFilter["BUYER"]) && strlen($arFilter["BUYER"]) > 0)
 {
 	$nameSearch = trim($arFilter["BUYER"]);
-	$arFilter[] = array(
-		"LOGIC" => "OR",
-		"%USER.LOGIN" => $nameSearch,
-		"%USER.NAME" => $nameSearch,
-		"%USER.LAST_NAME" => $nameSearch,
-		"%USER.SECOND_NAME" => $nameSearch,
-		"%USER.EMAIL" => $nameSearch,
-	);
+	$searchFilter = \Bitrix\Main\UserUtils::getAdminSearchFilter([
+		'FIND' => $nameSearch
+	]);
+
+	$renameUserFields = function ($fields) use (&$renameUserFields)
+	{
+		$result = [];
+		foreach ($fields as $key => $value)
+		{
+			if (is_array($value))
+			{
+				$result[$key] = $renameUserFields($value);
+			}
+			else
+			{
+				if (strpos($key, 'INDEX') !== false)
+				{
+					$key = str_replace('INDEX', 'USER.INDEX', $key);
+				}
+				elseif ($key !== 'LOGIC')
+				{
+					$namePosition = strpos($key, preg_replace('/^\W+/', '', $key));
+					$key = substr($key, 0, $namePosition)."USER.".substr($key, $namePosition);
+				}
+				$result[$key] = $value;
+			}
+		}
+		return $result;
+	};
+
+	$arFilter = array_merge($arFilter, $renameUserFields($searchFilter));
 	unset($arFilter["BUYER"]);
 }
 
@@ -255,7 +278,25 @@ if ($publicMode && \Bitrix\Main\Loader::includeModule('crm'))
 
 	if ($searchString !== '')
 	{
-		$filter = array_merge($filter, \Bitrix\Main\UserUtils::getAdminSearchFilter(['FIND' => $searchString]));
+		$searchFields = ['FIND' => $searchString];
+	}
+	else
+	{
+		$searchFields = [];
+
+		foreach ($arFilter as $key => $searchValue)
+		{
+			if (strpos($key, 'USER.') === 0)
+			{
+				$field = str_replace('USER.', '', $key);
+				$searchFields[$field] = $searchValue;
+			}
+		}
+	}
+
+	if (!empty($searchFields))
+	{
+		$filter = array_merge(\Bitrix\Main\UserUtils::getAdminSearchFilter($searchFields), $filter);
 	}
 
 	$gridColumns = $gridOptions->getUsedColumns();
@@ -451,7 +492,7 @@ while ($arBuyers = $resultUsersList->Fetch())
 	if (in_array("GROUPS_ID", $arVisibleColumns))
 	{
 		$strUserGroup = '';
-		$arUserGroups = CUser::GetUserGroup($arBuyers["USER_ID"]);
+		$arUserGroups = CUser::GetUserGroup($userId);
 
 		foreach ($arUsersGroups as $arGroup)
 		{
@@ -477,7 +518,7 @@ while ($arBuyers = $resultUsersList->Fetch())
 		"LINK" => $profileUrl,
 		"DEFAULT" => true
 	);
-	
+
 	if ($publicMode)
 	{
 		$arActions[] = array(
@@ -489,10 +530,10 @@ while ($arBuyers = $resultUsersList->Fetch())
 
 	foreach($arSitesShop as $val)
 	{
-		$addOrderUrl = "sale_order_create.php?USER_ID=".$arBuyers["USER_ID"]."&SITE_ID=".$val["ID"]."&lang=".LANGUAGE_ID;
+		$addOrderUrl = "sale_order_create.php?USER_ID=".$userId."&SITE_ID=".$val["ID"]."&lang=".LANGUAGE_ID;
 		if ($publicMode)
 		{
-			$addOrderUrl = "/shop/orders/details/0/?USER_ID=".$arBuyers["USER_ID"]."&SITE_ID=".$val["ID"]."&lang=".LANGUAGE_ID;
+			$addOrderUrl = "/shop/orders/details/0/?USER_ID=".$userId."&SITE_ID=".$val["ID"]."&lang=".LANGUAGE_ID;
 		}
 		$arActions[] = array(
 			"ICON" => "view",
@@ -523,8 +564,14 @@ $lAdmin->CheckListMode();
 
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/prolog.php");
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
-
-$lAdmin->DisplayFilter($filterFields);
-$lAdmin->DisplayList();
+if (!$publicMode && \Bitrix\Sale\Update\CrmEntityCreatorStepper::isNeedStub())
+{
+	$APPLICATION->IncludeComponent("bitrix:sale.admin.page.stub", ".default");
+}
+else
+{
+	$lAdmin->DisplayFilter($filterFields);
+	$lAdmin->DisplayList();
+}
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
 ?>

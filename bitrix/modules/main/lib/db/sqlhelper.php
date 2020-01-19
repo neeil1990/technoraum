@@ -10,6 +10,8 @@ abstract class SqlHelper
 	/** @var Connection $connection */
 	protected $connection;
 
+	protected $idCache;
+
 	/**
 	 * @param Connection $connection Database connection.
 	 */
@@ -61,17 +63,22 @@ abstract class SqlHelper
 	 */
 	public function quote($identifier)
 	{
-		// security unshielding
-		$identifier = str_replace(array($this->getLeftQuote(), $this->getRightQuote()), '', $identifier);
-
-		// shield [[database.]tablename.]columnname
-		if (strpos($identifier, '.') !== false)
+		if (empty($this->idCache[$identifier]))
 		{
-			$identifier = str_replace('.', $this->getRightQuote() . '.' . $this->getLeftQuote(), $identifier);
+			// security unshielding
+			$quotedIdentifier = str_replace([$this->getLeftQuote(), $this->getRightQuote()], '', $identifier);
+
+			// shield [[database.]tablename.]columnname
+			if (strpos($quotedIdentifier, '.') !== false)
+			{
+				$quotedIdentifier = str_replace('.', $this->getRightQuote() . '.' . $this->getLeftQuote(), $quotedIdentifier);
+			}
+
+			// shield general borders
+			$this->idCache[$identifier] = $this->getLeftQuote() . $quotedIdentifier . $this->getRightQuote();
 		}
 
-		// shield general borders
-		return $this->getLeftQuote() . $identifier . $this->getRightQuote();
+		return $this->idCache[$identifier];
 	}
 
 	/**

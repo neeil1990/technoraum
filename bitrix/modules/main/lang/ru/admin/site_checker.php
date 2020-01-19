@@ -86,6 +86,7 @@ $MESS["SC_SENT"] = "Отправлено. Время отправки:";
 $MESS["SC_SEC"] = "сек.";
 $MESS["SC_DB_ERR"] = "Проблемная версия БД:";
 $MESS["SC_DB_ERR_MODE"] = "Переменная sql_mode в MySQL должна быть пустая, текущее значение:";
+$MESS["SC_DB_ERR_INNODB_STRICT"] = "innodb_strict_mode=#VALUE#, требуется OFF";
 $MESS["SC_NO_PROXY"] = "Нет соединения с прокси сервером";
 $MESS["SC_PROXY_ERR_RESP"] = "Ошибочный ответ сервера обновлений через прокси";
 $MESS["SC_UPDATE_ERR_RESP"] = "Ошибочный ответ сервера обновлений";
@@ -312,10 +313,12 @@ $MESS["SC_HELP_CHECK_MYSQL_TIME"] = "Сравнивается системное время базы данных и 
 
 Вместо <i>Etc/GMT-3</i> укажите свой часовой пояс из списка: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones";
 $MESS["SC_HELP_CHECK_MYSQL_MODE"] = "Параметр <i>sql_mode</i> задаёт режим работы MySQL. Может принимать значения, несовместимые с 1С-Битрикс. Чтобы установить режим работы по умолчанию, добавьте в <i>/bitrix/php_interface/after_connect_d7.php</i>:
-<code>\$connection = Bitrix\\Main\\Application::getConnection(); 
-\$connection-&gt;queryExecute(&quot;SET sql_mode=''&quot;);</code>
+<code>\$connection = Bitrix\\Main\\Application::getConnection();
+\$connection-&gt;queryExecute(&quot;SET sql_mode=''&quot;);
+\$connection-&gt;queryExecute(&quot;SET innodb_strict_mode=0&quot;);</code>
 В файл <i>/bitrix/php_interface/after_connect.php</i>
-<code>\$DB->Query(&quot;SET sql_mode=''&quot;);</code>
+<code>\$DB->Query(&quot;SET sql_mode=''&quot;);
+\$DB->Query(&quot;SET innodb_strict_mode=0&quot;);</code>
 ";
 $MESS["SC_HELP_CHECK_MYSQL_TABLE_CHARSET"] = "Кодировка всех таблиц (и полей) должна совпадать с кодировкой базы данных. Если какие-то таблицы имеют неправильную кодировку, необходимо исправить их вручную через SQL запросы.
 
@@ -343,7 +346,8 @@ $MESS["SC_HELP_CHECK_MYSQL_CONNECTION_CHARSET"] = "Проверяется кодировка и сравн
 ";
 $MESS["SC_READ_MORE_ANC"] = "Подробности в <a href=\"#LINK#\" target=_blank>журнале проверки системы</a>.";
 $MESS["SC_CHARSET_CONN_VS_RES"] = "Кодировка соединения (#CONN#) отличается от кодировки результата (#RES#)";
-$MESS["SC_STRLEN_FAIL_PHP56"] = "Строковые функции работают некорректно. Такая ситуация может возникать из-за ошибки в PHP 5.6 (<a href=\"https://bugs.php.net/bug.php?id=68644\" target=_blank>https://bugs.php.net/bug.php?id=68644</a>), в этом случае надо установить более раннюю или более позднюю версию PHP.";
+$MESS["SC_STRLEN_FAIL_PHP56"] = "Строковая функция strlen работает некорректно.";
+$MESS["SC_STRTOUPPER_FAIL"] = "Строковые функции strtoupper и strtolower работают некорректно";
 $MESS["SC_T_RECURSION"] = "Размер стека и pcre.recursion_limit";
 $MESS["SC_HELP_CHECK_PCRE_RECURSION"] = "Если параметр <i>pcre.recursion_limit</i> превышает системный размер стека (обычно 8 Мб), то PHP падает с ошибкой <i>Segmentation fault</i> при выполнении сложных регулярных выражений.
 
@@ -465,6 +469,7 @@ $MESS["MAIN_SC_SSL_NOT_VALID"] = "Сервер имеет невалидный SSL сертификат, возмож
 $MESS["MAIN_SC_PATH_PUB"] = "Путь для публикации сообщений в настройках модуля Push and Pull некорректен";
 $MESS["MAIN_SC_PATH_SUB"] = "Путь для чтения сообщений в настройках модуля Push and Pull некорректен";
 $MESS["MAIN_SC_STREAM_DISABLED"] = "Выключена опция nginx-push-stream-module в настройках модуля Push and Pull. ";
+$MESS["MAIN_SC_PULL_NOT_REGISTERED"] = "Ошибка регистрации на Push сервере, предоставленном 1С-Битрикс";
 $MESS["MAIN_NO_PULL"] = "Модуль Push and Pull не установлен. ";
 $MESS["MAIN_NO_PULL_MODULE"] = "Модуль Push and Pull не установлен. PUSH уведомления не будут приходить на мобильные устройства.";
 $MESS["MAIN_NO_OPTION_PULL"] = "Не включена опция модуля Push and Pull отправки PUSH уведомлений. PUSH уведомления не будут приходить на мобильные устройства.";
@@ -564,7 +569,7 @@ $MESS["MAIN_SC_NTLM_SUCCESS"] = "Авторизация NTLM работает, текущий пользователь
 $MESS["MAIN_SC_NO_NTLM"] = "Текущее подключение не использует NTLM авторизацию";
 $MESS["MAIN_SC_NO_PUSH_STREAM_CONNECTION"] = "Не удалось подключиться к модулю nginx-push-stream отправки мгновенных сообщений";
 $MESS["MAIN_SC_NO_SUB_CONNECTION"] = "Не удалось подключиться к модулю nginx-push-stream чтения мгновенных сообщений";
-$MESS["MAIN_SC_PUSH_INCORRECT"] = "Модуль nginx-push-stream работает некорректно";
+$MESS["MAIN_SC_PUSH_INCORRECT"] = "Модуль #MODULE# работает некорректно";
 $MESS["MAIN_SC_NO_PUSH_STREAM"] = "Не настроен модуль nginx push-stream, который необходим для отображения комментариев в живой ленте в реальном режиме времени";
 $MESS["MAIN_SC_NO_PUSH_STREAM_VIDEO"] = "Не настроен модуль nginx push-stream, который необходим для осуществления видеозвонков";
 $MESS["MAIN_SC_NO_EXTERNAL_ACCESS_MOB"] = "Функция недоступна из-за невозможности подключиться к порталу снаружи из мобильного приложения";

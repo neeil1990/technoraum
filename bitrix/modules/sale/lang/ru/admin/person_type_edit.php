@@ -27,6 +27,7 @@ $MESS ['SPTEN_PRICE_TO'] = "до";
 $MESS ['SPTEN_PERSON_TYPE_VALUE'] = "Величина скидки";
 $MESS ['SPTEN_ACTIVE'] = "Активность";
 $MESS ['SPTEN_SORT'] = "Индекс сортировки";
+$MESS ['SPTEN_XML_ID'] = "Внешний код";
 $MESS ['SPTEN_DOMAIN_P_TYPE'] = "Соответствие с физ. и юр. лицом";
 $MESS ['SPTEN_DOMAIN_P_TYPE_NONE'] = "Не установлено";
 $MESS ['SPTEN_DOMAIN_P_TYPE_I'] = "Физическое лицо";

@@ -248,6 +248,13 @@ class AdminFilterOption extends Stepper
 					$newFields[$ratioFields[$fieldId]."_to"] = $oldFields[$fieldId."_2"]["value"];
 				}
 			}
+			elseif (isset($ratioFields[$fieldId."_integer"]))
+			{
+				$fieldId = $fieldId."_integer";
+				$newFields[$ratioFields[$fieldId]."_numsel"] = "exact";
+				$newFields[$ratioFields[$fieldId]."_from"] = $field["value"];
+				$newFields[$ratioFields[$fieldId]."_to"] = $field["value"];
+			}
 			elseif (substr($fieldId, -6) === "_start")
 			{
 				$fieldId = substr($fieldId, 0, strlen($fieldId)-6);
@@ -257,6 +264,34 @@ class AdminFilterOption extends Stepper
 					$newFields[$ratioFields[$fieldId]."_numsel"] = "range";
 					$newFields[$ratioFields[$fieldId]."_start"] = $field["value"];
 					$newFields[$ratioFields[$fieldId]."_end"] = $oldFields[$fieldId."_end"]["value"];
+				}
+			}
+			elseif ((bool)strtotime($field["value"]))
+			{
+				if ((substr($fieldId, -5) == "_from"))
+				{
+					$fieldId = substr($fieldId, 0, strlen($fieldId)-5);
+				}
+				elseif ((substr($fieldId, -3) == "_to"))
+				{
+					$fieldId = substr($fieldId, 0, strlen($fieldId)-3);
+				}
+				$from = "";
+				$to = "";
+				if (array_key_exists($fieldId."_from", $oldFields))
+				{
+					$from = $oldFields[$fieldId."_from"]["value"];
+					$to = $oldFields[$fieldId."_to"]["value"];
+				}
+				if ($from || $to)
+				{
+					$newFields[$ratioFields[$fieldId]."_datesel"] = DateType::RANGE;
+					$newFields[$ratioFields[$fieldId]."_from"] = $from;
+					$newFields[$ratioFields[$fieldId]."_to"] = $to;
+					$newFields[$ratioFields[$fieldId]."_days"] = "";
+					$newFields[$ratioFields[$fieldId]."_month"] = "";
+					$newFields[$ratioFields[$fieldId]."_quarter"] = "";
+					$newFields[$ratioFields[$fieldId]."_year"] = "";
 				}
 			}
 			elseif (substr($fieldId, -5) == "_from" && !array_key_exists($fieldId."_FILTER_DIRECTION", $oldFields))

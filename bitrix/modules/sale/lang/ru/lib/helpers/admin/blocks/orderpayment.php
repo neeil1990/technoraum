@@ -69,4 +69,5 @@ $MESS["SALE_ORDER_PAYMENT_ADD_COMPANY"] = 'Список активных компаний пуст. <a hre
 $MESS["SALE_ORDER_PAYMENT_NO_COMPANY"] = 'Не выбрано';
 $MESS["SALE_ORDER_PAYMENT_PAY_SYSTEM_CHECK"] = 'Получить';
 $MESS['SALE_ORDER_PAYMENT_HIDDEN'] = "[Скрыто]";
+$MESS['SALE_ORDER_PAYMENT_DOC_PREVIEW'] = "Просмотреть";
 $MESS['PAYMENT_CASHBOX_CHECK_ADD_WINDOW_TITLE'] = "Добавление нового чека";

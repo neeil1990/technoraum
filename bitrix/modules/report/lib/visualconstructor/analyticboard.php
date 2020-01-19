@@ -1,8 +1,8 @@
 <?php
 namespace Bitrix\Report\VisualConstructor;
 
+use Bitrix\Main\ArgumentException;
 use Bitrix\Report\VisualConstructor\Helper\Filter;
-
 
 /**
  * Class AnalyticBoard
@@ -17,26 +17,24 @@ class AnalyticBoard
 	private $batchKey = null;
 	private $buttons = [];
 	private $disabled = false;
-
-
+	private $stepperEnabled = false;
+	private $stepperIds = [];
+	private $limited = false;
+	private $limitComponentParams = [];
+private $isExternal = false;
+	private $externalUrl = "";
 	public function __construct($boardId = '')
 	{
 		if ($boardId)
 		{
 			$this->setBoardKey($boardId);
-			$boardControls = new BoardComponentButton('bitrix:report.visualconstructor.board.controls', '', [
-				'BOARD_ID' => $this->getBoardKey(),
-				'DEMO_TOGGLE' => false
+
+			$configurationButton = new BoardComponentButton('bitrix:report.analytics.config.control', '', [
+				'BOARD_ID' => $this->getBoardKey()
 			]);
-			$this->addButton($boardControls);
-			$feedbackButton = new BoardComponentButton('bitrix:report.analytics.feedback', '', [
-				'BOARD_KEY' => $this->getBoardKey(),
-			]);
-			$this->addButton($feedbackButton);
+			$this->addButton($configurationButton);
+			$this->addButton(new BoardButton(' '));
 		}
-
-
-
 	}
 
 	/**
@@ -145,6 +143,10 @@ class AnalyticBoard
 				'string' => [],
 			]
 		];
+		if ($this->isDisabled())
+		{
+			return $result;
+		}
 		$buttons = $this->getButtons();
 		foreach ($buttons as $button)
 		{
@@ -190,5 +192,183 @@ class AnalyticBoard
 	public function setDisabled($disabled)
 	{
 		$this->disabled = $disabled;
+	}
+
+	public function addFeedbackButton()
+	{
+		$feedbackButton = new BoardComponentButton('bitrix:ui.feedback.form', '', [
+			'ID' => 'crm-analytics',
+			'VIEW_TARGET' => null,
+			'FORMS' => [
+				['zones' => ['com.br'], 'id' => '58','lang' => 'br', 'sec' => 'k6be5r'],
+				['zones' => ['es'], 'id' => '60','lang' => 'la', 'sec' => '1shpig'],
+				['zones' => ['de'], 'id' => '62','lang' => 'de', 'sec' => 'dj2q8l'],
+				['zones' => ['ua'], 'id' => '66','lang' => 'ua', 'sec' => 't5y7px'],
+				['zones' => ['ru', 'kz', 'by'], 'id' => '68','lang' => 'ru', 'sec' => 'h6thh2'],
+				['zones' => ['en'], 'id' => '64','lang' => 'en', 'sec' => '776ire'],
+			],
+			'PRESETS' => [
+				'BOARD_KEY' => $this->getBoardKey(),
+				'sender_page' => $this->getTitle()
+			]
+
+		]);
+		$this->addButton($feedbackButton);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isStepperEnabled()
+	{
+		return $this->stepperEnabled;
+	}
+
+	public function getStepperIds()
+	{
+		return $this->stepperIds;
+	}
+
+	public function setStepperIds($stepperIds = [])
+	{
+		$this->stepperIds =$stepperIds;
+	}
+	/**
+	 * @param bool $stepperEnabled
+	 */
+	public function setStepperEnabled($stepperEnabled)
+	{
+		$this->stepperEnabled = $stepperEnabled;
+	}
+
+	public function isLimited()
+	{
+		return $this->limited;
+	}
+
+	private function getLimitComponentOptions()
+	{
+		return $this->limitComponentParams;
+	}
+
+	public function getLimitComponentName()
+	{
+		$componentParams = $this->getLimitComponentOptions();
+		if (!isset($componentParams['NAME']))
+		{
+			throw new ArgumentException("Component name do not isset");
+		}
+		return $componentParams['NAME'];
+	}
+
+	public function getLimitComponentTemplateName()
+	{
+		$componentOptions = $this->getLimitComponentOptions();
+		if (!isset($componentOptions['TEMPLATE_NAME']))
+		{
+			return '';
+		}
+		return $componentOptions['TEMPLATE_NAME'];
+	}
+
+	public function getLimitComponentParams()
+	{
+		$componentOptions = $this->getLimitComponentOptions();
+		if (!isset($componentOptions['PARAMS']))
+		{
+			return [];
+		}
+		return $componentOptions['PARAMS'];
+	}
+
+	public function setLimit($limitComponentParams, $limit = false)
+	{
+		$this->limitComponentParams = $limitComponentParams;
+		$this->limited = $limit;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isExternal(): bool
+	{
+		return $this->isExternal;
+	}
+
+	/**
+	 * @param bool $isExternal
+	 */
+	public function setExternal(bool $isExternal): void
+	{
+		$this->isExternal = $isExternal;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getExternalUrl(): string
+	{
+		return $this->externalUrl;
+	}
+
+	/**
+	 * @param string $externalUrl
+	 */
+	public function setExternalUrl(string $externalUrl): void
+	{
+		$this->externalUrl = $externalUrl;
+	}
+
+	public function getDisplayComponentName()
+	{
+		if ($this->isDisabled())
+		{
+			return 'bitrix:report.analytics.empty';
+		}
+		elseif ($this->isLimited())
+		{
+			return $this->getLimitComponentName();
+		}
+		else
+		{
+			return 'bitrix:report.visualconstructor.board.base';
+		}
+	}
+
+	public function getDisplayComponentTemplate()
+	{
+		return ($this->isLimited() ? $this->getLimitComponentTemplateName() : "");
+	}
+
+	public function getDisplayComponentParams()
+	{
+		if ($this->isDisabled())
+		{
+			return [];
+		}
+		elseif ($this->isLimited())
+		{
+			return $this->getLimitComponentParams();
+		}
+		else
+		{
+			return [
+				'BOARD_ID' => $this->getBoardKey(),
+				'IS_DEFAULT_MODE_DEMO' => false,
+				'IS_BOARD_DEFAULT' => true,
+				'FILTER' => $this->getFilter(),
+				'BOARD_BUTTONS' => $this->getButtons(),
+				'IS_ENABLED_STEPPER' => $this->isStepperEnabled(),
+				'STEPPER_IDS' => $this->getStepperIds()
+			];
+		}
+	}
+
+	/**
+	 * Special actions to perform with board reset, required by some boards
+	 */
+	public function resetToDefault()
+	{
+		// nothing here
 	}
 }

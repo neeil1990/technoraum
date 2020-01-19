@@ -2211,10 +2211,15 @@ h2.basket-item-info-name {
 
 div.bx-blue .btn.btn-default {
 	border-color: #feee35!important;
-	background-color: #feee35!important;
+	background-color: #fff!important;
 	color: #000!important;
 	display: block;
 	margin-bottom: 3px;
+	width:100%;
+}
+div.bx-blue .btn.btn-default:hover {
+    background-color: #eede25!important;
+    border-color: #eede25!important;
 }
 .basket-coupon-block-total-price-difference.credit {
 	cursor: pointer;

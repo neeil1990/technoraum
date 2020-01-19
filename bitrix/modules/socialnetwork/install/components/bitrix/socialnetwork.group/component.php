@@ -248,6 +248,11 @@ else
 				$arExtranetUserID[] = $arUser["ID"];
 		}
 
+		if ($arGroup['NUMBER_OF_MODERATORS'] >= 1)
+		{
+			$arGroup['NUMBER_OF_MODERATORS']--;
+		}
+
 		$arResult["Group"] = $arGroup;
 
 		$arResult["HideArchiveLinks"] =
@@ -313,6 +318,7 @@ else
 			$arResult["Urls"]["Subscribe"] = CComponentEngine::MakePathFromTemplate($arParams["PATH_TO_GROUP_SUBSCRIBE"], array("group_id" => $arResult["Group"]["ID"]));
 			$arResult["Urls"]["MessageToGroup"] = CComponentEngine::MakePathFromTemplate($arParams["PATH_TO_MESSAGE_TO_GROUP"], array("group_id" => $arResult["Group"]["ID"]));
 			$arResult["Urls"]["GroupLog"] = CComponentEngine::MakePathFromTemplate($arParams["PATH_TO_GROUP_LOG"], array("group_id" => $arResult["Group"]["ID"]));
+			$arResult["Urls"]["Copy"] = CComponentEngine::MakePathFromTemplate($arParams["PATH_TO_GROUP_COPY"], array("group_id" => $arResult["Group"]["ID"]));
 
 			if ($arParams["SET_TITLE"]=="Y")
 				$APPLICATION->SetTitle($arResult["Group"]["NAME"]);
@@ -418,7 +424,11 @@ else
 				$arResult["Moderators"] = false;
 				$dbModerators = CSocNetUserToGroup::GetList(
 					array("ROLE" => "ASC"),
-					array("GROUP_ID" => $arResult["Group"]["ID"], "<=ROLE" => SONET_ROLES_MODERATOR, "USER_ACTIVE" => "Y"),
+					array(
+						"GROUP_ID" => $arResult["Group"]["ID"],
+						"=ROLE" => SONET_ROLES_MODERATOR,
+						"USER_ACTIVE" => "Y"
+					),
 					false,
 					array("nTopCount" => $arParams["ITEMS_COUNT"]),
 					array("ID", "USER_ID", "ROLE", "USER_NAME", "USER_LAST_NAME", "USER_SECOND_NAME", "USER_LOGIN", "USER_PERSONAL_PHOTO", "USER_PERSONAL_GENDER", "USER_WORK_POSITION")

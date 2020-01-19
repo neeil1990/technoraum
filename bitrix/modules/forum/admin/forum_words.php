@@ -152,7 +152,7 @@
 	);
 	$db_res = CFilterDictionary::GetList(array(), array("TYPE"=>"T"));
 	$option = "";
-	$active = COption::GetOptionString("forum", "FILTER_DICT_T", '', SITE);
+	$active = COption::GetOptionString("forum", "FILTER_DICT_T", '', SITE_ID);
 	while ($res = $db_res->GetNext())
 		$option .= "<option value='".$res["ID"].($res["ID"] == $active ? " selected " : "")."'>".$res["TITLE"]."</option>";
 	$lAdmin->AddGroupActionTable(

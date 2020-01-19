@@ -2,5 +2,4 @@
 /** @var array $templateData */
 /** @var @global CMain $APPLICATION */
 global $APPLICATION;
-$APPLICATION->SetAdditionalCSS("/bitrix/css/main/font-awesome.css");
 ?>

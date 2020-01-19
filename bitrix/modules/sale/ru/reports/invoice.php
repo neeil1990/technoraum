@@ -168,6 +168,11 @@ for ($i = 0, $max = count($arBasketIDs); $i < $max; $i++)
 	$arBasketOrder[] = $arBasketTmp;
 }
 
+if ($arOrder['DELIVERY_VAT_RATE'] > 0)
+{
+	$bUseVat = true;
+}
+
 //разбрасываем скидку на заказ по товарам
 if (floatval($arOrder["DISCOUNT_VALUE"]) > 0)
 {
@@ -236,8 +241,7 @@ $currency = preg_replace('/(^|[^&])#/', '${1}', $arCurFormat['FORMAT_STRING']);
 			}
 			elseif(!$bUseVat)
 			{
-				$basket_tax = CSaleOrderTax::CountTaxes($b_AMOUNT*$arQuantities[$mi], $arTaxList, $arOrder["CURRENCY"]);
-
+				$basket_tax = CSaleOrderTax::CountTaxes($b_AMOUNT, $arTaxList, $arOrder["CURRENCY"]);
 				for ($i = 0, $max = count($arTaxList); $i < $max; $i++)
 				{
 					if ($arTaxList[$i]["IS_IN_PRICE"] == "Y")
@@ -248,7 +252,11 @@ $currency = preg_replace('/(^|[^&])#/', '${1}', $arCurFormat['FORMAT_STRING']);
 					$taxRate += ($arTaxList[$i]["VALUE"]);
 				}
 			}
-			$total_nds += $nds_val*$arQuantities[$mi];
+			if (empty($arBasket['SET_PARENT_ID']))
+			{
+				$total_nds += $nds_val*$arQuantities[$mi];
+			}
+
 			?>
 			<tr valign="top">
 				<td bgcolor="#ffffff" style="border: 1pt solid #000000; border-right:none; border-top:none;">
@@ -281,7 +289,10 @@ $currency = preg_replace('/(^|[^&])#/', '${1}', $arCurFormat['FORMAT_STRING']);
 				</td>
 			</tr>
 			<?
-			$total_sum += $arBasket["PRICE"]*$arQuantities[$mi];
+			if (empty($arBasket['SET_PARENT_ID']))
+			{
+				$total_sum += $arBasket["PRICE"]*$arQuantities[$mi];
+			}
 			$mi++;
 		}//endforeach
 		?>
@@ -313,15 +324,15 @@ $currency = preg_replace('/(^|[^&])#/', '${1}', $arCurFormat['FORMAT_STRING']);
 				</td>
 				<td bgcolor="#ffffff" style="border: 1pt solid #000000; border-right:none; border-top:none;">
 					ƒоставка <?
-					$res = \Bitrix\Sale\Delivery\Services\Table::getList(array(
-						'filter' => array(
-							'=CODE' => $arOrder["DELIVERY_ID"]
-						)
-					));
+					$deliveryId = \CSaleDelivery::getIdByCode($arOrder['DELIVERY_ID']);
 
-					if ($deliveryService = $res->fetch())
-						if(strlen($deliveryService["NAME"]) > 0)
-							echo "(".htmlspecialcharsEx($deliveryService["NAME"]).")";
+					if($deliveryId > 0)
+					{
+						if($delivery = \Bitrix\Sale\Delivery\Services\Manager::getObjectById($deliveryId))
+						{
+							echo "[".htmlspecialcharsbx($delivery->getNameWithParent())."]";
+						}
+					}
 
 					$total_nds += $arOrder["DELIVERY_VAT_SUM"];
 					$total_sum += $arOrder["PRICE_DELIVERY"];
@@ -354,7 +365,7 @@ $currency = preg_replace('/(^|[^&])#/', '${1}', $arCurFormat['FORMAT_STRING']);
 					echo htmlspecialcharsbx($ar_tax_list["TAX_NAME"]);
 					if ($ar_tax_list["IS_PERCENT"]=="Y")
 					{
-						echo " (".$ar_tax_list["VALUE"]."%)";
+						echo " (".(int)$ar_tax_list["VALUE"]."%)";
 					}
 					?>:
 				</td>

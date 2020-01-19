@@ -7,4 +7,5 @@ $MESS["F_THEME_YELLOW"] = "Желтая";
 $MESS["F_THEME_GREEN"] = "Зеленая";
 $MESS["F_THEME_RED"] = "Красная";
 $MESS["F_THEME_BLACK"] = "Темная";
+$MESS["F_THEME_LIGHT"] = "Светлая";
 ?>

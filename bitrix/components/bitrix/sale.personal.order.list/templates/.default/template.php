@@ -278,7 +278,7 @@ else
 
 									</div>
 									<?
-									if ($payment['PAID'] === 'N' && $payment['IS_CASH'] !== 'Y')
+									if ($payment['PAID'] === 'N' && $payment['IS_CASH'] !== 'Y' && $payment['ACTION_FILE'] !== 'cash')
 									{
 										if ($order['ORDER']['IS_ALLOW_PAY'] == 'N')
 										{

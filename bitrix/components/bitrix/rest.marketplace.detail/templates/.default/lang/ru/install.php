@@ -8,7 +8,9 @@ $MESS["BX24_APP_INSTALL_ERROR"] = "ќшибка! ѕриложение не было установлено";
 $MESS["BX24_APP_INSTALL_ADMIN_ERROR"] = "ƒл€ установки приложени€ обратитесь к администратору портала";
 $MESS["BX24_APP_INSTALL_MODULE_UNINSTALL_BITRIX24"] = "Ќекоторые сервисы, требуемые дл€ работы приложени€, были удалены. ƒл€ корректной работы приложени€ установите их в <a href='#PATH_CONFIGS#'>настройках портала</a>.";
 $MESS["BX24_APP_INSTALL_MODULE_UNINSTALL"] = "Ќекоторые сервисы, требуемые дл€ работы приложени€, были удалены. ƒл€ корректной работы приложени€ установите требуемые модули.";
-$MESS["BX24_APP_INSTALL_LICENSE_CHECKBOX"] = "я ознакомлен и согласен с <a href=\"https://www.1c-bitrix.ru/license.php?module=#CODE#&TYPE=mp24\" target=\"_blank\">лицензионным соглашением</a>";
-$MESS["BX24_APP_INSTALL_LICENSE_CONFIDENTIALITY"] = "я ознакомлен и согласен с <a href=\"https://www.bitrix24.ru/about/privacy.php\" target=\"_blank\">политикой конфиденциальности</a>";
+$MESS["BX24_APP_INSTALL_EULA_TEXT"] = "я ознакомлен и согласен с <a href=\"#LINK#\" target=\"_blank\">лицензионным соглашением</a>";
+$MESS["BX24_APP_INSTALL_EULA_LINK"] = "https://www.1c-bitrix.ru/license.php?module=#CODE#&TYPE=mp24";
+$MESS["BX24_APP_INSTALL_PRIVACY_TEXT"] = "я ознакомлен и согласен с <a href=\"#LINK#\" target=\"_blank\">политикой конфиденциальности</a>";
+$MESS["BX24_APP_INSTALL_PRIVACY_LINK"] = "https://www.bitrix24.ru/about/privacy.php";
 $MESS["BX24_APP_INSTALL_HTTPS_WARNING"] = "<b>¬нимание!</b> ѕри работе без https работоспособность устанавливаемых приложений не гарантируетс€.";
 ?>

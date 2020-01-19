@@ -2,6 +2,7 @@
 
 use Bitrix\Main;
 use Bitrix\Main\Localization\Loc;
+
 \Bitrix\Main\UI\Extension::load("ui.fonts.ruble");
 
 /**
@@ -70,6 +71,8 @@ $arParams['BRAND_PROPERTY'] = isset($arParams['BRAND_PROPERTY']) ? trim($arParam
 
 if ($arParams['USE_GIFTS'] === 'Y')
 {
+	$arParams['GIFTS_BLOCK_TITLE'] = isset($arParams['GIFTS_BLOCK_TITLE']) ? trim((string)$arParams['GIFTS_BLOCK_TITLE']) : Loc::getMessage('SBB_GIFTS_BLOCK_TITLE');
+
 	CBitrixComponent::includeComponentClass('bitrix:sale.products.gift.basket');
 
 	$giftParameters = array(
@@ -156,12 +159,24 @@ if (empty($arResult['ERROR_MESSAGE']))
 {
 	if ($arParams['USE_GIFTS'] === 'Y' && $arParams['GIFTS_PLACE'] === 'TOP')
 	{
-		$APPLICATION->IncludeComponent(
-			'bitrix:sale.products.gift.basket',
-			'.default',
-			$giftParameters,
-			$component
-		);
+		?>
+		<div data-entity="parent-container">
+			<div class="catalog-block-header"
+					data-entity="header"
+					data-showed="false"
+					style="display: none; opacity: 0;">
+				<?=$arParams['GIFTS_BLOCK_TITLE']?>
+			</div>
+			<?
+			$APPLICATION->IncludeComponent(
+				'bitrix:sale.products.gift.basket',
+				'.default',
+				$giftParameters,
+				$component
+			);
+			?>
+		</div>
+		<?
 	}
 
 	if ($arResult['BASKET_ITEM_MAX_COUNT_EXCEEDED'])
@@ -280,18 +295,31 @@ if (empty($arResult['ERROR_MESSAGE']))
 			template: '<?=CUtil::JSEscape($signedTemplate)?>',
 			signedParamsString: '<?=CUtil::JSEscape($signedParams)?>',
 			siteId: '<?=CUtil::JSEscape($component->getSiteId())?>',
+			siteTemplateId: '<?=CUtil::JSEscape($component->getSiteTemplateId())?>',
 			templateFolder: '<?=CUtil::JSEscape($templateFolder)?>'
 		});
 	</script>
 	<?
 	if ($arParams['USE_GIFTS'] === 'Y' && $arParams['GIFTS_PLACE'] === 'BOTTOM')
 	{
-		$APPLICATION->IncludeComponent(
-			'bitrix:sale.products.gift.basket',
-			'.default',
-			$giftParameters,
-			$component
-		);
+		?>
+		<div data-entity="parent-container">
+			<div class="catalog-block-header"
+					data-entity="header"
+					data-showed="false"
+					style="display: none; opacity: 0;">
+				<?=$arParams['GIFTS_BLOCK_TITLE']?>
+			</div>
+			<?
+			$APPLICATION->IncludeComponent(
+				'bitrix:sale.products.gift.basket',
+				'.default',
+				$giftParameters,
+				$component
+			);
+			?>
+		</div>
+		<?
 	}
 }
 elseif ($arResult['EMPTY_BASKET'])

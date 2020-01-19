@@ -108,12 +108,12 @@ class Component extends \Bitrix\Landing\Node
 
 	/**
 	 * Save data for this node.
-	 * @param \Bitrix\Landing\Block &$block Block instance.
+	 * @param \Bitrix\Landing\Block $block Block instance.
 	 * @param string $selector Selector.
 	 * @param array $data Data array.
 	 * @return void
 	 */
-	public static function saveNode(\Bitrix\Landing\Block &$block, $selector, array $data)
+	public static function saveNode(\Bitrix\Landing\Block $block, $selector, array $data)
 	{
 		//$data = array_pop($data);// we allow one type of component per block
 		$manifest = $block->getManifest();
@@ -700,11 +700,11 @@ class Component extends \Bitrix\Landing\Node
 
 	/**
 	 * Get data for this node.
-	 * @param \Bitrix\Landing\Block &$block Block instance.
+	 * @param \Bitrix\Landing\Block $block Block instance.
 	 * @param string $selector Selector.
 	 * @return array
 	 */
-	public static function getNode(\Bitrix\Landing\Block &$block, $selector)
+	public static function getNode(\Bitrix\Landing\Block $block, $selector)
 	{
 		$data = array();
 		$manifest = $block->getManifest();

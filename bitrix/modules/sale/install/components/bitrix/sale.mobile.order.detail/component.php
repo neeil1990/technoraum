@@ -7,6 +7,14 @@ if (!CModule::IncludeModule('sale'))
 	return;
 }
 
+$saleModulePermissions = $APPLICATION->GetGroupRight("sale");
+
+if ($saleModulePermissions == "D")
+{
+	ShowError(GetMessage("SMOD_NO_PERMS2VIEW"));
+	return;
+}
+
 if (!CModule::IncludeModule('mobileapp'))
 {
 	ShowError(GetMessage('SMOD_MOBILEAPP_NOT_INSTALLED'));
@@ -22,16 +30,16 @@ else
 	$orderId = false;
 }
 
-$bUserCanViewOrder = CSaleOrder::CanUserViewOrder($orderId, $GLOBALS["USER"]->GetUserGroupArray(), $GLOBALS["USER"]->GetID());
+$arResult['ORDER'] = CSaleMobileOrderUtils::getOrderInfoDetail($orderId);
 
+$allowedStatusesView = \Bitrix\Sale\OrderStatus::getStatusesUserCanDoOperations($USER->GetID(), array('view'));
+$isAllowView = in_array($arResult['ORDER']['STATUS_ID'], $allowedStatusesView);
 
-if(!$bUserCanViewOrder)
+if(!$isAllowView)
 {
 	ShowError(GetMessage("SMOD_NO_PERMS2VIEW"));
 	return;
 }
-
-$arResult['ORDER'] = CSaleMobileOrderUtils::getOrderInfoDetail($orderId);
 
 if(!$orderId || !$arResult['ORDER'])
 {

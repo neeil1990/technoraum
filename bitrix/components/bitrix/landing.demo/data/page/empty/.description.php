@@ -10,7 +10,9 @@ Loc::loadLanguageFile(__FILE__);
 
 return array(
 	'name' => Loc::getMessage('LANDING_DEMO_EMPTY_TITLE_PAGE'),
+	'type' => 'page',
 	'description' => Loc::getMessage('LANDING_DEMO_EMPTY_DESCRIPTION'),
+	'type' => ['page', 'knowledge', 'group'],
 	'fields' => array(
 		'ADDITIONAL_FIELDS' => array(
 			'METAOG_IMAGE' => 'https://cdn.bitrix24.site/bitrix/images/demo/page/empty/preview.jpg',

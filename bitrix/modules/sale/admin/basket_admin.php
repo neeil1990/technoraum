@@ -7,6 +7,7 @@
 ##############################################
 
 use Bitrix\Main;
+use Bitrix\Sale;
 
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_before.php");
 
@@ -17,7 +18,7 @@ $saleModulePermissions = $APPLICATION->GetGroupRight("sale");
 if ($saleModulePermissions=="D")
 	$APPLICATION->AuthForm(GetMessage("ACCESS_DENIED"));
 
-require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/include.php");
+Main\Loader::includeModule('sale');
 
 if(!CBXFeatures::IsFeatureEnabled('SaleAccounts'))
 {
@@ -244,41 +245,22 @@ if (isset($_REQUEST['action']))
 				$url = $selfFolderUrl."sale_order_create.php?lang=".LANG."&SITE_ID=".$siteID."&USER_ID=".$userID."&FUSER_ID=".$fuserID."&ABANDONED=Y";
 			}
 
-			$dbBasketList = CSaleBasket::GetList(
-				array("ID" => "ASC"),
-				array(
-					"FUSER_ID" => $fuserID,
-					"LID" => $siteID,
-					// "CAN_BUY" => "Y",
-					// "DELAY" => "N",
-					"ORDER_ID" => false,
-				),
-				false,
-				false,
-				array("ID", "PRODUCT_ID", "CAN_BUY", "DELAY", "SUBSCRIBE", "QUANTITY")
-			);
-			$arID = Array();
-			while($arItems = $dbBasketList->Fetch())
-			{
-				if($arItems["CAN_BUY"] == "Y" && $arItems["DELAY"] == "N")
-				{
-					$arID[] = $arItems["ID"];
-				}
-				elseif($arItems["DELAY"] == "Y")
-				{
-					$url .= "&productDelay[]=".$arItems["PRODUCT_ID"];
-				}
-				elseif($arItems["SUBSCRIBE"] == "Y")
-				{
-					$url .= "&productSub[]=".$arItems["PRODUCT_ID"];
-				}
-				else
-				{
-					$url .= "&productNA[]=".$arItems["PRODUCT_ID"];
-				}
-			}
+			$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
 
-			if (count($arID) > 0)
+			/** @var Sale\Basket $basketClass */
+			$basketClass = $registry->getBasketClassName();
+
+			$basketData = $basketClass::getList([
+				'filter' => [
+					"=FUSER_ID" => $fuserID,
+					"=LID" => $siteID,
+					"=ORDER_ID" => false,
+					"CAN_BUY" => "Y",
+					"DELAY" => "N",
+				],
+				'limit' => 1
+			]);
+			if ($basketData->fetch())
 			{
 				LocalRedirect($url);
 				die();
@@ -376,7 +358,7 @@ while ($arBasket = $dbResultList->Fetch())
 	{
 		if (CSaleBasketHelper::isSetItem($arB))
 			continue;
-		
+
 		$productId .= "&product[]=".$arB["PRODUCT_ID"];
 		if ($bNeedLine)
 		{
@@ -445,9 +427,9 @@ while ($arBasket = $dbResultList->Fetch())
 	);
 	if ($publicMode)
 	{
-		$orderAction["ACTION"] = "top.BX.adminSidePanel.onOpenPage('/shop/orders/details/0/?USER_ID=".
-			CUtil::JSEscape($arBasket["USER_ID"])."&lang=".LANGUAGE_ID."&SITE_ID=".CUtil::JSEscape($arBasket["LID"]).
-			CUtil::JSEscape($productId)."');";
+		$orderAction["ACTION"] = "top.BX.adminSidePanel.onOpenPage('/shop/orders/details/0/?FUSER_ID=".
+			CUtil::JSEscape($arBasket["FUSER_ID"])."&lang=".LANGUAGE_ID."&SITE_ID=".CUtil::JSEscape($arBasket["LID"]).
+			"&USER_ID=".$arBasket["USER_ID"]."');";
 	}
 	$arActions[] = $orderAction;
 
@@ -474,9 +456,14 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/prolog.php");
 
 $APPLICATION->SetTitle(GetMessage("SB_TITLE"));
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
-
-$lAdmin->DisplayFilter($filterFields);
-$lAdmin->DisplayList();
-
+if (!$publicMode && \Bitrix\Sale\Update\CrmEntityCreatorStepper::isNeedStub())
+{
+	$APPLICATION->IncludeComponent("bitrix:sale.admin.page.stub", ".default");
+}
+else
+{
+	$lAdmin->DisplayFilter($filterFields);
+	$lAdmin->DisplayList();
+}
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
 ?>

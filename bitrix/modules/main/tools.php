@@ -6,6 +6,8 @@
  * @copyright 2001-2014 Bitrix
  */
 
+use Bitrix\Main\Page\Asset;
+use Bitrix\Main\Page\AssetLocation;
 use Bitrix\Main\UI\Extension;
 
 /**
@@ -711,8 +713,8 @@ function convertTimeToMilitary ($strTime, $fromFormat = 'H:MI T', $toFormat = 'H
 
 /**
  * @param string|array $format
- * @param int|bool|\Bitrix\Main\Type\DateTime $timestamp
- * @param int|bool|\Bitrix\Main\Type\DateTime $now
+ * @param int|bool|\Bitrix\Main\Type\Date $timestamp
+ * @param int|bool|\Bitrix\Main\Type\Date $now
  *
  * @return string
  */
@@ -724,7 +726,7 @@ function FormatDate($format = "", $timestamp = false, $now = false)
 	{
 		$timestamp = time();
 	}
-	else if ($timestamp instanceof \Bitrix\Main\Type\DateTime)
+	else if ($timestamp instanceof \Bitrix\Main\Type\Date)
 	{
 		$timestamp = $timestamp->getTimestamp();
 	}
@@ -737,7 +739,7 @@ function FormatDate($format = "", $timestamp = false, $now = false)
 	{
 		$now = time();
 	}
-	else if ($now instanceof \Bitrix\Main\Type\DateTime)
+	else if ($now instanceof \Bitrix\Main\Type\Date)
 	{
 		$now = $now->getTimestamp();
 	}
@@ -3094,6 +3096,16 @@ function GetLangFileName($before, $after, $lang=false)
 
 	global $ALL_LANG_FILES;
 	$ALL_LANG_FILES[] = $before.$lang.$after;
+
+	if (\Bitrix\Main\Localization\Translation::allowConvertEncoding())
+	{
+		$langFile = \Bitrix\Main\Localization\Translation::convertLangPath($before. $lang. $after, $lang);
+		if(file_exists($langFile))
+		{
+			return $langFile;
+		}
+	}
+
 	if(file_exists($before.$lang.$after))
 		return $before.$lang.$after;
 	if(file_exists($before."en".$after))
@@ -3164,18 +3176,26 @@ function __IncludeLang($path, $bReturnArray=false, $bFileChecked=false)
 			}
 		}
 
-		foreach($MESS as $key => $val)
+		if (!empty($MESS))
 		{
 			if ($convertEncoding)
 			{
-				$val = \Bitrix\Main\Text\Encoding::convertEncoding($val, $sourceEncoding, $targetEncoding);
+				$convertEncoding = \Bitrix\Main\Localization\Translation::checkPathRestrictionConvertEncoding($path);
 			}
 
-			$MESS[$key] = $val;
-
-			if (!$bReturnArray)
+			foreach ($MESS as $key => $val)
 			{
-				$GLOBALS['MESS'][$key] = $val;
+				if ($convertEncoding)
+				{
+					$val = \Bitrix\Main\Text\Encoding::convertEncoding($val, $sourceEncoding, $targetEncoding);
+				}
+
+				$MESS[$key] = $val;
+
+				if (!$bReturnArray)
+				{
+					$GLOBALS['MESS'][$key] = $val;
+				}
 			}
 		}
 	}
@@ -3607,6 +3627,34 @@ function AddMessage2Log($sText, $sModule = "", $traceDepth = 6, $bShowArgs = fal
 	}
 }
 
+function AddEventToStatFile($module, $action, $tag, $label)
+{
+	static $search = array("\t", "\n", "\r");
+	static $replace = " ";
+	if (defined('ANALYTICS_FILENAME') && is_writable(ANALYTICS_FILENAME))
+	{
+		$content =
+			date('Y-m-d H:i:s')
+			."\t".str_replace($search, $replace, $_SERVER["HTTP_HOST"])
+			."\t".str_replace($search, $replace, $module)
+			."\t".str_replace($search, $replace, $action)
+			."\t".str_replace($search, $replace, $tag)
+			."\t".str_replace($search, $replace, $label)
+			."\n";
+		$fp = @fopen(ANALYTICS_FILENAME, "ab");
+		if ($fp)
+		{
+			if (flock($fp, LOCK_EX))
+			{
+				@fwrite($fp, $content);
+				@fflush($fp);
+				@flock($fp, LOCK_UN);
+				@fclose($fp);
+			}
+		}
+	}
+}
+
 /*********************************************************************
 	Quoting reverse (to be removed with 5.4.0)
 *********************************************************************/
@@ -3830,10 +3878,7 @@ function LocalRedirect($url, $skip_security_check=false, $status="302 Found")
 
 	$_SESSION["BX_REDIRECT_TIME"] = time();
 
-	\Bitrix\Main\Context::getCurrent()->getResponse()->flush();
-
-	CMain::ForkActions();
-	exit;
+	\Bitrix\Main\Application::getInstance()->end();
 }
 
 function WriteFinalMessage($message = "")
@@ -3949,9 +3994,12 @@ function GetCountryArray($lang=LANGUAGE_ID)
 {
 	$arMsg = IncludeModuleLangFile(__FILE__, $lang, true);
 	$arr = array();
-	foreach($arMsg as $id=>$country)
-		if(strpos($id, "COUNTRY_") === 0)
-			$arr[intval(substr($id, 8))] = $country;
+	if (is_array($arMsg))
+	{
+		foreach($arMsg as $id=>$country)
+			if(strpos($id, "COUNTRY_") === 0)
+				$arr[intval(substr($id, 8))] = $country;
+	}
 	asort($arr);
 	$arCountry = array("reference_id"=>array_keys($arr), "reference"=>array_values($arr));
 	return $arCountry;
@@ -4247,11 +4295,9 @@ function InitURLParam($url=false)
 
 function _ShowHtmlspec($str)
 {
-	$str = str_replace("<br>", "\n", $str);
-	$str = str_replace("<br />", "\n", $str);
-	$str = htmlspecialcharsbx($str);
+	$str = str_replace(["<br>", "<br />", "<BR>", "<BR />"], "\n", $str);
+	$str = htmlspecialcharsbx($str, ENT_COMPAT, false);
 	$str = nl2br($str);
-	$str = str_replace("&amp;", "&", $str);
 	return $str;
 }
 
@@ -4367,7 +4413,7 @@ function check_email($email, $bStrict=false)
 
 	//"." can't be in the beginning or in the end of local-part
 	//dot-atom-text = 1*atext *("." 1*atext)
-	if(preg_match("#^[".$atom."]+(\\.[".$atom."]+)*@(([-0-9a-z_]+\\.)+)([a-z0-9-]{2,20})$#i", $email))
+	if(preg_match("#^[".$atom."]+(\\.[".$atom."]+)*@(([-0-9a-z]+\\.)+)([a-z0-9-]{2,20})$#i", $email))
 	{
 		return true;
 	}
@@ -4480,7 +4526,6 @@ class CJSCore
 	const USE_PUBLIC = 'public';
 
 	private static $arRegisteredExt = array();
-	private static $arAutoloadQueue = array();
 	private static $arCurrentlyLoadedExt = array();
 
 	private static $bInited = false;
@@ -4514,17 +4559,23 @@ class CJSCore
 			}
 		}
 
+		//An old path format required a language id.
 		if (isset($arPaths['lang']))
 		{
-			$arPaths['lang'] = str_replace("/lang/".LANGUAGE_ID."/", "/", $arPaths['lang']);
+			if (is_array($arPaths['lang']))
+			{
+				foreach ($arPaths['lang'] as $key => $lang)
+				{
+					$arPaths['lang'][$key] = str_replace('/lang/'.LANGUAGE_ID.'/', '/', $lang);
+				}
+			}
+			else
+			{
+				$arPaths['lang'] = str_replace('/lang/'.LANGUAGE_ID.'/', '/', $arPaths['lang']);
+			}
 		}
 
 		self::$arRegisteredExt[$name] = $arPaths;
-
-		if (isset($arPaths['autoload']))
-		{
-			self::$arAutoloadQueue[$name] = $arPaths;
-		}
 	}
 
 	public static function Init($arExt = array(), $bReturn = false)
@@ -4564,21 +4615,62 @@ class CJSCore
 		}
 
 		$ret = '';
-		if ($bNeedCore && !self::$arCurrentlyLoadedExt['core'])
+
+		if ($bNeedCore && !self::isCoreLoaded())
 		{
-			$config = self::GetCoreConfig();
+			$config = self::getCoreConfig();
+			
+			self::markExtensionLoaded('core');
+			self::markExtensionLoaded('main.core');
 
-			$ret .= self::_loadCSS($config['css'], $bReturn);
-			$ret .= self::_loadJS($config['js'], $bReturn);
-			$ret .= self::_loadLang($config['lang'], $bReturn);
+			$includes = '';
+			if (is_array($config['includes']))
+            {
+                foreach ($config['includes'] as $key => $item)
+                {
+					self::markExtensionLoaded($item);
+                }
 
-			self::$arCurrentlyLoadedExt['core'] = true;
-		}
+				$assets = Extension::getAssets($config['includes']);
+                $includes .= static::registerAssetsAsLoaded($assets);
+            }
 
-		foreach (self::$arAutoloadQueue as $extCode => $extParams)
-		{
-			$ret .= self::_loadExt($extCode, $bReturn);
-			unset(self::$arAutoloadQueue[$extCode]);
+			$relativities = '';
+
+			if (is_array($config['rel']))
+            {
+                $return = true;
+                $relativities .= self::init($config['rel'], $return);
+            }
+
+			$coreLang = self::_loadLang($config['lang'], true);
+            $coreJs = self::_loadJS($config['js'], true);
+			$coreCss = self::_loadCSS($config['css'], true);
+
+			if ($bReturn)
+			{
+			    $ret .= $coreLang;
+				$ret .= $relativities;
+			    $ret .= $coreJs;
+			    $ret .= $coreCss;
+			    $ret .= $includes;
+            }
+
+			$asset = Asset::getInstance();
+			$asset->addString($coreLang, true, AssetLocation::AFTER_CSS);
+            $asset->addString($relativities, true, AssetLocation::AFTER_CSS);
+            $asset->addString($coreJs, true, AssetLocation::AFTER_CSS);
+            $asset->addString($includes, true, AssetLocation::AFTER_CSS);
+
+			// Asset addString before_css doesn't works in admin section
+            if (!defined('ADMIN_SECTION') || ADMIN_SECTION !== true)
+			{
+				$asset->addString($coreCss, true, AssetLocation::BEFORE_CSS);
+			}
+            else
+			{
+				self::_loadCSS($config['css'], false);
+			}
 		}
 
 		for ($i = 0, $len = count($arExt); $i < $len; $i++)
@@ -4592,15 +4684,48 @@ class CJSCore
 		return $bReturn ? $ret : true;
 	}
 
+	protected static function registerAssetsAsLoaded($assets)
+    {
+        if (is_array($assets))
+        {
+            $result = '';
+
+            if (isset($assets['js']) && is_array($assets['js']) && !empty($assets['js']))
+            {
+                $result .= "BX.setJSList(".\CUtil::phpToJSObject($assets['js']).");\n";
+            }
+
+			if (isset($assets['css']) && is_array($assets['css']) && !empty($assets['css']))
+			{
+				$result .= "BX.setCSSList(".\CUtil::phpToJSObject($assets['css']).");";
+			}
+
+            return '<script>'.$result.'</script>';
+        }
+
+        return '';
+    }
+	
+	/**
+	 * @param $code - name of extension
+	 */
+	public static function markExtensionLoaded($code)
+	{
+		self::$arCurrentlyLoadedExt[$code] = true;
+	}
+
 	/**
 	 * Returns true if Core JS was inited
 	 * @return bool
 	 */
 	public static function IsCoreLoaded()
 	{
-		return isset(self::$arCurrentlyLoadedExt["core"]);
+		return (
+			self::isExtensionLoaded("core")
+			|| self::isExtensionLoaded("main.core")
+        );
 	}
-
+	
 	/**
 	 * Returns true if JS extension was loaded.
 	 * @param string $code Code of JS extension.
@@ -4608,7 +4733,7 @@ class CJSCore
 	 */
 	public static function isExtensionLoaded($code)
 	{
-		return isset(self::$arCurrentlyLoadedExt[$code]);
+		return isset(self::$arCurrentlyLoadedExt[$code]) && self::$arCurrentlyLoadedExt[$code];
 	}
 
 	public static function GetCoreMessagesScript($compositeMode = false)
@@ -4820,18 +4945,25 @@ JS;
 
 	public static function GetCoreConfig()
 	{
-		return Array(
-			'css' => '/bitrix/js/main/core/css/core.css',
-			'js' => '/bitrix/js/main/core/core.js',
-			'lang' => BX_ROOT.'/modules/main/js_core.php',
-		);
+		return Extension::getConfig('main.core');
 	}
 
 	private static function _loadExt($ext, $bReturn)
 	{
 		$ret = '';
 
-		$ext = preg_replace('/[^a-z0-9_\.\-]/i', '', $ext);
+		if (preg_match("/^((?P<MODULE_ID>[\w\.]+):)?(?P<EXT_NAME>[\w\.\-]+)$/", $ext, $matches))
+		{
+			if (strlen($matches['MODULE_ID']) > 0 && $matches['MODULE_ID'] !== 'main')
+			{
+				\Bitrix\Main\Loader::includeModule($matches['MODULE_ID']);
+			}
+			$ext = $matches['EXT_NAME'];
+		}
+		else
+		{
+			$ext = preg_replace('/[^a-z0-9_\.\-]/i', '', $ext);
+		}
 
 		if (!self::IsExtRegistered($ext))
 		{
@@ -4842,7 +4974,7 @@ JS;
 			}
 		}
 
-		if (isset(self::$arCurrentlyLoadedExt[$ext]) && self::$arCurrentlyLoadedExt[$ext])
+		if (self::isExtensionLoaded($ext))
 		{
 			return "";
 		}
@@ -4879,7 +5011,7 @@ JS;
 			unset(self::$arRegisteredExt[$ext]['oninit']);
 		}
 
-		self::$arCurrentlyLoadedExt[$ext] = true;
+		self::markExtensionLoaded($ext);
 
 		if (isset(self::$arRegisteredExt[$ext]['rel']) && is_array(self::$arRegisteredExt[$ext]['rel']))
 		{
@@ -4959,21 +5091,6 @@ JS;
 		return self::$arRegisteredExt[$ext];
 	}
 
-	public static function getAutoloadExtInfo()
-	{
-		$result = Array();
-
-		foreach(self::$arRegisteredExt as $ext => $info)
-		{
-			if ($info['autoload'])
-			{
-				$result[$ext] = $info;
-			}
-		}
-
-		return $result;
-	}
-
 	private static function _RegisterStandardExt()
 	{
 		require_once($_SERVER['DOCUMENT_ROOT'].BX_ROOT.'/modules/main/jscore.php');
@@ -4990,7 +5107,12 @@ JS;
 			$res = '';
 			foreach ($js as $val)
 			{
-				$res .= '<script type="text/javascript" src="'.CUtil::GetAdditionalFileURL($val).'"></script>'."\r\n";
+				$fullPath = Asset::getInstance()->getFullAssetPath($val);
+
+				if ($fullPath)
+				{
+					$res .= '<script type="text/javascript" src="'.$fullPath.'"></script>'."\r\n";
+				}
 			}
 			return $res;
 		}
@@ -5010,13 +5132,20 @@ JS;
 		global $APPLICATION;
 		$jsMsg = '';
 
-		if (is_string($lang))
+		if (!is_array($lang))
 		{
-			$messLang = \Bitrix\Main\Localization\Loc::loadLanguageFile($_SERVER['DOCUMENT_ROOT'].$lang);
+			$lang = [$lang];
+		}
 
-			if (!empty($messLang))
+		foreach ($lang as $path)
+		{
+			if (is_string($path))
 			{
-				$jsMsg = '(window.BX||top.BX).message('.CUtil::PhpToJSObject($messLang, false).');';
+				$messLang = \Bitrix\Main\Localization\Loc::loadLanguageFile($_SERVER['DOCUMENT_ROOT'].$path);
+				if (!empty($messLang))
+				{
+					$jsMsg .= '(window.BX||top.BX).message('.CUtil::PhpToJSObject($messLang, false).');';
+				}
 			}
 		}
 
@@ -5060,9 +5189,18 @@ JS;
 			return '';
 
 		if ($bReturn)
-			return '<link href="'.CUtil::GetAdditionalFileURL($css).'" type="text/css" rel="stylesheet" />'."\r\n";
-		else
-			$APPLICATION->SetAdditionalCSS($css);
+		{
+			$fullPath = Asset::getInstance()->getFullAssetPath($css);
+
+			if ($fullPath)
+			{
+				return '<link href="'.$fullPath.'" type="text/css" rel="stylesheet" />'."\r\n";
+			}
+
+			return '';
+		}
+
+		$APPLICATION->SetAdditionalCSS($css);
 
 		return '';
 	}
@@ -5071,14 +5209,14 @@ JS;
 	{
 		$files = is_array($files) ? $files : array($files);
 
-		\Bitrix\Main\Page\Asset::getInstance()->addJsKernelInfo($bundleName, $files);
+		Asset::getInstance()->addJsKernelInfo($bundleName, $files);
 	}
 
 	private static function registerCssBundle($bundleName, $files)
 	{
 		$files = is_array($files) ? $files : array($files);
 
-		\Bitrix\Main\Page\Asset::getInstance()->addCssKernelInfo($bundleName, $files);
+		Asset::getInstance()->addCssKernelInfo($bundleName, $files);
 	}
 }
 

@@ -52,12 +52,13 @@
 	 */
 	BX.Landing.History.getInstance = function()
 	{
-		if (!top.BX.Landing.History.instance)
+		var rootWindow = BX.Landing.PageObject.getRootWindow();
+		if (!rootWindow.BX.Landing.History.instance)
 		{
-			top.BX.Landing.History.instance = new BX.Landing.History();
+			rootWindow.BX.Landing.History.instance = new BX.Landing.History();
 		}
 
-		return top.BX.Landing.History.instance;
+		return rootWindow.BX.Landing.History.instance;
 	};
 
 
@@ -161,6 +162,14 @@
 				id: "removeCard",
 				undo: BX.Landing.History.Action.addCard.bind(null, UNDO),
 				redo: BX.Landing.History.Action.removeCard.bind(null, REDO)
+			})
+		);
+
+		history.registerCommand(
+			new BX.Landing.History.Command({
+				id: "updateBlockState",
+				undo: BX.Landing.History.Action.updateBlockState.bind(null, UNDO),
+				redo: BX.Landing.History.Action.updateBlockState.bind(null, REDO)
 			})
 		);
 
@@ -394,7 +403,8 @@
 	 */
 	function onInit(history)
 	{
-		fireCustomEvent(top.window, "BX.Landing.History:init", [history]);
+		var rootWindow = BX.Landing.PageObject.getRootWindow();
+		fireCustomEvent(rootWindow.window, "BX.Landing.History:init", [history]);
 		return Promise.resolve(history);
 	}
 
@@ -406,7 +416,8 @@
 	 */
 	function onUpdate(history)
 	{
-		fireCustomEvent(top.window, "BX.Landing.History:update", [history]);
+		var rootWindow = BX.Landing.PageObject.getRootWindow();
+		fireCustomEvent(rootWindow.window, "BX.Landing.History:update", [history]);
 		return Promise.resolve(history);
 	}
 
@@ -418,7 +429,8 @@
 	 */
 	function onActualize(history)
 	{
-		fireCustomEvent(top.window, "BX.Landing.History:actualize", [history]);
+		var rootWindow = BX.Landing.PageObject.getRootWindow();
+		fireCustomEvent(rootWindow.window, "BX.Landing.History:actualize", [history]);
 		return Promise.resolve(history);
 	}
 
@@ -430,7 +442,8 @@
 	 */
 	function onNewBranch(history)
 	{
-		fireCustomEvent(top.window, "BX.Landing.History:newBranch", [history]);
+		var rootWindow = BX.Landing.PageObject.getRootWindow();
+		fireCustomEvent(rootWindow.window, "BX.Landing.History:newBranch", [history]);
 		return Promise.resolve(history);
 	}
 

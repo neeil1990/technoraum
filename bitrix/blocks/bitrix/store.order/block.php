@@ -45,7 +45,9 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 				'EMPTY_BASKET_HINT_PATH' => $classBlock->get('EMPTY_PATH'),
 				'HIDE_ORDER_DESCRIPTION' => 'Y',
 				'USE_CUSTOM_MAIN_MESSAGES' => 'Y',
-				'MESS_REGION_BLOCK_NAME' => $classBlock->get('MESS_REGION_BLOCK_NAME')
+				'MESS_REGION_BLOCK_NAME' => $classBlock->get('MESS_REGION_BLOCK_NAME'),
+				'CONTEXT_SITE_ID' => $classBlock->get('SITE_ID'),
+				'SHOW_COUPONS' => 'Y'
 			),
 			false
 		);?>

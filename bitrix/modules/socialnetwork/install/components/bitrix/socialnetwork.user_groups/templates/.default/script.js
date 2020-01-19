@@ -136,12 +136,12 @@ BitrixSUG.prototype.sendRequest = function(params)
 
 BitrixSUG.prototype.showRequestWait = function(target)
 {
-	BX.addClass(target, 'popup-window-button-wait');
+	BX.addClass(target, 'ui-btn-wait');
 };
 
 BitrixSUG.prototype.closeRequestWait = function(target)
 {
-	BX.removeClass(target, 'popup-window-button-wait');
+	BX.removeClass(target, 'ui-btn-wait');
 };
 
 BitrixSUG.prototype.setFavorites = function(node, active)

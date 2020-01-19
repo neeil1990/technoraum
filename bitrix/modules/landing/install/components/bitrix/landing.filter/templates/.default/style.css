@@ -2,7 +2,7 @@
 	position: relative;
 }
 
-.landing-filter-loading {
+.landing-filter-loading-container {
 	position: fixed;
 	width: 100%;
 	height: 100%;
@@ -26,7 +26,6 @@
 }
 
 .landing-filter-action-link {
-	margin-right: 12px;
 	text-decoration: none;
 }
 

@@ -170,6 +170,11 @@ class CAllForumMessage
 			}
 		}
 
+		if (!empty($arFields['POST_MESSAGE']))
+		{
+			$arFields["POST_MESSAGE"] = \Bitrix\Main\Text\Emoji::encode($arFields["POST_MESSAGE"]);
+		}
+
 		if (!is_set($arFields, "FILES"))
 			$arFields["FILES"] = array();
 		if (is_set($arFields, "ATTACH_IMG"))
@@ -417,12 +422,12 @@ class CAllForumMessage
 				if ($arMessage_prev["FORUM_INFO"]["INDEXATION"] == "Y" &&
 					$arMessage["FORUM_INFO"]["INDEXATION"] != "Y")
 				{
-					CSearch::DeleteIndex("forum", $ID);
+					\CSearch::DeleteIndex("forum", $ID);
 				}
 				elseif ($arMessage["FORUM_INFO"]["INDEXATION"] == "Y" &&
 					$arMessage_prev["APPROVED"] != "N" && $arMessage["APPROVED"] == "N")
 				{
-					CSearch::DeleteIndex("forum", $ID);
+					\CSearch::DeleteIndex("forum", $ID);
 				}
 				elseif ($arMessage["APPROVED"] == "Y")
 				{
@@ -1161,7 +1166,7 @@ class CAllForumMessage
 	public static function GetMentionedUserID($strMessage)
 	{
 		$arMentionedUserID = array();
-								
+
 		if (strlen($strMessage) > 0)
 		{
 			preg_match_all("/\[user\s*=\s*([^\]]*)\](.+?)\[\/user\]/is".BX_UTF_PCRE_MODIFIER, $strMessage, $arMention);
@@ -1502,44 +1507,17 @@ class CALLForumFiles
 
 	public static function Save(&$arFields, $arParams, $bCheckFields = true)
 	{
-		global $DB;
-		if ($bCheckFields && !CForumFiles::CheckFields($arFields, $arParams, "ADD"))
-			return false;
-		$arFiles = array();
-		$arParams = (is_array($arParams) ? $arParams : array($arParams));
-		$strUploadDir = (!is_set($arParams, "upload_dir") ? "forum/upload" : $arParams["upload_dir"]);
-		$arParams = array("FORUM_ID" => intVal($arParams["FORUM_ID"]), "USER_ID" => intVal($arParams["USER_ID"]),
-			"TOPIC_ID" => 0, "MESSAGE_ID" => 0);
-		foreach ($arFields as $key => $val):
-			$val["MODULE_ID"] = "forum";
-			$val["FILE_ID"] = intVal($val["FILE_ID"]);
-			$val["old_file"] = intVal($val["old_file"]);
-			if ($val["FILE_ID"] <= 0 && $val["old_file"] > 0)
-				$val["FILE_ID"] = $val["old_file"];
-			$old_file = $val["FILE_ID"];
-			unset($val["old_file"]);
-			if (!empty($val["name"])):
+		if ($bCheckFields)
+		{
+			$result = \Bitrix\Forum\File::checkFiles(\Bitrix\Forum\Forum::getById($arParams["FORUM_ID"]), $arFields, $arParams);
+			if (!$result->isSuccess())
 			{
-				$res = CFile::SaveFile($val, $strUploadDir, true, true);
-				$DB->Commit();
-				if ($res > 0)
-				{
-					CForumFiles::Add($res, $arParams);
-					$arFiles[$res] = $arParams;
-				}
-				if (($res > 0 || !empty($val["del"])) && $old_file > 0)
-				{
-					CFile::Delete($old_file);
-					unset($arFields[$key]);
-				}
+				return false;
 			}
-			elseif (!empty($val["del"])):
-				CFile::Delete($val["FILE_ID"]);
-				unset($arFields[$key]);
-			else:
-				$arFiles[$val["FILE_ID"]] = $val;
-			endif;
-		endforeach;
+		}
+
+		$result = \Bitrix\Forum\File::saveFiles($arFields, $arParams);
+
 		return $arFiles;
 	}
 

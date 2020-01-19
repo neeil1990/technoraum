@@ -256,7 +256,7 @@
 	  }, {
 	    key: "version",
 	    value: function version() {
-	      return Vue.version();
+	      return Vue.version;
 	    }
 	    /**
 	     *

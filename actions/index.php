@@ -1,7 +1,7 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 $APPLICATION->SetPageProperty("title", "Акции на продукцию Karcher в Краснодаре");
-$APPLICATION->SetPageProperty("description", "Акции на всю продукцию Karcher в Краснодаре - Технораум");
+$APPLICATION->SetPageProperty("description", "Купить Karcher (Керхер) по акции в Краснодаре - Технораум");
 $APPLICATION->SetTitle("Акции Karcher");
 ?><?$APPLICATION->IncludeComponent(
 	"bitrix:news",

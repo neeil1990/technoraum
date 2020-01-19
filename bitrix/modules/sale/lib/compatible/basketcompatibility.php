@@ -198,6 +198,11 @@ class BasketCompatibility extends Internals\EntityCompatibility
 		$sort = 100;
 		foreach ($requestBasketItems as $basketIndex => $basketItemData)
 		{
+			if (!isset($basketItemData['BASE_PRICE']) && isset($basketItemData['PRICE']))
+			{
+				$basketItemData['BASE_PRICE'] = $basketItemData['PRICE'];
+			}
+
 			$basketItem = null;
 			if (isset($basketItemData['ID']) && intval($basketItemData['ID']) > 0)
 			{
@@ -695,10 +700,6 @@ class BasketCompatibility extends Internals\EntityCompatibility
 
 		$registry = Sale\Registry::getInstance(static::getRegistryType());
 
-		foreach(GetModuleEvents("sale", "OnBeforeBasketUpdateAfterCheck", true) as $event)
-			if (ExecuteModuleEventEx($event, array($id, &$fields))===false)
-				return false;
-
 		/** @var Sale\Result $itemResult */
 		$itemResult = static::loadEntityFromBasket($id);
 		if ($itemResult->isSuccess())
@@ -708,7 +709,7 @@ class BasketCompatibility extends Internals\EntityCompatibility
 			{
 				/** @var Sale\BasketItem $item */
 				$item = $itemResultData['BASKET_ITEM'];
-				$basket = $item->getCollection();
+				$basket = $item->getBasket();
 			}
 
 			if (isset($itemResultData['ORDER']))

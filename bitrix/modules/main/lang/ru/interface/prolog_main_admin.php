@@ -40,7 +40,7 @@ $MESS["TRIAL_ATTENTION_TEXT4_1c_bitrix_gossite"] = "Срок работы пробной версии п
 $MESS["TRIAL_ATTENTION_TEXT5_1c_bitrix_gossite"] = "Вы можете купить полнофункциональную версию продукта по адресу <a href=\"http://www.1c-bitrix.ru/buy/?r1=bsm7trial&amp;r2=expiried\">http://www.1c-bitrix.ru/buy/</a>";
 $MESS["MAIN_PR_ADMIN_FAV_ADD"] = "Добавить в избранное";
 $MESS["MAIN_PR_ADMIN_FAV_DEL"] = "Удалить из избранного";
-$MESS["admin_panel_browser"] = "Административная панель не поддерживает Internet Explorer версии 7 и ниже. Установите современный браузер <a href=\"http://www.firefox.com\">Firefox</a>, <a href=\"http://www.google.com/chrome/\">Chrome</a>, <a href=\"http://www.opera.com\">Opera</a> или <a href=\"http://www.microsoft.com/windows/internet-explorer/\">Internet Explorer 9</a>.";
+$MESS["admin_panel_browser"] = "Административная панель не поддерживает Internet Explorer версии 7 и ниже. Установите современный браузер <a href=\"http://www.firefox.com\">Firefox</a>, <a href=\"http://www.google.com/chrome/\">Chrome</a>, <a href=\"http://www.opera.com\">Opera</a> или <a href=\"http://www.microsoft.com/windows/edge/\">Microsoft Edge</a>.";
 $MESS["MAIN_PR_ADMIN_FAV"] = "Избранное";
 $MESS["prolog_main_support_wit"] = "Что это такое?";
 $MESS["prolog_main_support_wit_descr1"] = "Что означает окончание срока «Стандартной лицензии»?";
@@ -70,7 +70,6 @@ $MESS["prolog_main_support_menu2"] = "неделю";
 $MESS["prolog_main_support_menu3"] = "две недели";
 $MESS["prolog_main_support_menu4"] = "<span style=\"color:red;\">месяц</span>";
 $MESS["DEVSERVER_ADMIN_MESSAGE"] = "Эта установка предназначена для разработки на базе продукта \"1С-Битрикс: Управление сайтом\". Она не должна использоваться в качестве рабочего (боевого) сайта.";
-
 $MESS["prolog_main_timelimit11"] = "<span class=\"required\">Внимание!</span> Срок действия текущей лицензии заканчивается #DAYS_AGO_TXT#. В срок до #FINISH_DATE# необходимо приобрести продление лицензии на следующий год во избежание блокировки продукта. Свяжитесь с <a href=\"mailto:enterprise@1c-bitrix.ru\">отделом по работе с ключевыми клиентами компании 1С-Битрикс</a>. ";
 $MESS["prolog_main_timelimit12"] = "<span class=\"required\">Внимание!</span> Срок действия текущей лицензии закончился #FINISH_DATE#. Через #DAYS_AGO# дней работа проекта будет остановлена, доступ к продукту заблокирован. Срочно свяжитесь с <a href=\"mailto:enterprise@1c-bitrix.ru\">отделом по работе с ключевыми клиентами компании 1С-Битрикс</a> для приобретения лицензии на следующий год. ";
 ?>

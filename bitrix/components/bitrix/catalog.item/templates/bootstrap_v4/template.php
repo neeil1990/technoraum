@@ -116,7 +116,7 @@ if (isset($arResult['ITEM']))
 		if (!$haveOffers)
 		{
 			$jsParams = array(
-				'PRODUCT_TYPE' => $item['CATALOG_TYPE'],
+				'PRODUCT_TYPE' => $item['PRODUCT']['TYPE'],
 				'SHOW_QUANTITY' => $arParams['USE_PRODUCT_QUANTITY'],
 				'SHOW_ADD_BASKET_BTN' => false,
 				'SHOW_BUY_BTN' => true,
@@ -181,7 +181,7 @@ if (isset($arResult['ITEM']))
 		else
 		{
 			$jsParams = array(
-				'PRODUCT_TYPE' => $item['CATALOG_TYPE'],
+				'PRODUCT_TYPE' => $item['PRODUCT']['TYPE'],
 				'SHOW_QUANTITY' => false,
 				'SHOW_ADD_BASKET_BTN' => false,
 				'SHOW_BUY_BTN' => true,

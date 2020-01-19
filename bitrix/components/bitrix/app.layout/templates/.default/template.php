@@ -111,7 +111,7 @@ if($arParams['PLACEMENT'] !== \Bitrix\Rest\PlacementTable::PLACEMENT_DEFAULT)
 }
 ?>
 <div id="appframe_layout_<?=$arResult['APP_SID']?>" <? if(!empty($frameStyle)) echo ' style="'.implode(';', $frameStyle).'"' ?> class="app-frame-layout">
-	<iframe id="appframe_<?=$arResult['APP_SID']?>" name="<?=htmlspecialcharsbx($frameName)?>" frameborder="0" class="app-frame app-loading" style="height: 100%; width: 100%;"></iframe>
+	<iframe id="appframe_<?=$arResult['APP_SID']?>" name="<?=htmlspecialcharsbx($frameName)?>" frameborder="0" class="app-frame app-loading" style="height: 100%; width: 100%;" allow="geolocation *; microphone *; camera *"></iframe>
 	<div id="appframe_loading_<?=$arResult['APP_SID']?>" class="app-loading-msg" <?if($arParams['SHOW_LOADER'] === 'N'):?> style="display: none;"<?endif;?>>
 		<?=GetMessage('REST_LOADING', array('#APP_NAME#' =>  htmlspecialcharsbx($arResult['APP_NAME'])))?>
 	</div>

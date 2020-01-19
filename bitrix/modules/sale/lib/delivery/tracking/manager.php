@@ -7,10 +7,12 @@ use Bitrix\Main\Config\Option;
 use Bitrix\Main\Error;
 use Bitrix\Main\Event;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\ORM\Data\UpdateResult;
 use Bitrix\Main\SystemException;
 use Bitrix\Sale\Delivery\Services;
 use Bitrix\Sale\Internals\ShipmentTable;
 use Bitrix\Sale\Order;
+use Bitrix\Sale;
 use Bitrix\Sale\PropertyValueCollection;
 use Bitrix\Sale\Result;
 use Bitrix\Sale\Shipment;
@@ -241,15 +243,14 @@ class Manager
 	}
 
 	/**
-	 * @param $trackingNumber
-	 * @param $deliveryId
+	 * @param array shipment
 	 * @return StatusResult
 	 * @throws ArgumentNullException
 	 * @throws SystemException
 	 */
 	protected function getStatus($shipment)
 	{
-		$result = new \Bitrix\Sale\Result();
+		$result = new StatusResult();
 
 		if(intval($shipment['DELIVERY_ID']) <= 0)
 			throw new ArgumentNullException('deliveryId');
@@ -299,6 +300,7 @@ class Manager
 	/**
 	 * @param string $className Class name delivered from \Bitrix\Sale\Delivery\Tracking\Base
 	 * @param array $params
+	 * @param Services\Base $deliveryService
 	 * @return Base
 	 * @throws ArgumentNullException
 	 * @throws SystemException
@@ -341,15 +343,28 @@ class Manager
 		$data = $result->getData();
 
 		if(!empty($data))
-			$manager->processStatusChange($data);
+		{
+			$result = $manager->processStatusChange($data);
+
+			if(!$result->isSuccess())
+			{
+				$eventLog = new \CEventLog;
+
+				$eventLog->Add(array(
+					"SEVERITY" => \CEventLog::SEVERITY_ERROR,
+					"AUDIT_TYPE_ID" => 'SALE_DELIVERY_TRACKING_REFRESHING_STATUS_ERROR',
+					"MODULE_ID" => "sale",
+					"ITEM_ID" => time(),
+					"DESCRIPTION" => implode('\n', $result->getErrorMessages())
+				));
+			}
+		}
 
 		return '\Bitrix\Sale\Delivery\Tracking\Manager::startRefreshingStatuses();';
 	}
 
 	/**
 	 * @return Result
-	 * @throws ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentException
 	 * todo: timelimit
 	 */
 	protected function updateStatuses()
@@ -541,6 +556,10 @@ class Manager
 	{
 		$result = new Result();
 
+		$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
+		/** @var Sale\Order $orderClass */
+		$orderClass = $registry->getOrderClassName();
+
 		foreach($params as $param)
 		{
 			if(intval($param->status) <= 0 && strlen($param->description) <= 0)
@@ -551,7 +570,7 @@ class Manager
 			if(!empty($mappedStatuses[$param->status]))
 			{
 				/** @var Order $order */
-				$order = Order::load($param->orderId);
+				$order = $orderClass::load($param->orderId);
 				$shipmentCollection = null;
 				$oShipment = null;
 
@@ -606,6 +625,10 @@ class Manager
 		foreach($params as $status)
 			$paramsByShipmentId[$status->shipmentId] = $status;
 
+		$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
+		/** @var Sale\Order $orderClass */
+		$orderClass = $registry->getOrderClassName();
+
 		$res = ShipmentTable::getList(array(
 			'filter' => array(
 				'=ID' => array_keys($paramsByShipmentId)
@@ -639,7 +662,7 @@ class Manager
 		{
 			$userEmail = '';
 			$userName = '';
-			$order = Order::load($paramsByShipmentId[$data['SHIPMENT_NO']]->orderId);
+			$order = $orderClass::load($paramsByShipmentId[$data['SHIPMENT_NO']]->orderId);
 
 			/** @var PropertyValueCollection $propertyCollection */
 			if ($propertyCollection = $order->getPropertyCollection())
@@ -710,7 +733,6 @@ class Manager
 
 	/**
 	 * @param StatusChangeEventParam[] $params
-	 * @throws SystemException
 	 */
 	protected function sendOnStatusesChangedEvent(array $params)
 	{
@@ -790,8 +812,7 @@ class Manager
 	/**
 	 * @param int $shipmentId
 	 * @param StatusResult $params
-	 * @param bool|false $isStatusChanged
-	 * @return Result
+	 * @return UpdateResult
 	 * @throws ArgumentNullException
 	 * @throws \Exception
 	 */

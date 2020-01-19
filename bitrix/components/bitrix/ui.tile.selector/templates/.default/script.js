@@ -61,7 +61,7 @@
 	TileSelector.getById = function (id)
 	{
 		var filtered = selectorList.filter(function (item) {
-			return item.id === id;
+			return (item.id === id && document.body.contains(item.context));
 		});
 		return filtered.length > 0 ? filtered[0] : null;
 	};
@@ -78,6 +78,9 @@
 		this.duplicates = params.duplicates;
 		this.multiple = params.multiple;
 		this.readonly = params.readonly;
+		this.manualInputEnd = params.manualInputEnd;
+		this.caption = params.caption;
+		this.captionMore = params.captionMore;
 
 		this.attributeId = 'data-bx-id';
 		this.attributeData = 'data-bx-data';
@@ -119,8 +122,20 @@
 			BX.bind(this.tileContainer, 'click', this.onButtonSelect.bind(this));
 		}
 		BX.bind(this.input, 'input', this.onInput.bind(this));
-		BX.bind(this.input, 'blur', this.onInputEnd.bind(this));
-		Helper.handleKeyEnter(this.input, this.onInputEnd.bind(this));
+		if (!this.manualInputEnd)
+		{
+			BX.bind(this.input, 'blur', this.onInputEnd.bind(this));
+			Helper.handleKeyEnter(this.input, this.onInputEnd.bind(this));
+		}
+
+		BX.bind(this.input, 'keydown', function (e) {
+			if (e.key === 'Enter')
+			{
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			}
+		});
 	};
 	TileSelector.prototype.getSearchInput = function ()
 	{
@@ -221,6 +236,29 @@
 		e.preventDefault();
 		e.stopPropagation();
 		this.removeTile(tile);
+
+		if (BX.UI.SelectorManager)
+		{
+			var selectorInstance = BX.UI.SelectorManager.instances[this.id];
+			if (
+				selectorInstance
+				&& selectorInstance.callback.unSelect
+			)
+			{
+				if (
+					BX.type.isNotEmptyObject(tile.data)
+					&& BX.type.isNotEmptyString(tile.data.entityType)
+				)
+				{
+					selectorInstance.callback.unSelect({
+						item: selectorInstance.entities[tile.data.entityType.toUpperCase()].items[(tile.id.match(/^\d+$/) ? ('U' + tile.id) : tile.id)],
+						entityType: tile.data.entityType,
+						selectorId: selectorInstance.id
+					});
+				}
+			}
+		}
+
 		return false;
 	};
 	TileSelector.prototype.onClick = function (tile, e)
@@ -241,6 +279,7 @@
 		this.list = BX.util.deleteFromArray(this.list, this.list.indexOf(tile));
 		BX.remove(tile.node);
 		this.fire(this.events.tileRemove, [tile]);
+		this.recalcButtonSelectText();
 	};
 	TileSelector.prototype.getTile = function (id)
 	{
@@ -314,12 +353,25 @@
 		{
 			style += 'background-color: ' + BX.util.htmlspecialchars(background) + '; ';
 		}
+
+		var type = (BX.type.isNotEmptyString(data.entityType) ? data.entityType.toLowerCase() : 'none');
+		if (!!data.extranet)
+		{
+			type += '-extranet';
+		}
+		if (!!data.crmEmail)
+		{
+			type += '-crm';
+		}
+
 		template = Helper.replace(template, {
 			'id': BX.util.htmlspecialchars(id + ''),
 			'name': BX.util.htmlspecialchars(name),
 			'data': BX.util.htmlspecialchars(JSON.stringify(data)),
-			'style': style
-		});
+			'style': style,
+			'type': type,
+			'readonly': (!!data.readonly ? 'yes' : 'no')
+		}, true);
 
 
 		var node = document.createElement('div');
@@ -334,6 +386,7 @@
 
 		this.input.parentNode.insertBefore(node, this.input);
 		this.fire(this.events.tileAdd, [tile]);
+		this.recalcButtonSelectText();
 
 		return tile;
 	};
@@ -394,7 +447,7 @@
 		this.input.value = '';
 		Helper.changeDisplay(this.input, false);
 		Helper.changeDisplay(this.buttonSelect, true);
-
+		this.recalcButtonSelectText();
 		this.fire(this.events.search, [value]);
 	};
 	TileSelector.prototype.onButtonAdd = function (e)
@@ -423,6 +476,17 @@
 			this.fire(this.events.buttonSelectFirst, []);
 			this.isButtonSelectFired = true;
 		}
+	};
+
+	TileSelector.prototype.recalcButtonSelectText = function()
+	{
+		if (!this.buttonSelect)
+		{
+			return;
+		}
+
+		var list = this.getTiles();
+		this.buttonSelect.innerHTML = (list.length > 0 ? this.captionMore : this.caption)
 	};
 
 	var Helper = {
@@ -798,5 +862,29 @@
 
 
 	BX.UI.TileSelector = TileSelector;
+
+	BX.addCustomEvent('BX.Main.SelectorV2:onGetDataStart', function(selectorId) {
+		var
+			maskNode = BX('ui-tile-selector-' + selectorId + '-mask');
+
+		if (!maskNode)
+		{
+			return;
+		}
+
+		maskNode.classList.add('ui-tile-selector-selector-mask-active');
+	});
+
+	BX.addCustomEvent('BX.Main.SelectorV2:onGetDataFinish', function(selectorId) {
+		var
+			maskNode = BX('ui-tile-selector-' + selectorId + '-mask');
+
+		if (!maskNode)
+		{
+			return;
+		}
+
+		maskNode.classList.remove('ui-tile-selector-selector-mask-active');
+	});
 
 })(window);

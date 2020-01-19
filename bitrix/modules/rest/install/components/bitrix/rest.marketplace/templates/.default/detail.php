@@ -18,8 +18,8 @@ if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
 ?>
 
 <div class="mp_wrap">
-<?php/*
-if(!$arResult['SLIDER'])
+<?php
+/*if(!$arResult['SLIDER'])
 {
 	$APPLICATION->IncludeComponent("bitrix:rest.marketplace.toolbar", '', array(
 		"COMPONENT_PAGE" => $arParams["COMPONENT_PAGE"],

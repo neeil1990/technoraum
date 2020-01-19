@@ -1,4 +1,6 @@
 <?
+use Bitrix\Main\Loader;
+
 IncludeModuleLangFile(__FILE__);
 
 class CAllIBlockSection
@@ -106,6 +108,10 @@ class CAllIBlockSection
 					AND BS1.RIGHT_MARGIN <= BS.RIGHT_MARGIN
 				)";
 				break;
+			case "PICTURE":
+			case "DETAIL_PICTURE":
+				$arSqlSearch[] = CIBlock::FilterCreate("BS.".$key, $val, "number", $cOperationType);
+				break;
 			}
 		}
 
@@ -154,7 +160,7 @@ class CAllIBlockSection
 
 	public static function GetTreeList($arFilter = array(), $arSelect = array())
 	{
-		return CIBlockSection::GetList(Array("left_margin"=>"asc"), $arFilter, false, $arSelect);
+		return CIBlockSection::GetList(array("left_margin"=>"asc"), $arFilter, false, $arSelect);
 	}
 
 	public static function GetNavChain($IBLOCK_ID, $SECTION_ID, $arSelect = array(), $arrayResult = false)
@@ -657,7 +663,7 @@ class CAllIBlockSection
 						//Look up GLOBAL_ACTIVE of the parent
 						//if none then take our own
 						if($arParent)//We must inherit active from the parent
-							$arUpdate["GLOBAL_ACTIVE"] = $arParent["ACTIVE"] == "Y"? "Y": "N";
+							$arUpdate["GLOBAL_ACTIVE"] = $arParent["GLOBAL_ACTIVE"] == "Y"? "Y": "N";
 						else //No parent was found take our own
 							$arUpdate["GLOBAL_ACTIVE"] = "Y";
 					}
@@ -2156,13 +2162,31 @@ class CAllIBlockSection
 		$loadSections = self::checkLoadSections($elementInherentFilter)
 			&& !(isset($arFilter['ID']) && is_object($arFilter['ID']));
 
+		$filterById = array();
+		if (isset($arFilter["ID_1"]) || isset($arFilter["ID_2"]))
+		{
+			if (isset($arFilter["ID_1"]))
+				$filterById[">=ID"] = $arFilter["ID_1"];
+			if (isset($arFilter["ID_2"]))
+				$filterById["<=ID"] = $arFilter["ID_2"];
+		}
+		else
+		{
+			$prepared = array();
+			foreach (array_keys($arFilter) as $index)
+			{
+				if ($arFilter[$index] === null || is_object($arFilter[$index]))
+					continue;
+				if (preg_match('/^(>=|<=|>|<|=|!=)ID$/', strtoupper($index), $prepared))
+					$filterById[$index] = $arFilter[$index];
+			}
+		}
+
 		if ($loadSections)
 		{
 			$arSectionFilter = array(
 				"IBLOCK_ID" => $arFilter["IBLOCK_ID"],
 				"?NAME" => $arFilter["NAME"],
-				">=ID" => $arFilter["ID_1"],
-				"<=ID" => $arFilter["ID_2"],
 				">=TIMESTAMP_X" => $arFilter["TIMESTAMP_X_1"],
 				"<=TIMESTAMP_X" => $arFilter["TIMESTAMP_X_2"],
 				"MODIFIED_BY" => $arFilter["MODIFIED_USER_ID"] ? $arFilter["MODIFIED_USER_ID"] : $arFilter["MODIFIED_BY"],
@@ -2184,6 +2208,8 @@ class CAllIBlockSection
 			}
 			if (array_key_exists("SECTION_ID", $arFilter))
 				$arSectionFilter["SECTION_ID"] = $arFilter["SECTION_ID"];
+			if (!empty($filterById))
+				$arSectionFilter = $filterById + $arSectionFilter;
 
 			$sectionFields = array(
 				"ID" => true,
@@ -2254,8 +2280,6 @@ class CAllIBlockSection
 			"IBLOCK_ID"		=>$arFilter["IBLOCK_ID"],
 			"?NAME"			=>$arFilter["NAME"],
 			"SECTION_ID"		=>$arFilter["SECTION_ID"],
-			">=ID"			=>$arFilter["ID_1"],
-			"<=ID"			=>$arFilter["ID_2"],
 			"=ID"			=> $arFilter["ID"],
 			">=TIMESTAMP_X"		=>$arFilter["TIMESTAMP_X_1"],
 			"<=TIMESTAMP_X"		=>$arFilter["TIMESTAMP_X_2"],
@@ -2291,6 +2315,9 @@ class CAllIBlockSection
 		if (!empty($elementInherentFilter))
 			$arElementFilter = $arElementFilter + $elementInherentFilter;
 		unset($elementInherentFilter);
+
+		if (!empty($filterById))
+			$arElementFilter = $filterById + $arElementFilter;
 
 		if(!$validatedSelect)
 			$arSelectedFields = array("*");
@@ -2690,13 +2717,14 @@ class CAllIBlockSection
 		$result = array();
 		if (!empty($filter))
 		{
+			$catalogIncluded = Loader::includeModule('catalog');
 			foreach($filter as $index => $value)
 			{
 				$op = CIBlock::MkOperationFilter($index);
 				$newIndex = strtoupper($op["FIELD"]);
 				if (
 					strncmp($newIndex, "PROPERTY_", 9) == 0
-					|| strncmp($newIndex, "CATALOG_", 8) == 0
+					|| ($catalogIncluded && \CProductQueryBuilder::isValidField($newIndex))
 				)
 				{
 					$result[$index] = $value;
@@ -2715,24 +2743,15 @@ class CAllIBlockSection
 		$result = true;
 		if (!empty($filter))
 		{
+			$catalogIncluded = Loader::includeModule('catalog');
 			foreach($filter as $index => $value)
 			{
-				$found = false;
 				$op = CIBlock::MkOperationFilter($index);
 				$newIndex = strtoupper($op["FIELD"]);
 				if (
 					strncmp($newIndex, "PROPERTY_", 9) == 0
+					|| ($catalogIncluded && \CProductQueryBuilder::isRealFilterField($newIndex))
 				)
-				{
-					$found = true;
-				}
-				elseif (strncmp($newIndex, "CATALOG_", 8) == 0)
-				{
-					if (strncmp($newIndex, "CATALOG_SHOP_QUANTITY_", 22) != 0)
-						$found = true;
-				}
-
-				if ($found)
 				{
 					$result = false;
 					break;

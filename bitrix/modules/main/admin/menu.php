@@ -167,8 +167,8 @@ if($USER->CanDoOperation('view_other_settings') || $USER->CanDoOperation('manage
 			),
 		);
 		$settingsItems[] = array(
-			"text" => GetMessage("MAIN_MENU_EVENT"),
-			"title" => GetMessage("MAIN_MENU_EVENT_TITLE"),
+			"text" => GetMessage("MAIN_MENU_EVENT1"),
+			"title" => GetMessage("MAIN_MENU_EVENT_TITLE1"),
 			"items_id" => "menu_templates",
 			"items" => array(
 				array(
@@ -178,8 +178,14 @@ if($USER->CanDoOperation('view_other_settings') || $USER->CanDoOperation('manage
 					"title" => GetMessage("MAIN_MENU_TEMPLATES_ALT"),
 				),
 				array(
-					"text" => GetMessage("MAIN_MENU_EVENT_TYPES"),
-					"title" => GetMessage("MAIN_MENU_EVENT_TYPES_TITLE"),
+					"text" => GetMessage("main_menu_sms_templates"),
+					"url" => "sms_template_admin.php?lang=".LANGUAGE_ID,
+					"more_url" => array("sms_template_edit.php"),
+					"title" => GetMessage("main_menu_sms_templates_title"),
+				),
+				array(
+					"text" => GetMessage("MAIN_MENU_EVENT_TYPES1"),
+					"title" => GetMessage("MAIN_MENU_EVENT_TYPES_TITLE1"),
 					"url" => "type_admin.php?lang=".LANGUAGE_ID,
 					"more_url" => array(
 						"type_edit.php"

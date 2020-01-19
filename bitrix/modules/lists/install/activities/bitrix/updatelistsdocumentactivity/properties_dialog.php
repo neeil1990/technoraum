@@ -46,7 +46,7 @@ $docType = $dialog->getMap()['DocumentType'];
 					<td width="60%" class="adm-detail-content-cell-r"><?=$documentService->GetFieldInputControl(
 							$listsDocumentType,
 							$property,
-							array($dialog->getFormName(), 'fields['.$fieldKey.']'),
+							array($dialog->getFormName(), 'fields__'.$fieldKey),
 							$fieldValue,
 							true
 						)?>

@@ -120,7 +120,7 @@ $MESS["top_panel_edit_mode_title"] = "Перейдите в режим правки для отображения с
 $MESS["top_panel_comp"] = "Компоненты";
 $MESS["top_panel_comp_tooltip_title"] = "Компоненты";
 $MESS["top_panel_comp_tooltip_empty"] = "На данной странице компоненты отсутствуют.";
-$MESS["top_panel_browser"] = "Административная панель не поддерживает Internet Explorer версии 7 и ниже. Установите современный браузер <a href=\"http://www.firefox.com\">Firefox</a>, <a href=\"http://www.google.com/chrome/\">Chrome</a>, <a href=\"http://www.opera.com\">Opera</a> или <a href=\"http://www.microsoft.com/windows/internet-explorer/\">Internet Explorer 8</a>.";
+$MESS["top_panel_browser"] = "Административная панель не поддерживает Internet Explorer версии 7 и ниже. Установите современный браузер <a href=\"http://www.firefox.com\">Firefox</a>, <a href=\"http://www.google.com/chrome/\">Chrome</a>, <a href=\"http://www.opera.com\">Opera</a> или <a href=\"http://www.microsoft.com/windows/internet-explorer/\">Microsoft Edge</a>.";
 $MESS["top_panel_menu"] = "Меню";
 $MESS["top_panel_start_menu_tooltip_title"] = "Меню";
 $MESS["top_panel_site"] = "Сайт";
@@ -169,4 +169,5 @@ $MESS["top_panel_debug_cache"] = "Детальная статистика кеша";
 $MESS["top_panel_debug_cache_title"] = "Внимание! Может сильно влиять на время исполнения страницы.";
 $MESS["HK_PANEL_TITLE"] = "Настройки горячих клавиш";
 $MESS["top_panel_more_button_title"] = "Еще";
+$MESS["top_panel_b24"] = "Битрикс24";
 ?>

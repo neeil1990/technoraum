@@ -24,7 +24,7 @@ return [
 								</p>
 							</div>
 							<div class="col-md-3">
-								<a href="/"
+								<a href="#"
 								   class="landing-block-node-card-button text-uppercase btn u-btn-outline-white btn-md rounded-0">
 									Read more
 								</a>
@@ -74,7 +74,7 @@ return [
 								</p>
 							</div>
 							<div class="col-md-3">
-								<a href="/"
+								<a href="#"
 								   class="landing-block-node-card-button text-uppercase btn u-btn-outline-white btn-md rounded-0">
 									Read more
 								</a>

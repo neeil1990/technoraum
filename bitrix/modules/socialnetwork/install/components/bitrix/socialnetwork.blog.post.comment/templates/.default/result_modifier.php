@@ -221,7 +221,7 @@ if(
 					// parse inline disk attached object ids
 					if (preg_match_all("#\\[disk file id=(\\d+)\\]#is".BX_UTF_PCRE_MODIFIER, $comment['POST_TEXT'], $matches))
 					{
-						$inlineDiskAttachedObjectIdList = array_map(function($a) { return intval(substr($a, 1)); }, $matches[1]);
+						$inlineDiskAttachedObjectIdList = array_map(function($a) { return intval($a); }, $matches[1]);
 					}
 
 					// get inline attached images;
@@ -237,20 +237,25 @@ if(
 						$filter = array(
 							'=OBJECT.TYPE_FILE' => \Bitrix\Disk\TypeFile::IMAGE
 						);
+
+						$subFilter = [];
 						if (!empty($inlineDiskObjectIdList))
 						{
-							$filter['@OBJECT_ID'] = $inlineDiskObjectIdList;
+							$subFilter['@OBJECT_ID'] = $inlineDiskObjectIdList;
 						}
-						if (!empty($inlineDiskAttachedObjectIdList))
+						elseif (!empty($inlineDiskAttachedObjectIdList))
 						{
-							$filter['@ID'] = $inlineDiskAttachedObjectIdList;
+							$subFilter['@ID'] = $inlineDiskAttachedObjectIdList;
 						}
-						if (
-							!empty($inlineDiskObjectIdList)
-							&& !empty($inlineDiskAttachedObjectIdList)
-						)
+
+						if(count($subFilter) > 1)
 						{
-							$filter['LOGIC'] = 'OR';
+							$subFilter['LOGIC'] = 'OR';
+							$filter[] = $subFilter;
+						}
+						else
+						{
+							$filter = array_merge($filter, $subFilter);
 						}
 
 						$res = \Bitrix\Disk\Internals\AttachedObjectTable::getList(array(

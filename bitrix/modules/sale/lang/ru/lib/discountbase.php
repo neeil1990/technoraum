@@ -13,6 +13,7 @@ $MESS["BX_SALE_DISCOUNT_ERR_APPLY_WITHOUT_SALE_DISCOUNT"] = "Не найдено правило,
 $MESS["BX_SALE_DISCOUNT_ERR_APPLY_WITHOUT_EXT_DISCOUNT"] = "Не найдена скидка, использованная в заказе. Возможен только полный пересчет заказа";
 $MESS["BX_SALE_DISCOUNT_ERR_DISCOUNT_WITHOUT_COUPON"] = "Отсутствует купон";
 $MESS["BX_SALE_DISCOUNT_ERR_COUPON_NOT_FOUND"] = "Отсутствует информация о купоне";
+$MESS["BX_SALE_DISCOUNT_ERR_BAD_COUPONS_USED"] = "Добавленные купоны не могут быть использованы";
 $MESS["BX_SALE_DISCOUNT_ERR_SAVE_APPLY_RULES"] = "Ошибка сохранения результатов применения скидок и правил корзины";
 $MESS["BX_SALE_DISCOUNT_ERR_BASKET_BUNDLE_EMPTY"] = "Отсутствуют элементы комплекта";
 ?>

@@ -3,6 +3,7 @@ define("PUBLIC_AJAX_MODE", true);
 define("NO_KEEP_STATISTIC", "Y");
 define("NO_AGENT_STATISTIC","Y");
 define("NO_AGENT_CHECK", true);
+define('BX_SECURITY_SESSION_READONLY', true);
 define("DisableEventsCheck", true);
 
 $lng = (isset($_REQUEST["lang"]) && is_string($_REQUEST["lang"])) ? trim($_REQUEST["lang"]): "";
@@ -130,7 +131,6 @@ if ($_REQUEST["post_id"] > 0 && !empty($_REQUEST["name"]) && !empty($_REQUEST["v
 
 					$arList["items"][$arUser['ID']] = $arUser;
 					$arUserId[] = $arUser["ID"];
-
 				} while ($res = $db_res->Fetch());
 
 				if (

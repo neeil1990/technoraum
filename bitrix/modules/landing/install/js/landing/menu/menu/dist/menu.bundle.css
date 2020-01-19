@@ -1,0 +1,83 @@
+.landing-menu-add {
+	position: absolute;
+	bottom: 0;
+	padding-top: 10px;
+	padding-bottom: 20px;
+	padding-left: 20px;
+	padding-right: 20px;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
+}
+
+.landing-menu-add-field {
+	position: relative;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	width: 100%;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.landing-menu-add-field-input {
+	background: #ffffff;
+	height: 39px;
+	-webkit-box-sizing: border-box;
+	        box-sizing: border-box;
+	border: #C6CDD3 1px solid;
+	border-radius: 2px;
+	-webkit-box-flex: 1;
+	    -ms-flex-positive: 1;
+	        flex-grow: 1;
+	padding-left: 10px;
+	padding-right: 35px;
+	line-height: 39px;
+	width: 100%;
+}
+
+.landing-menu-add-field-clear {
+	background: url('../images/remove-icon.svg') center center no-repeat;
+	width: 26px;
+	height: 26px;
+	position: absolute;
+	top: 50%;
+	right: 10px;
+	margin-top: -14px;
+	cursor: pointer;
+}
+
+.landing-ui-menu-add-button {
+	background: #ffffff;
+}
+
+.landing-menu-add-field-input:focus,
+.landing-ui-menu-add-button:focus {
+	outline: none;
+}
+
+@media all {
+	body .landing-menu-root-list {
+		margin-bottom: 69px!important;
+	}
+
+	body .landing-menu-root-list-with-field {
+		margin-bottom: 128px!important;
+	}
+}

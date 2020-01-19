@@ -72,6 +72,13 @@ if($arParams["SEF_MODE"] == "Y")
 
 	$arParams["CATEGORY_URL_TPL"] = $arParams["SEF_FOLDER"].$arParams["SEF_URL_TEMPLATES"]["category"];
 	$arParams["DETAIL_URL_TPL"] = $arParams["SEF_FOLDER"].$arParams["SEF_URL_TEMPLATES"]["detail"];
+	if (\CRestUtil::isSlider())
+	{
+		$request = \Bitrix\Main\Context::getCurrent()->getRequest();
+		$arParams["DETAIL_URL_TPL"] .= "?".(new \Bitrix\Main\Web\Uri($arParams["DETAIL_URL_TPL"]))
+				->addParams(["IFRAME" => $request->get("IFRAME"), "IFRAME_TYPE" => $request->get("IFRAME_TYPE")])
+				->getQuery();
+	}
 }
 else
 {
@@ -93,7 +100,10 @@ else
 		$componentPage = "top";
 	}
 
-	$arParams['DETAIL_URL_TPL'] = $APPLICATION->GetCurPageParam('app=#app#', array('IFRAME', 'IFRAME_TYPE'));
+	if (\CRestUtil::isSlider())
+		$arParams['DETAIL_URL_TPL'] = $APPLICATION->GetCurPageParam('app=#app#');
+	else
+		$arParams['DETAIL_URL_TPL'] = $APPLICATION->GetCurPageParam('app=#app#', array('IFRAME', 'IFRAME_TYPE'));
 }
 
 $arResult = array(

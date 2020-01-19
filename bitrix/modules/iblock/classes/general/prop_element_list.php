@@ -226,6 +226,10 @@ class CIBlockPropertyElementList
 	{
 		$fields["type"] = "list";
 		$fields["items"] = self::getItemsForUiFilter($arProperty);
+		$fields["operators"] = array(
+			"default" => "=",
+			"enum" => "@"
+		);
 	}
 
 	private static function getItemsForUiFilter($arProperty)

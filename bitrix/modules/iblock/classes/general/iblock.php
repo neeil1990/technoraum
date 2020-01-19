@@ -1,6 +1,7 @@
 <?
 use Bitrix\Main\Loader,
-	Bitrix\Main;
+	Bitrix\Main,
+	Bitrix\Iblock;
 
 IncludeModuleLangFile(__FILE__);
 
@@ -1435,7 +1436,7 @@ class CAllIBlock
 		}
 	}
 
-	function SetMessages($ID, $arFields)
+	public static function SetMessages($ID, $arFields)
 	{
 		/** @global CDatabase $DB */
 		global $DB;
@@ -2144,7 +2145,7 @@ REQ
 		return $arRes;
 	}
 
-	function GetPermission($IBLOCK_ID, $FOR_USER_ID = false)
+	public static function GetPermission($IBLOCK_ID, $FOR_USER_ID = false)
 	{
 		/** @global CDatabase $DB */
 		global $DB;
@@ -2203,7 +2204,7 @@ REQ
 		return $CACHE[$CACHE_KEY];
 	}
 
-	function OnBeforeLangDelete($lang)
+	public static function OnBeforeLangDelete($lang)
 	{
 		/** @global CDatabase $DB */
 		global $DB;
@@ -2230,12 +2231,12 @@ REQ
 		}
 	}
 
-	function OnLangDelete($lang)
+	public static function OnLangDelete($lang)
 	{
 		return true;
 	}
 
-	function OnGroupDelete($group_id)
+	public static function OnGroupDelete($group_id)
 	{
 		/** @global CDatabase $DB */
 		global $DB;
@@ -2264,22 +2265,27 @@ REQ
 		);
 
 		$key = (string)$key;
+		$result = array(
+			"FIELD" => $key,
+			"OPERATION" => "E",
+			"PREFIX" => ""
+		);
 		if ($key == '')
-			return array("FIELD"=>$key, "OPERATION"=>"E"); // zero key
+			return $result; // zero key
 
 		for ($i = 3; $i > 0; $i--)
 		{
 			$op = substr($key, 0, $i);
 			if ($op && isset($operations[$op]))
 			{
-				return array(
-					"FIELD" => substr($key, $i),
-					"OPERATION" => $operations[$op],
-				);
+				$result["FIELD"] = substr($key, $i);
+				$result["OPERATION"] = $operations[$op];
+				$result["PREFIX"] = $op;
+				break;
 			}
 		}
 
-		return array("FIELD"=>$key, "OPERATION"=>"E"); // field LIKE val
+		return $result; // field LIKE val
 	}
 
 	public static function FilterCreate($field_name, $values, $type, $cOperationType=false, $bSkipEmpty = true)
@@ -2287,7 +2293,7 @@ REQ
 		return CIBlock::FilterCreateEx($field_name, $values, $type, $bFullJoin, $cOperationType, $bSkipEmpty);
 	}
 
-	function ForLIKE($str)
+	public static function ForLIKE($str)
 	{
 		/** @global CDatabase $DB */
 		global $DB;
@@ -2392,7 +2398,9 @@ REQ
 					elseif($cOperationType=="FTL")
 					{
 						$sqlWhere = new CSQLWhere();
-						$res[] = $sqlWhere->matchLike($fname, $val);
+						$condition = $sqlWhere->matchLike($fname, $val);
+						if ($condition != '')
+							$res[] = $condition;
 					}
 					else
 					{
@@ -2456,12 +2464,16 @@ REQ
 					if($cOperationType=="FT" || $cOperationType=="FTI")
 					{
 						$sqlWhere = new CSQLWhere();
-						$res[] = $sqlWhere->match($fname, $val, $cOperationType=="FT");
+						$condition = $sqlWhere->match($fname, $val, $cOperationType=="FT");
+						if ($condition != '')
+							$res[] = $condition;
 					}
 					elseif($cOperationType=="FTL")
 					{
 						$sqlWhere = new CSQLWhere();
-						$res[] = $sqlWhere->matchLike($fname, $val);
+						$condition = $sqlWhere->matchLike($fname, $val);
+						if ($condition != '')
+							$res[] = $condition;
 					}
 					elseif($cOperationType=="?")
 					{
@@ -2566,7 +2578,7 @@ REQ
 		return array();
 	}
 
-	function OnSearchGetURL($arFields)
+	public static function OnSearchGetURL($arFields)
 	{
 		/** @global CDatabase $DB */
 		global $DB;
@@ -2614,7 +2626,7 @@ REQ
 		return CIBlock::ReplaceDetailUrl($url, $arr, $server_name, $arrType);
 	}
 
-	function _GetProductUrl($OF_ELEMENT_ID, $OF_IBLOCK_ID, $server_name = false, $arrType = false)
+	public static function _GetProductUrl($OF_ELEMENT_ID, $OF_IBLOCK_ID, $server_name = false, $arrType = false)
 	{
 		static $arIBlockCache = array();
 		static $arElementCache = array();
@@ -2841,7 +2853,7 @@ REQ
 	}
 
 
-	function OnSearchReindex($NS=Array(), $oCallback=NULL, $callback_method="")
+	public static function OnSearchReindex($NS=Array(), $oCallback=NULL, $callback_method="")
 	{
 		/** @global CUserTypeManager $USER_FIELD_MANAGER */
 		global $USER_FIELD_MANAGER;
@@ -3149,7 +3161,7 @@ REQ
 		return $arResult;
 	}
 
-	function GetElementCount($iblock_id)
+	public static function GetElementCount($iblock_id)
 	{
 		/** @global CDatabase $DB */
 		global $DB;
@@ -3448,9 +3460,10 @@ REQ
 			"desc"       => array(false, "desc"),
 		);
 		$order = strtolower(trim($order));
-		if(array_key_exists($order, $arOrder))
+		$default_order = strtolower(trim($default_order));
+		if (isset($arOrder[$order]))
 			$o = $arOrder[$order];
-		elseif(array_key_exists($default_order, $arOrder))
+		elseif(isset($arOrder[$default_order]))
 			$o = $arOrder[$default_order];
 		else
 			$o = $arOrder["desc,nulls"];
@@ -3459,10 +3472,7 @@ REQ
 		//column can not contain nulls
 		if(!$nullable)
 		{
-			if($o[1] == "asc")
-				$o[0] = true;
-			else
-				$o[0] = false;
+			$o[0] = ($o[1] == "asc");
 		}
 
 		return $o;
@@ -3768,7 +3778,7 @@ REQ
 		$DB->Query("UPDATE b_iblock set TMP_ID = '".md5(mt_rand())."' WHERE ID = ".$IBLOCK_ID);
 	}
 
-	function isShortDate($strDate)
+	public static function isShortDate($strDate)
 	{
 		$arDate = ParseDateTime($strDate, FORMAT_DATETIME);
 		unset($arDate["DD"]);
@@ -4040,5 +4050,57 @@ REQ
 		if ($jpgQuality <= 0 || $jpgQuality > 100)
 			$jpgQuality = 95;
 		return $jpgQuality;
+	}
+
+	public static function checkActivityDatesAgent($iblockId, $previousTime)
+	{
+		$iblockId = (int)$iblockId;
+		if ($iblockId <= 0)
+		{
+			return '';
+		}
+		$currentTime = time();
+		$result = '\CIBlock::checkActivityDatesAgent('.$iblockId.', '.$currentTime.');';
+		$previousTime = (int)$previousTime;
+		if ($previousTime <= 0)
+		{
+			return $result;
+		}
+
+		$start = Main\Type\DateTime::createFromTimestamp($previousTime);
+		$finish = Main\Type\DateTime::createFromTimestamp($currentTime);
+
+		$iterator = Iblock\ElementTable::getList(array(
+			'select' => array('ID'),
+			'filter' => array(
+				'=IBLOCK_ID' => $iblockId,
+				'=ACTIVE' => 'Y',
+				'=WF_STATUS_ID' => 1,
+				'=WF_PARENT_ELEMENT_ID' => null,
+				array(
+					'LOGIC' => 'OR',
+					array(
+						'>ACTIVE_FROM' => $start,
+						'<=ACTIVE_FROM' => $finish
+					),
+					array(
+						'>ACTIVE_TO' => $start,
+						'<=ACTIVE_TO' => $finish
+					)
+				)
+			),
+			'limit' => 1
+		));
+		unset($finish);
+		unset($start);
+		$row = $iterator->fetch();
+		unset($iterator);
+		if (!empty($row))
+		{
+			static::clearIblockTagCache($iblockId);
+		}
+		unset($row);
+
+		return $result;
 	}
 }

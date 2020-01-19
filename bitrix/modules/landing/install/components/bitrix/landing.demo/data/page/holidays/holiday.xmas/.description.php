@@ -193,7 +193,7 @@ return array(
 					0 => 'landing-block-node-title g-font-weight-400 g-my-0 g-font-size-50 g-font-marmelad',
 				),
 				'#wrapper' => array(
-					0 => 'landing-block js-animation fadeInUp g-pt-55 g-pb-7',
+					0 => 'landing-block js-animation fadeInUp g-pt-55 g-pb-7 container g-max-width-100x',
 				),
 			),
 		),

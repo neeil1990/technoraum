@@ -228,8 +228,7 @@ $APPLICATION->SetTitle("Согласие на обработку персональных данных");
 	 9.2. Новая Политика конфиденциальности вступает в силу с момента ее размещения на Сайте интернет-магазина, если иное не предусмотрено новой редакцией Политики конфиденциальности.
 </p>
 <p>
-	 9.3. Все предложения или вопросы по настоящей Политике конфиденциальности следует сообщать на e-mail: <a href="mailto:ed@technoraum.ru">ed@technoraum.ru</a>
-</p>
-<p>
-</p>
- 9.4. Действующая Политика конфиденциальности размещена на странице по адресу&nbsp;<a href="https://technoraum.ru/soglasie-na-obrabotku-personalnykh-dannykh/">https://technoraum.ru/soglasie-na-obrabotku-personalnykh-dannykh/</a>&nbsp;<?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
+	 9.3. Все предложения или вопросы по настоящей Политике конфиденциальности следует сообщать на e-mail: <a href="mailto:km@technoraum.ru">km@technoraum.ru</a><br>
+	<br>
+	 9.4. Действующая Политика конфиденциальности размещена на странице по адресу&nbsp;<a href="https://technoraum.ru/soglasie-na-obrabotku-personalnykh-dannykh/">https://technoraum.ru/soglasie-na-obrabotku-personalnykh-dannykh/</a>&nbsp;
+</p><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

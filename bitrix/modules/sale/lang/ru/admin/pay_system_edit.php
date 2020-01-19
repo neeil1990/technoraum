@@ -86,6 +86,7 @@ $MESS["SALE_PSE_ERROR_DOCUMENT_TEMPLATE_EMPTY"] = "Не указан шаблон документа";
 $MESS["SALE_PSE_ERROR_ACTION_SAVE"] = "Не указан обработчик платежной системы";
 $MESS['SALE_PSE_ERROR_IMAGE_ERROR'] = "Ошибка при загрузке #SETTING_NAME#. Попробуйте, например, загрузить в другом формате.<br>";
 $MESS["SPS_ENCODING"] = "Кодировка";
+$MESS["SPS_XML_ID"] = "Внешний код";
 $MESS["SPS_IS_CASH"] = "Тип оплаты";
 $MESS["SPS_IS_CASH_TYPE_CASH"] = "Наличный";
 $MESS["SPS_IS_CASH_TYPE_NO_CASH"] = "Безналичный";

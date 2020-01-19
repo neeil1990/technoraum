@@ -70,6 +70,14 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 		{
 			$arParams["FILTER_NAME"] = "arrFilter";
 		}
+		$arParams["PREFILTER_NAME"] = (isset($arParams["PREFILTER_NAME"]) ? (string)$arParams["PREFILTER_NAME"] : '');
+		if(
+			$arParams["PREFILTER_NAME"] == ''
+			|| !preg_match("/^[A-Za-z_][A-Za-z01-9_]*$/", $arParams["PREFILTER_NAME"])
+		)
+		{
+			$arParams["PREFILTER_NAME"] = "smartPreFilter";
+		}
 
 		$arParams["CONVERT_CURRENCY"] = $arParams["CONVERT_CURRENCY"] === "Y";
 		$arParams["CURRENCY_ID"] = trim($arParams["CURRENCY_ID"]);
@@ -399,8 +407,8 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 	{
 		if (isset($arElement["MIN_VALUE_NUM"]) && isset($arElement["MAX_VALUE_NUM"]))
 		{
-			$currency = $arElement["VALUE"];
-			$existCurrency = strlen($currency) > 0;
+			$currency = (string)$arElement["VALUE"];
+			$existCurrency = $currency !== '';
 			if ($existCurrency)
 				$currency = $this->facet->lookupDictionaryValue($currency);
 
@@ -438,10 +446,19 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 		}
 		else
 		{
-			$currency = $arElement["CATALOG_CURRENCY_".$resultItem["ID"]];
-			$existCurrency = strlen($currency) > 0;
-			$price = $arElement["CATALOG_PRICE_".$resultItem["ID"]];
-			if(strlen($price))
+			$newFormat = array_key_exists("PRICE_".$resultItem["ID"], $arElement);
+			if ($newFormat)
+			{
+				$currency = (string)$arElement["CURRENCY_".$resultItem["ID"]];
+				$price = (string)$arElement["PRICE_".$resultItem["ID"]];
+			}
+			else
+			{
+				$currency = (string)$arElement["CATALOG_CURRENCY_".$resultItem["ID"]];
+				$price = (string)$arElement["CATALOG_PRICE_".$resultItem["ID"]];
+			}
+			$existCurrency = $currency !== '';
+			if($price !== '')
 			{
 				if ($this->convertCurrencyId && $existCurrency)
 				{
@@ -456,10 +473,10 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 				if(
 					!isset($resultItem["VALUES"]["MIN"])
 					|| !array_key_exists("VALUE", $resultItem["VALUES"]["MIN"])
-					|| doubleval($resultItem["VALUES"]["MIN"]["VALUE"]) > $convertPrice
+					|| (float)$resultItem["VALUES"]["MIN"]["VALUE"] > $convertPrice
 				)
 				{
-					$resultItem["VALUES"]["MIN"]["VALUE"] = $price;
+					$resultItem["VALUES"]["MIN"]["VALUE"] = $convertPrice;
 					if ($existCurrency)
 					{
 						if ($this->convertCurrencyId)
@@ -472,10 +489,10 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 				if(
 					!isset($resultItem["VALUES"]["MAX"])
 					|| !array_key_exists("VALUE", $resultItem["VALUES"]["MAX"])
-					|| doubleval($resultItem["VALUES"]["MAX"]["VALUE"]) < $convertPrice
+					|| (float)$resultItem["VALUES"]["MAX"]["VALUE"] < $convertPrice
 				)
 				{
-					$resultItem["VALUES"]["MAX"]["VALUE"] = $price;
+					$resultItem["VALUES"]["MAX"]["VALUE"] = $convertPrice;
 					if ($existCurrency)
 					{
 						if ($this->convertCurrencyId)
@@ -874,7 +891,8 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 		if($arTuple)
 		{
 			reset($arTuple);
-			list($key, $head) = each($arTuple);
+			$key = key($arTuple);
+			$head = $arTuple[$key];
 			unset($arTuple[$key]);
 			$arTemp[$key] = false;
 			if(is_array($head))
@@ -945,14 +963,14 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 		}
 
 		if ($this->arParams['HIDE_NOT_AVAILABLE'] == 'Y')
-			$arFilter['CATALOG_AVAILABLE'] = 'Y';
+			$arFilter['AVAILABLE'] = 'Y';
 
 		if(self::$catalogIncluded && $bOffersIBlockExist)
 		{
 			$arPriceFilter = array();
 			foreach($gFilter as $key => $value)
 			{
-				if(preg_match('/^(>=|<=|><)CATALOG_PRICE_/', $key))
+				if (\CProductQueryBuilder::isPriceFilterField($key))
 				{
 					$arPriceFilter[$key] = $value;
 					unset($gFilter[$key]);
@@ -970,7 +988,7 @@ class CBitrixCatalogSmartFilter extends CBitrixComponent
 				$arSubFilter["ACTIVE_DATE"] = "Y";
 				$arSubFilter["ACTIVE"] = "Y";
 				if ('Y' == $this->arParams['HIDE_NOT_AVAILABLE'])
-					$arSubFilter['CATALOG_AVAILABLE'] = 'Y';
+					$arSubFilter['AVAILABLE'] = 'Y';
 				$arFilter["=ID"] = CIBlockElement::SubQuery("PROPERTY_".$this->SKU_PROPERTY_ID, $arSubFilter);
 			}
 			elseif(!empty($arPriceFilter))

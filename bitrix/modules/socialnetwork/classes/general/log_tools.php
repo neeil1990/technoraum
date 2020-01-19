@@ -4896,9 +4896,17 @@ class CSocNetLogTools
 		$user_site_id = (
 			IsModuleInstalled("extranet") 
 				? (
-					(!in_array($user_id, $arIntranetUsers) && $extranet_site_id) 
-						? $extranet_site_id 
-						: ($explicit_site_id ? $explicit_site_id : $intranet_site_id)
+					(
+						!in_array($user_id, $arIntranetUsers)
+						&& $extranet_site_id
+					)
+						? $extranet_site_id // extranet user
+						: (
+							$explicit_site_id
+							&& $explicit_site_id != $extranet_site_id
+								? $explicit_site_id
+								: $intranet_site_id
+						)
 				)
 				: ($explicit_site_id ? $explicit_site_id : SITE_ID)
 		);
@@ -5875,6 +5883,14 @@ class logTextParser extends CTextParser
 	var $matchNum = 0;
 	var $matchNum2 = 0;
 
+	function sonet_sortlen($a, $b)
+	{
+		if (strlen($a["TYPING"]) == strlen($b["TYPING"]))
+			return 0;
+
+		return (strlen($a["TYPING"]) > strlen($b["TYPING"])) ? -1 : 1;
+	}
+
 	function logTextParser($strLang = False, $pathToSmile = false)
 	{
 		$this->CTextParser();
@@ -5887,15 +5903,22 @@ class logTextParser extends CTextParser
 		$this->pathToSmile = $pathToSmile;
 
 		if($CACHE_MANAGER->Read(604800, "b_sonet_smile"))
+		{
 			$arSmiles = $CACHE_MANAGER->Get("b_sonet_smile");
+		}
 		else
 		{
+			$arSmiles = [];
 			$db_res = CSocNetSmile::GetList(array("SORT" => "ASC"), array("SMILE_TYPE" => "S"/*, "LANG_LID" => $strLang*/), false, false, Array("LANG_LID", "ID", "IMAGE", "DESCRIPTION", "TYPING", "SMILE_TYPE", "SORT"));
 			while ($res = $db_res->Fetch())
 			{
 				$tok = strtok($res['TYPING'], " ");
 				while ($tok !== false)
 				{
+					if (!isset($arSmiles[$res['LANG_LID']]))
+					{
+						$arSmiles[$res['LANG_LID']] = [];
+					}
 					$arSmiles[$res['LANG_LID']][] = array(
 						'TYPING' => $tok,
 						'IMAGE'  => stripslashes($res['IMAGE']), // stripslashes is not needed here
@@ -5905,17 +5928,9 @@ class logTextParser extends CTextParser
 				}
 			}
 
-			function sonet_sortlen($a, $b) 
-			{
-				if (strlen($a["TYPING"]) == strlen($b["TYPING"]))
-					return 0;
-
-				return (strlen($a["TYPING"]) > strlen($b["TYPING"])) ? -1 : 1;
-			}
-
 			foreach ($arSmiles as $LID => $arSmilesLID)
 			{
-				uasort($arSmilesLID, 'sonet_sortlen');
+				uasort($arSmilesLID, array('logTextParser', 'sonet_sortlen'));
 				$arSmiles[$LID] = $arSmilesLID;
 			}
 
@@ -6611,7 +6626,8 @@ class CSocNetLogComponent
 		if ($isWebDavEnabled === false)
 		{
 			$isWebDavEnabled = (
-				CModule::includeModule('webdav')
+				$isDiskEnabled == 'N'
+				&& CModule::includeModule('webdav')
 					? "Y"
 					: "N"
 			);
@@ -6645,7 +6661,7 @@ class CSocNetLogComponent
 				"ENABLED" => "N"
 			);
 
-			if ($isWebDavEnabled == "Y")
+			if ($isWebDavEnabled == "Y" && $USER instanceof \CUser)
 			{
 				$webDavData = CWebDavIblock::getRootSectionDataForUser($userId);
 
@@ -7129,6 +7145,8 @@ class CSocNetLogComponent
 
 			if ($arRes = $dbRes->Fetch())
 			{
+				$arRes['MESSAGE'] = \Bitrix\Main\Text\Emoji::decode($arRes['MESSAGE']);
+
 				if ($checkPerms)
 				{
 					$bAllow = CSocNetLogComponent::canUserChangeComment(array(

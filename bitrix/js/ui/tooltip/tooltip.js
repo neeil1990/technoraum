@@ -125,6 +125,17 @@ BX.UI.TooltipBalloon = function(params)
 		}
 
 		BX.bind(this.node, 'mouseout', BX.delegate(this.stopTrackMouse, this));
+
+		BX.addCustomEvent("SidePanel.Slider:onOpen", function(event) {
+			if (this.tracking)
+			{
+				this.stopTrackMouse();
+			}
+			else
+			{
+				this.hideTooltip();
+			}
+		}.bind(this));
 	};
 
 	this.trackMouseHandle = this.trackMouse.bind(this);
@@ -143,7 +154,12 @@ BX.UI.TooltipBalloon.prototype.startTrackMouse = function()
 
 		var elCoords = BX.pos(this.node);
 		this.realAnchor = this.node;
-		this.coordsLeft = elCoords.left + 0;
+
+		this.coordsLeft = (
+			elCoords.width < 40
+				? (elCoords.left - 35)
+				: (elCoords.left + 0)
+		);
 		this.coordsTop = elCoords.top - 245; // 325
 		this.anchorRight = elCoords.right;
 		this.anchorTop = elCoords.top;
@@ -365,7 +381,7 @@ BX.UI.TooltipBalloon.prototype.showTooltip = function()
 		if (_this.version >= 3)
 		{
 			BX.ajax.runComponentAction('bitrix:ui.tooltip', 'getData', {
-				mode: 'ajax', //это означает, что мы хотим вызывать действие из class.php
+				mode: 'ajax',
 				data: {
 					userId: _this.userId,
 					params: (typeof _this.params != 'undefined' ? _this.params : {})
@@ -392,7 +408,7 @@ BX.UI.TooltipBalloon.prototype.showTooltip = function()
 				{
 					if (response.data.user.cardFields.hasOwnProperty(fieldCode))
 					{
-						cardFields += '<span class="field-row field-row-' + fieldCode.toLowerCase() + '"><span class="field-name">' + response.data.user.cardFields[fieldCode].name + '</span>: <span class="field-value">' + response.data.user.cardFields[fieldCode].value + '</span></span>';
+						cardFields += '<span class="bx-ui-tooltip-field-row bx-ui-tooltip-field-row-' + fieldCode.toLowerCase() + '"><span class="bx-ui-tooltip-field-name">' + response.data.user.cardFields[fieldCode].name + '</span>: <span class="bx-ui-tooltip-field-value">' + response.data.user.cardFields[fieldCode].value + '</span></span>';
 					}
 				}
 				cardFields += '</div>';
@@ -577,7 +593,7 @@ BX.UI.TooltipBalloon.prototype.adjustPosition = function()
 	}
 	else
 	{
-		this.ROOT_DIV.style.top = parseInt(this.anchorTop - tooltipCoords.height - 13 + 35) + "px"; // 35 - bottom block
+		this.ROOT_DIV.style.top = parseInt(this.anchorTop - tooltipCoords.height - 13 + 12) + "px"; // 12 - bottom block
 	}
 };
 

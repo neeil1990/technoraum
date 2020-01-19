@@ -1,5 +1,5 @@
 <?
-$MESS["LANDING_TPL_LOAD_APP_TEMPLATE"] = "<span>Завантажити</span> шаблон із Застосунку24";
+$MESS["LANDING_TPL_LOAD_APP_TEMPLATE"] = "<span>Завантажити</span> шаблон із Застосунки24";
 $MESS["LANDING_TPL_TITLE"] = "Оберіть відповідний шаблон";
 $MESS["LANDING_TPL_ACTION_SELECT"] = "Обрати";
 $MESS["LANDING_TPL_ACTION_ADD"] = "Новий";

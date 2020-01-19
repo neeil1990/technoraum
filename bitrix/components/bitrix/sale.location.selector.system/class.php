@@ -25,7 +25,7 @@ class CBitrixLocationSelectorSystemComponent extends CBitrixLocationSelectorSear
 {
 	const ID_BLOCK_LEN = 			90;
 	const HUGE_TAIL_LEN = 			30;
-	const PAGE_SIZE = 				10;
+	const PAGE_SIZE = 				100;
 	const LOCATION_ENTITY_NAME = 	'\Bitrix\Sale\Location\LocationTable';
 
 	protected $entityClass = false;

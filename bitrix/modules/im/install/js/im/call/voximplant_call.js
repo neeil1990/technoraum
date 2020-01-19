@@ -467,7 +467,29 @@
 				self.voximplantCall.addEventListener(VoxImplant.CallEvents.Failed, onCallFailed);
 			}).catch(function(err)
 			{
-				self.runCallback(BX.Call.Event.onCallFailure, {error: err})
+				var error;
+				if(typeof(err) === "string")
+				{
+					// backward compatibility
+					self.runCallback(BX.Call.Event.onCallFailure, {error: err})
+				}
+				else if(BX.type.isPlainObject(err))
+				{
+					if(err.hasOwnProperty('status') && err.status == 401)
+					{
+						error = "AUTHORIZE_ERROR";
+					}
+					else if(err.name === "AuthResult")
+					{
+						error = "AUTHORIZE_ERROR";
+					}
+					else
+					{
+						error = "UNKNOWN_ERROR";
+					}
+
+					self.runCallback(BX.Call.Event.onCallFailure, {error: error})
+				}
 			});
 		});
 	};

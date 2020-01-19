@@ -1,4 +1,7 @@
 <?php
+
+use Bitrix\Main\Loader;
+
 IncludeModuleLangFile(__FILE__);
 
 if(!defined("CACHED_b_iblock_type")) define("CACHED_b_iblock_type", 36000);
@@ -57,20 +60,14 @@ $arClasses = array(
 	"CIBlockPropertyTools" => "classes/general/iblockproptools.php",
 	"CIBlockSectionPropertyLink" => "classes/general/section_property.php",
 	"CIBlockXmlImport" => "classes/general/iblockxmlimport.php",
-	'\Bitrix\Iblock\ElementTable' => "lib/element.php",
-	'\Bitrix\Iblock\IblockTable' => "lib/iblock.php",
 	'\Bitrix\Iblock\IblockFieldTable' => "lib/iblockfield.php",
 	'\Bitrix\Iblock\IblockGroupTable' => "lib/iblockgroup.php",
 	'\Bitrix\Iblock\IblockMessageTable' => "lib/iblockmessage.php",
 	'\Bitrix\Iblock\IblockRssTable' => "lib/iblockrss.php",
 	'\Bitrix\Iblock\IblockSiteTable' => "lib/iblocksite.php",
 	'\Bitrix\Iblock\InheritedPropertyTable' => "lib/inheritedproperty.php",
-	'\Bitrix\Iblock\PropertyTable' => "lib/property.php",
 	'\Bitrix\Iblock\PropertyEnumerationTable' => "lib/propertyenumeration.php",
 	'\Bitrix\Iblock\PropertyFeatureTable' => 'lib/propertyfeature.php',
-	'\Bitrix\Iblock\SectionTable' => "lib/section.php",
-	'\Bitrix\Iblock\SectionElementTable' => "lib/sectionelement.php",
-	'\Bitrix\Iblock\SectionPropertyTable' => "lib/sectionproperty.php",
 	'\Bitrix\Iblock\SequenceTable' => "lib/sequence.php",
 	'\Bitrix\Iblock\SiteTable' => "lib/site.php",
 	'\Bitrix\Iblock\TypeTable' => "lib/type.php",
@@ -86,7 +83,11 @@ $arClasses = array(
 	'\Bitrix\Iblock\Component\Element' => "lib/component/element.php",
 	'\Bitrix\Iblock\Component\ElementList' => "lib/component/elementlist.php",
 	'\Bitrix\Iblock\Component\Filters' => "lib/component/filters.php",
+	'\Bitrix\Iblock\Component\Selector\Element' => "lib/component/selector/element.php",
+	'\Bitrix\Iblock\Component\Selector\Entity' => "lib/component/selector/entity.php",
 	'\Bitrix\Iblock\Component\Tools' => "lib/component/tools.php",
+	'\Bitrix\Iblock\Grid\Panel\GroupAction' => "lib/grid/panel/groupaction.php",
+	'\Bitrix\Iblock\Grid\ActionType' => "lib/grid/actiontype.php",
 	'\Bitrix\Iblock\Helpers\Admin\Property' => "lib/helpers/admin/property.php",
 	'\Bitrix\Iblock\Helpers\Filter\Property' => "lib/helpers/filter/property.php",
 	'\Bitrix\Iblock\Helpers\Filter\PropertyManager' => "lib/helpers/filter/propertymanager.php",
@@ -99,6 +100,8 @@ $arClasses = array(
 	'\Bitrix\Iblock\InheritedProperty\SectionTemplates' => "lib/inheritedproperty/sectiontemplates.php",
 	'\Bitrix\Iblock\InheritedProperty\SectionValues' => "lib/inheritedproperty/sectionvalues.php",
 	'\Bitrix\Iblock\InheritedProperty\ValuesQueue' => "lib/inheritedproperty/valuesqueue.php",
+	'\Bitrix\Iblock\LandingSource\DataLoader' => "lib/landingsource/dataloader.php",
+	'\Bitrix\Iblock\LandingSource\Element' => "lib/landingsource/element.php",
 	'\Bitrix\Iblock\Model\PropertyFeature' => "lib/model/propertyfeature.php",
 	'\Bitrix\Iblock\Model\Section' => "lib/model/section.php",
 	'\Bitrix\Iblock\PropertyIndex\Dictionary' => "lib/propertyindex/dictionary.php",
@@ -153,7 +156,10 @@ $arClasses = array(
 if (\Bitrix\Main\ModuleManager::isModuleInstalled('bizproc'))
 	$arClasses["CIBlockDocument"] = "classes/general/iblockdocument.php";
 
-\Bitrix\Main\Loader::registerAutoLoadClasses("iblock", $arClasses);
+Loader::registerAutoLoadClasses("iblock", $arClasses);
+
+// orm autoloader
+Loader::registerHandler([\Bitrix\Iblock\ORM\Loader::class, 'autoLoad']);
 
 /**
  * Returns list of the information blocks of specified $type linked to the current site

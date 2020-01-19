@@ -5,29 +5,29 @@
 		 data-speed="5000"
 		 data-pagi-classes="u-carousel-indicators-v1 g-absolute-centered--x g-bottom-30">
 		<div class="landing-block-node-card-block js-slide">
-			<div class="landing-block-node-card-bgimg u-bg-overlay g-color-white g-bg-black-opacity-0_5--after g-bg-img-hero"
+			<div class="landing-block-node-card-bgimg h-100 d-flex align-items-center u-bg-overlay g-color-white g-bg-black-opacity-0_5--after g-bg-img-hero g-min-height-100vh"
 				 style="background-image: url(https://cdn.bitrix24.site/bitrix/images/landing/business/1920x1280/img3.jpg);">
-				<div class="u-bg-overlay__inner g-flex-centered g-height-100vh g-min-height-600 g-py-40">
-					<div class="container">
+				<div class="landing-block-card-container u-bg-overlay__inner w-100 d-flex justify-content-center g-py-40">
+					<div class="container g-mr-0 g-ml-0 g-pl-0 g-pr-0">
 						<h2 class="landing-block-node-card-title js-animation slideInUp h2 text-uppercase g-line-height-1_2 g-letter-spacing-1 g-font-size-65 g-color-white g-mb-40">
 							For some,
 							<br> <span style="font-weight: bold;">food is a luxury</span></h2>
 
 						<div class="landing-block-node-card-buttons1 js-animation slideInUp g-mb-45">
 							<div class="d-inline-flex text-uppercase g-font-weight-600 g-font-size-11 g-mr-10 g-mb-10 g-mb-0--md">
-								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									Need
 								</div>
-								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									$1 250 000
 								</div>
 							</div>
 
 							<div class="d-inline-flex text-uppercase g-font-weight-600 g-font-size-11 g-mb-10 g-mb-0--md">
-								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									We have
 								</div>
-								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									$175 586
 								</div>
 							</div>
@@ -53,29 +53,29 @@
 		</div>
 
 		<div class="landing-block-node-card-block js-slide">
-			<div class="landing-block-node-card-bgimg u-bg-overlay g-color-white g-bg-black-opacity-0_5--after g-bg-img-hero"
+			<div class="landing-block-node-card-bgimg h-100 d-flex align-items-center u-bg-overlay g-color-white g-bg-black-opacity-0_5--after g-bg-img-hero g-min-height-100vh"
 				 style="background-image: url(https://cdn.bitrix24.site/bitrix/images/landing/business/1920x1280/img4.jpg);">
-				<div class="u-bg-overlay__inner g-flex-centered g-height-100vh g-min-height-600 g-py-40">
-					<div class="container">
+				<div class="landing-block-card-container u-bg-overlay__inner w-100 d-flex justify-content-center g-py-40">
+					<div class="container g-mr-0 g-ml-0 g-pl-0 g-pr-0">
 						<h2 class="landing-block-node-card-title js-animation slideInUp h2 text-uppercase g-line-height-1_2 g-letter-spacing-1 g-font-size-65 g-color-white g-mb-40">
 							For some,
 							<br><span style="font-weight: bold;">support is a necessity</span></h2>
 
 						<div class="landing-block-node-card-buttons1 js-animation slideInUp g-mb-45">
 							<div class="d-inline-flex text-uppercase g-font-weight-600 g-font-size-11 g-mr-10 g-mb-10 g-mb-0--md">
-								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									Need
 								</div>
-								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									$1 250 000
 								</div>
 							</div>
 
 							<div class="d-inline-flex text-uppercase g-font-weight-600 g-font-size-11 g-mb-10 g-mb-0--md">
-								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-title u-label u-ns-bg-v7-right g-bg-black g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									We have
 								</div>
-								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-px-20 g-py-14">
+								<div class="landing-block-node-card-label-text u-label g-color-gray-dark-v1 g-font-weight-700 g-bg-primary g-pl-20 g-pr-20 g-pt-14 g-pb-14">
 									$175 586
 								</div>
 							</div>

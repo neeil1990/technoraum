@@ -1,8 +1,9 @@
 <?
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_before.php");
-require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/include.php");
 
 use Bitrix\Main\Localization\Loc;
+
+\Bitrix\Main\Loader::includeModule('sale');
 
 $publicMode = $adminPage->publicMode;
 $selfFolderUrl = $adminPage->getSelfFolderUrl();
@@ -61,6 +62,13 @@ $filter = array();
 
 $lAdmin->AddFilter($filterFields, $filter);
 
+$personTypeId = [];
+if (!empty($filter["PERSON_TYPE_ID"]))
+{
+	$personTypeId = $filter["PERSON_TYPE_ID"];
+	unset($filter["PERSON_TYPE_ID"]);
+}
+
 if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 {
 	if ($request->get('action_target')=='selected')
@@ -90,7 +98,7 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 				if ($dbRes->fetch())
 				{
 					$lAdmin->AddGroupError(Loc::getMessage("SALE_DELETE_ERROR"), $id);
-					continue;
+					continue 2;
 				}
 
 				$result = \Bitrix\Sale\PaySystem\Manager::delete($id);
@@ -150,20 +158,20 @@ $result = array();
 
 while ($paySystem = $dbRes->fetch())
 {
-	if (!empty($filter["PERSON_TYPE_ID"]))
+	if (!empty($personTypeId))
 	{
 		$dbRestriction = \Bitrix\Sale\Internals\ServiceRestrictionTable::getList(array(
 			'filter' => array(
 				'SERVICE_ID' => $paySystem['ID'],
 				'SERVICE_TYPE' => \Bitrix\Sale\Services\PaySystem\Restrictions\Manager::SERVICE_TYPE_PAYMENT,
-				'=CLASS_NAME' => '\Bitrix\Sale\Services\PaySystem\Restrictions\PersonType'
+				'=CLASS_NAME' => '\\'.\Bitrix\Sale\Services\PaySystem\Restrictions\PersonType::class
 			)
 		));
 
 		while ($restriction = $dbRestriction->fetch())
 		{
 			if (!CSalePaySystemAction::checkRestriction($restriction,
-				array("PERSON_TYPE_ID" => $filter["PERSON_TYPE_ID"])))
+				array("PERSON_TYPE_ID" => $personTypeId)))
 			{
 				continue(2);
 			}
@@ -227,7 +235,7 @@ while ($arCCard = $dbRes->NavNext(false))
 		'filter' => array(
 			'SERVICE_ID' => $arCCard["ID"],
 			'SERVICE_TYPE' => \Bitrix\Sale\Services\PaySystem\Restrictions\Manager::SERVICE_TYPE_PAYMENT,
-			'=CLASS_NAME' => '\Bitrix\Sale\Services\PaySystem\Restrictions\PersonType'
+			'=CLASS_NAME' => '\\'.\Bitrix\Sale\Services\PaySystem\Restrictions\PersonType::class
 		)
 	));
 
@@ -327,8 +335,15 @@ $lAdmin->CheckListMode();
 $APPLICATION->SetTitle(GetMessage("SALE_SECTION_TITLE"));
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
 
-$lAdmin->DisplayFilter($filterFields);
-$lAdmin->DisplayList();
+if (!$publicMode && \Bitrix\Sale\Update\CrmEntityCreatorStepper::isNeedStub())
+{
+	$APPLICATION->IncludeComponent("bitrix:sale.admin.page.stub", ".default");
+}
+else
+{
+	$lAdmin->DisplayFilter($filterFields);
+	$lAdmin->DisplayList();
+}
 
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
 

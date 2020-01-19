@@ -1397,7 +1397,7 @@ abstract class Element extends Base
 				'MEASURE' => $offer['ITEM_MEASURE']['TITLE'],
 				'OFFER_GROUP' => (isset($offerSet[$offer['ID']]) && $offerSet[$offer['ID']]),
 				'CAN_BUY' => $offer['CAN_BUY'],
-				'CATALOG_SUBSCRIBE' => $offer['CATALOG_SUBSCRIBE'],
+				'CATALOG_SUBSCRIBE' => $offer['PRODUCT']['SUBSCRIBE'],
 				'SLIDER' => $offer['MORE_PHOTO'],
 				'SLIDER_COUNT' => $offer['MORE_PHOTO_COUNT'],
 			);

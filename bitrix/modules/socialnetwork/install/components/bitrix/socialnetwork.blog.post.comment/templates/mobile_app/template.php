@@ -86,6 +86,7 @@ $arResult["OUTPUT_LIST"] = $APPLICATION->IncludeComponent(
 			"entityType" => 'LOG_ENTRY',
 			"entityId" => $arParams["LOG_ID"]
 		),
+		"IS_POSTS_LIST" => ($arParams["bFromList"] ? "Y" : "N"),
 	),
 	$this->__component
 );

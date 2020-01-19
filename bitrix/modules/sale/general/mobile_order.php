@@ -629,6 +629,18 @@ class CSaleMobileOrderUtils
 		);
 	}
 
+	/**
+	 * @param string $strDate
+	 * @return string
+	 */
+	static function getDate($strDate)
+	{
+		return FormatDateFromDB(
+			$strDate,
+			CSite::GetDateFormat('SHORT', LANGUAGE_ID)
+		);
+	}
+
 	function getPreparedTemplate($template, $arFields)
 	{
 		$retStr = $template;
@@ -946,19 +958,22 @@ class CSaleMobileOrderPush
 		$arOldSubs = &self::getData();
 		$arTmpSubs = array();
 
-		foreach ($arOldSubs as $subId => $subItem)
-			if($subItem["U"] == $userId)
-				$arTmpSubs[$subId] = &$arOldSubs[$subId];
-
-		foreach ($arTmpSubs as $subId => &$subItem)
+		if(is_array($arOldSubs))
 		{
-			if(isset($arSubs[self::$arEvents[$subItem["E"]]]))
-			{
-				$subItem["V"] = $arSubs[self::$arEvents[$subItem["E"]]];
-				unset($arSubs[self::$arEvents[$subItem["E"]]]);
-			}
+			foreach ($arOldSubs as $subId => $subItem)
+				if($subItem["U"] == $userId)
+					$arTmpSubs[$subId] = &$arOldSubs[$subId];
 
-			unset($arTmpSubs[$subId]);
+			foreach ($arTmpSubs as $subId => &$subItem)
+			{
+				if(isset($arSubs[self::$arEvents[$subItem["E"]]]))
+				{
+					$subItem["V"] = $arSubs[self::$arEvents[$subItem["E"]]];
+					unset($arSubs[self::$arEvents[$subItem["E"]]]);
+				}
+
+				unset($arTmpSubs[$subId]);
+			}
 		}
 
 		if(!empty($arSubs))
@@ -966,7 +981,6 @@ class CSaleMobileOrderPush
 				self::addSubscription($userId, $eventId, $value);
 
 		self::saveData();
-
 		return true;
 	}
 
@@ -992,9 +1006,25 @@ class CSaleMobileOrderPush
 
 	private static function checkRights($userId, $eventId, $arParams)
 	{
-		$orderId = $arParams["ORDER_ID"];
-		$arUserGroups = CUser::GetUserGroup($userId);
-		return CSaleOrder::CanUserViewOrder($orderId, $arUserGroups, $userId);
+		$orderId = (int)$arParams["ORDER_ID"];
+
+		if($orderId <= 0)
+		{
+			return false;
+		}
+
+		$registry = \Bitrix\Sale\Registry::getInstance(\Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER);
+
+		/** @var \Bitrix\Sale\Order $orderClass */
+		$orderClass = $registry->getOrderClassName();
+
+		if(!($order = $orderClass::load($orderId)))
+		{
+			return false;
+		}
+
+		$allowedStatusesView = \Bitrix\Sale\OrderStatus::getStatusesUserCanDoOperations($userId, array('view'));
+		return(in_array($order->getField('STATUS_ID'), $allowedStatusesView));
 	}
 
 	public static function getSubscriptions($userId)

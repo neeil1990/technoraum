@@ -1,4 +1,5 @@
 <?
+$MESS["BX_SALE_DCM_COUPONS_VERIFY_ERR"] = "Coupon verification error";
 $MESS["BX_SALE_DCM_ERR_BAD_MODE"] = "Bad manager mode";
 $MESS["BX_SALE_DCM_ERR_BAD_USER_ID"] = "Customer ID is missing";
 $MESS["BX_SALE_DCM_ERR_ORDER_ID_EXIST"] = "Order ID specified in new order creation mode";

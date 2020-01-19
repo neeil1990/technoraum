@@ -95,6 +95,7 @@
 .new-from-email-dialog-content {
 	position: relative;
 	margin: 0 20px;
+	width: 440px;
 	overflow-y: hidden;
 }
 
@@ -144,4 +145,20 @@
 	background: rgb(253,225,200);
 	color: rgb(219,90,22);
 	white-space: normal;
+}
+
+.main-mail-confirm-menu-content .popup-window-content {
+	max-height: 360px;
+	overflow-y: auto;
+}
+
+.menu-popup-right-icon {
+	padding-right: 16px;
+}
+.menu-popup-item .main-mail-confirm-menu-delete-icon {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 100%;
+	width: 32px;
 }

@@ -338,7 +338,7 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admi
 	?>
 	<tr>
 		<td>ID</td>
-		<td><input type="text" name="find_id" size="47" value="<?echo htmlspecialcharsbx($find_id)?>"><?=ShowFilterLogicHelp()?></td>
+		<td><input type="text" name="find_id" size="47" value="<?echo htmlspecialcharsbx($find_id)?>"></td>
 	</tr>
 	<?
 	$USER_FIELD_MANAGER->AdminListShowFilter($ufEntityId);

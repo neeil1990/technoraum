@@ -658,12 +658,11 @@ class CCatalogProductAvailable extends CCatalogStepOperations
 	{
 		if (empty($this->currentList))
 			return;
-		//TODO: change CATALOG_AVAILABLE to PRODUCT.AVAILABLE
 		$offers = \CCatalogSku::getOffersList(
 			$this->currentIdsList,
 			$this->params['IBLOCK_ID'],
 			array(),
-			array('ID', 'ACTIVE', 'CATALOG_AVAILABLE')
+			array('ID', 'ACTIVE', 'AVAILABLE')
 		);
 		foreach ($this->currentIdsList as $id)
 		{
@@ -679,8 +678,7 @@ class CCatalogProductAvailable extends CCatalogStepOperations
 			foreach ($offers[$id] as $offerId => $row)
 			{
 				$allOffers[] = $offerId;
-				//TODO: change CATALOG_AVAILABLE to PRODUCT.AVAILABLE
-				if ($row['ACTIVE'] != 'Y' || $row['CATALOG_AVAILABLE'] != 'Y')
+				if ($row['ACTIVE'] != 'Y' || $row['AVAILABLE'] != 'Y')
 					continue;
 				$this->currentList[$id]['SKU_STATE'] = Catalog\Product\Sku::OFFERS_AVAILABLE;
 				$availableOffers[] = $offerId;

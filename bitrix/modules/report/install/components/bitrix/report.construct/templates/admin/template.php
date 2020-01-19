@@ -134,6 +134,11 @@ AAAAElFTkSuQmCC") no-repeat scroll 0 0 transparent;
 	.adm-filter-box-sizing { width: auto; }
 	.reports-title-label { padding-top: 20px; }
 	#bx-admin-prefix .popup-window-close-icon { background-color: inherit; right: 0; top: 0; }
+
+	.report-period-hidden {
+		margin-top: 10px;
+	}
+	.report-period-hidden > input[type=checkbox] { margin: 0; }
 </style>
 
 <script type="text/javascript">
@@ -292,6 +297,14 @@ AAAAElFTkSuQmCC") no-repeat scroll 0 0 transparent;
 			OnReportIntervalChange(BX('report-interval-filter'));
 		});
 	</script>
+	<div class="report-period-hidden">
+		<input type="hidden" name="period_hidden" value="N">
+		<input type="checkbox" <?=($arResult['preSettings']['period']['hidden'] === 'Y')?'checked="checked" ':''?>
+			class="reports-checkbox" id="report-period-hidden-checkbox" name="period_hidden" value="Y" />
+		<span class="reports-limit-res-select-lable">
+			<label for="report-period-hidden-checkbox"><?=GetMessage('REPORT_PERIOD_HIDDEN')?></label>
+		</span>
+	</div>
 </div>
 
 <!-- select -->
@@ -963,14 +976,24 @@ AAAAElFTkSuQmCC") no-repeat scroll 0 0 transparent;
 	</div>
 </div>
 
-<!-- choose filter column popup -->
+<!-- choose filter column popup --><?php
+$refChooseParam = call_user_func([$arParams['REPORT_HELPER_CLASS'], 'getFiltrableColumnGroups']);
+if (!is_array($refChooseParam) || empty($refChooseParam))
+{
+	$refChooseParam = true;
+}
+?>
 <div class="reports-add_col-popup-cont reports-add_filcol-popup-cont" id="reports-add_filcol-popup-cont" style="display:none;">
 	<div class="reports-add_col-popup-title">
 		<?=GetMessage('REPORT_POPUP_FILTER_TITLE'.'_'.call_user_func(array($arParams['REPORT_HELPER_CLASS'], 'getOwnerId')))?>
 	</div>
 	<div class="popup-window-hr popup-window-buttons-hr"><i></i></div>
 	<div class="reports-add_col-popup">
-		<?=call_user_func(array($arParams['REPORT_HELPER_CLASS'], 'buildHTMLSelectTreePopup'), $arResult['fieldsTree'], true)?>
+		<?php echo call_user_func(
+			[$arParams['REPORT_HELPER_CLASS'], 'buildHTMLSelectTreePopup'],
+			$arResult['fieldsTree'],
+			$refChooseParam
+		); ?>
 	</div>
 </div>
 

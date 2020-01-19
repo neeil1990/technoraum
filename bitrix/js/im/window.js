@@ -65,8 +65,6 @@
 				this.contentBodyWindow = true;
 			}
 
-
-
 			this.popup = BX('im-workarea-popup');
 			this.popupBackground = this.popup;
 			this.content = BX('im-workarea-content');
@@ -87,7 +85,6 @@
 			{
 				this.popupBackground = BX('im-workarea-popup-bg');
 			}
-
 
 			if (this.context == 'PAGE')
 			{
@@ -711,7 +708,7 @@
 
 		this.contentAvatar.innerHTML = '';
 		this.contentAvatar.appendChild(
-			BX.create('a', { attrs : { href : this.userInfo.profile, title : BX.util.htmlspecialcharsback(this.userInfo.name), target: "_blank" }, props : { className : "bx-desktop-avatar" }, events: events, children: [
+			BX.create('a', { attrs : { href : this.userInfo.profile, title : BX.util.htmlspecialcharsback(this.userInfo.name), target: "_blank", "data-slider-ignore-autobinding": "true" }, props : { className : "bx-desktop-avatar" }, events: events, children: [
 				BX.create('img', { attrs : { src : this.userInfo.avatar, style: (BX.MessengerCommon.isBlankAvatar(this.userInfo.avatar)? 'background-color: '+this.userInfo.color: '')}, props : { className : "bx-desktop-avatar-img bx-desktop-avatar-img-default" }})
 			]})
 		);
@@ -771,6 +768,11 @@
 		}
 	}
 
+	MessengerWindow.prototype.setZIndex = function(zindex)
+	{
+		BX.style(this.popup, 'z-index', zindex);
+	};
+
 	MessengerWindow.prototype.showPopup = function(dialogId)
 	{
 		if (this.isPopupShow())
@@ -793,6 +795,12 @@
 			BX.removeClass(this.popup, 'bx-im-fullscreen-opening');
 			BX.addClass(this.popup, 'bx-im-fullscreen-open');
 		}, this), 400);
+
+		if (BX.SidePanel && BX.SidePanel.Instance.getTopSlider())
+		{
+			var zIndex = BX.SidePanel.Instance.getTopSlider().getZindex();
+			this.setZIndex(zIndex+1);
+		}
 
 		BX.onCustomEvent(this, 'OnMessengerWindowShowPopup', [dialogId]);
 		return true;
@@ -830,8 +838,9 @@
 			BX.removeClass(this.popup, 'bx-im-fullscreen-closing');
 			BX.removeClass(this.popup, 'bx-im-fullscreen-open');
 			BX.addClass(this.popup, 'bx-im-fullscreen-closed');
-
+			BX.style(this.popup, 'z-index', '');
 		}, this), 400);
+
 
 		return true;
 	}

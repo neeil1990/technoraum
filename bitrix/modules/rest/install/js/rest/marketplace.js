@@ -26,6 +26,7 @@ BX.rest.Marketplace = (function(){
 		install: function(params)
 		{
 			params = params || {url:location.href};
+			params.IFRAME = location.href.indexOf("IFRAME=Y") > 0;
 
 			var loaded = false;
 
@@ -36,6 +37,7 @@ BX.rest.Marketplace = (function(){
 				offsetTop: 0,
 				overlay: true,
 				draggable: {restrict: true},
+//				titleBar: "...",
 				closeByEsc: true,
 				closeIcon: {right: "12px", top: "10px"},
 				buttons: [
@@ -118,18 +120,14 @@ BX.rest.Marketplace = (function(){
 
 											if(!!result.open)
 											{
-												BX.SidePanel.Instance.close(
-													false,
-													function(){
-														top.BX.rest.AppLayout.openApplication(result.id, {});
-												});
+												BX.SidePanel.Instance.reload();
+												top.BX.rest.AppLayout.openApplication(result.id, {});
 											}
 											else
 											{
-												location.reload();
+												BX.SidePanel.Instance.reload();
 											}
 										}
-
 									}, this)
 								);
 							}
@@ -151,19 +149,31 @@ BX.rest.Marketplace = (function(){
 				events: {
 					onAfterPopupShow: function()
 					{
-						BX.ajax.post(
-							params.url || location.href,
-							{
+						return BX.ajax({
+							'method': 'POST',
+							'processData' : false,
+							'url': params.url || location.href,
+							'data':  BX.ajax.prepareData({
 								install: 1,
-								sessid: BX.bitrix_sessid()
-							},
-							BX.delegate(function(result)
-							{
+								sessid: BX.bitrix_sessid(),
+								dataType: 'json'
+							}),
+							'onsuccess': BX.delegate(function(result) {
 								loaded = true;
-								this.setContent(result);
+								var res = BX.parseJSON(result);
+								if (BX.type.isPlainObject(res) && res["status"] == "success")
+								{
+									this.setContent(res["data"]["content"]);
+									this.setTitleBar(res["data"]["title"]);
+								}
+								else
+								{
+									this.setContent(result);
+								}
+
 								BX.defer(this.adjustPosition, this)();
 							}, this)
-						);
+						});
 					}
 				}
 			});
@@ -173,7 +183,7 @@ BX.rest.Marketplace = (function(){
 
 		uninstallConfirm: function(code)
 		{
-			var popup = BX.PopupWindowManager.create('mp_delete_confirm_popup', null, {
+			var popup = new BX.PopupWindow('mp_delete_confirm_popup', null, {
 				content: '<div class="mp_delete_confirm"><div class="mp_delete_confirm_text">' + BX.message('REST_MP_DELETE_CONFIRM') + '</div><div class="mp_delete_confirm_cb"><input type="checkbox" name="delete_data" id="delete_data">&nbsp;<label for="delete_data">' + BX.message('REST_MP_DELETE_CONFIRM_CLEAN') + '</label></div></div>',
 				closeByEsc: true,
 				closeIcon: {top: '1px', right: '10px'},
@@ -187,7 +197,28 @@ BX.rest.Marketplace = (function(){
 								BX.rest.Marketplace.uninstall(
 									code,
 									BX('delete_data').checked,
-									BX.delegate(this.popupWindow.close, this.popupWindow)
+									function(result) {
+										if(result.error)
+										{
+											popup.setContent('<div class="mp_delete_confirm"><div class="mp_delete_confirm_text">' + result.error + '</div></div>');
+											popup.setButtons([new BX.PopupWindowButtonLink({
+												text: BX.message('JS_CORE_WINDOW_CLOSE'),
+												className: "popup-window-button-link-cancel",
+												events: {
+													click: function()
+													{
+														this.popupWindow.close()
+													}
+												}
+											})]);
+											popup.adjustPosition();
+										}
+										else
+										{
+											popup.close();
+											window.location.reload();
+										}
+									}
 								);
 							}
 						}
@@ -220,16 +251,18 @@ BX.rest.Marketplace = (function(){
 
 				if(!!callback)
 				{
-					callback();
-				}
-
-				if(!!result.error)
-				{
-					alert(result.error);
+					callback(result);
 				}
 				else
 				{
-					location.reload();
+					if (!!result.error)
+					{
+						alert(result.error);
+					}
+					else
+					{
+						location.reload();
+					}
 				}
 			});
 		},
@@ -280,6 +313,37 @@ BX.rest.Marketplace = (function(){
 				offsetLeft: 43,
 				angle: true
 			});
+		},
+		buySubscription : function(params) 
+		{
+			var oPopup = BX.PopupWindowManager.create('marketplace_buy_subscription', null, {
+				content: [
+'\t\t<div class="rest-marketplace-popup-block">\n' +
+'\t\t\t<div class="rest-marketplace-popup-text-block">\n' +
+'\t\t\t\t<div class="rest-marketplace-popup-text">' + BX.message("REST_MP_SUBSCRIPTION_TEXT1") + '</div>\n' +
+'\t\t\t\t<div class="rest-marketplace-popup-text">' + BX.message("REST_MP_SUBSCRIPTION_TEXT2") + '</div>' +
+'\t\t\t\t<div class="rest-marketplace-popup-text">' + BX.message("REST_MP_SUBSCRIPTION_TEXT3") + '</div>\n' +
+'\t\t\t</div>\n' +
+'\t\t</div>\n'
+				].join(),
+				titleBar: BX.message("REST_MP_SUBSCRIPTION_TITLE"),
+				closeIcon : true,
+				closeByEsc : true,
+				draggable: true,
+				lightShadow: true,
+				overlay: true,
+				className: 'landing-marketplace-popup-wrapper',
+				buttons: [
+					new BX.PopupWindowButton({
+						text: BX.message("REST_MP_SUBSCRIPTION_BUTTON_TITLE"),
+						className: "popup-window-button-accept"
+					}),
+					new BX.PopupWindowButtonLink({
+						text: BX.message("REST_MP_SUBSCRIPTION_BUTTON_TITLE2"),
+						className: "popup-window-button-link-cancel"
+					})
+				]
+			}).show();
 		},
 
 		setRights: function(appId, siteId)
@@ -338,7 +402,7 @@ BX.rest.Marketplace = (function(){
 				category = 'all';
 			}
 
-			var url = '/bitrix/components/bitrix/rest.marketplace/lazyload.ajax.php';
+			var url = BX.message("REST_MARKETPLACE_CATEGORY_URL").replace("#CODE#", category);
 
 			if(!!placementConfig && !!placementConfig.PLACEMENT)
 			{
@@ -349,17 +413,13 @@ BX.rest.Marketplace = (function(){
 				url = BX.util.add_url_param(url, {category: category});
 			}
 
-			BX.SidePanel.Instance.open(
-				url,
-				{
-					cacheable: false,
-					allowChangeHistory: false,
-					requestMethod: 'post',
-					requestParams: {
-						sessid: BX.bitrix_sessid()
-					}
-				}
-			);
+			var rule = BX.SidePanel.Instance.getUrlRule(url);
+			var options = (rule && BX.type.isPlainObject(rule.options)) ? rule.options : {};
+			options["cacheable"] = false;
+			options["allowChangeHistory"] = false;
+			options["requestMethod"] = "post";
+			options["requestParams"] = { sessid: BX.bitrix_sessid() };
+			BX.SidePanel.Instance.open(url, options);
 
 			var slider = BX.SidePanel.Instance.getTopSlider();
 			top.BX.addCustomEvent(top, 'Rest:AppLayout:ApplicationInstall', function(installed, eventResult){

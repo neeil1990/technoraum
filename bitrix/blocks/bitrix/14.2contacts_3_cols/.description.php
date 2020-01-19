@@ -85,7 +85,7 @@ return array(
 		),
 		'.landing-block-node-linkcontact-title' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_7_CONTACTS_4_COLS_STYLE_LANDINGBLOCKNODECONTACTTITLE'),
-			'type' => 'typo',
+			'type' => 'typo-link',
 		),
 		'.landing-block-node-linkcontact-text' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_7_CONTACTS_4_COLS_STYLE_LANDINGBLOCKNODECONTACTTEXT'),

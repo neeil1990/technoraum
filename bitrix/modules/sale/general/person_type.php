@@ -276,15 +276,20 @@ class CAllSalePersonType
 				$GLOBALS["SALE_PERSON_TYPE_LIST_CACHE"][$arPersonType["ID"]] = Array("ID" => $arPersonType["ID"], "NAME" => $arPersonType["NAME"], "LID" => implode(", ", $arPersonType["LIDS"]));
 			}
 		}
+		$s1 = '';
 		$s = '<select name="'.$sFieldName.'"';
 		if (strlen($sAddParams)>0) $s .= ' '.$sAddParams.'';
 		if (strlen($JavaFunc)>0) $s .= ' OnChange="'.$JavaFunc.'"';
 		$s .= '>'."\n";
 		$found = false;
-		foreach ($GLOBALS["SALE_PERSON_TYPE_LIST_CACHE"] as $res)
+
+		if (is_array($GLOBALS["SALE_PERSON_TYPE_LIST_CACHE"]))
 		{
-			$found = (IntVal($res["ID"]) == IntVal($sValue));
-			$s1 .= '<option value="'.$res["ID"].'"'.($found ? ' selected':'').'>'.(($bFullName)?("[".$res["ID"]."] ".htmlspecialcharsbx($res["NAME"])." (".htmlspecialcharsbx($res["LID"]).")"):(htmlspecialcharsbx($res["NAME"]))).'</option>'."\n";
+			foreach ($GLOBALS["SALE_PERSON_TYPE_LIST_CACHE"] as $res)
+			{
+				$found = (IntVal($res["ID"]) == IntVal($sValue));
+				$s1 .= '<option value="'.$res["ID"].'"'.($found ? ' selected' : '').'>'.(($bFullName) ? ("[".$res["ID"]."] ".htmlspecialcharsbx($res["NAME"])." (".htmlspecialcharsbx($res["LID"]).")") : (htmlspecialcharsbx($res["NAME"]))).'</option>'."\n";
+			}
 		}
 		if (strlen($sDefaultValue)>0)
 			$s .= "<option value='' ".($found ? "" : "selected").">".htmlspecialcharsbx($sDefaultValue)."</option>";

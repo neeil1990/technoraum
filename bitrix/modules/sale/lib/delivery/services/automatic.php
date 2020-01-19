@@ -76,11 +76,6 @@ class Automatic extends Base
 		return Loc::getMessage("SALE_DLVR_HANDL_AUT_DESCRIPTION");
 	}
 
-	protected function calculateConcrete(\Bitrix\Sale\Shipment $shipment)
-	{
-		throw new SystemException("Only Automatic Profiles can calculate concrete");
-	}
-
 	protected function getConfigStructure()
 	{
 		static $handlers = null;
@@ -930,6 +925,7 @@ class Automatic extends Base
 				"DESCRIPTION" => isset($params["DESCRIPTION"]) ? $params["DESCRIPTION"] : "",
 				"CLASS_NAME" => '\Bitrix\Sale\Delivery\Services\AutomaticProfile',
 				"CURRENCY" => $this->currency,
+				"XML_ID" => Manager::generateXmlId(),
 				"CONFIG" => array(
 					"MAIN" => array(
 						"PROFILE_ID" => $profId,

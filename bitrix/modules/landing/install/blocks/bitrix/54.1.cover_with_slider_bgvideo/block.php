@@ -19,7 +19,7 @@
 			 data-speed="5000"
 			 data-pagi-classes="u-carousel-indicators-v1 g-absolute-centered--x g-bottom-minus-70">
 
-			<div class="landing-block-node-card js-slide js-animation fadeIn g-px-15">
+			<div class="landing-block-node-card js-slide align-self-center js-animation fadeIn g-px-15">
 				<h2 class="landing-block-node-title text-uppercase g-line-height-1 g-font-weight-700 g-font-size-90 g-color-white g-mb-20 g-font-montserrat">
 					Solutions</h2>
 
@@ -34,7 +34,7 @@
 				</div>
 			</div>
 
-			<div class="landing-block-node-card js-slide js-animation fadeIn g-px-15">
+			<div class="landing-block-node-card js-slide align-self-center js-animation fadeIn g-px-15">
 				<h2 class="landing-block-node-title text-uppercase g-line-height-1 g-font-weight-700 g-font-size-90 g-color-white g-mb-20 g-font-montserrat">
 					High quality solutions</h2>
 
@@ -49,7 +49,7 @@
 				</div>
 			</div>
 
-			<div class="landing-block-node-card js-slide js-animation fadeIn g-px-15">
+			<div class="landing-block-node-card js-slide align-self-center js-animation fadeIn g-px-15">
 				<h2 class="landing-block-node-title text-uppercase g-line-height-1 g-font-weight-700 g-font-size-90 g-color-white g-mb-20 g-font-montserrat">
 					The best solutions</h2>
 
