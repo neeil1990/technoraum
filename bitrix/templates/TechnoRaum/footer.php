@@ -97,11 +97,22 @@ if($_SERVER["REQUEST_URI"] != "/")
                 <div class="the_form_div">
                     <input required type="text" name="name" placeholder="Ваше имя">
                 </div>
+
                 <div class="the_form_div">
-                    <input required type="text" name="tel" placeholder="+7 (9ХХ) ХХХ-ХХ-ХХ">
+                    <fieldset>
+                        <legend style="font-size: 16px;margin-bottom: 15px;">Выберите удобный способ связи: </legend>
+                        <label for="emailContact" style="display: inline-block;vertical-align: middle;">Email</label>
+                        <input type="radio" name="change_contact" id="emailContact" checked style="margin-right: 15px;">
+
+                        <label for="phoneContact" style="display: inline-block;vertical-align: middle;">Телефон</label>
+                        <input type="radio" name="change_contact" id="phoneContact">
+                    </fieldset>
                 </div>
                 <div class="the_form_div">
-                    <input required type="email" name="email" placeholder="e-mail">
+                    <input type="text" name="tel" placeholder="+7 (9ХХ) ХХХ-ХХ-ХХ" style="display: none;">
+                </div>
+                <div class="the_form_div">
+                    <input type="email" name="email" placeholder="e-mail" required="required">
                 </div>
                 <div class="the_form_div">
                     <textarea name="msg" placeholder="Сообщение"></textarea>

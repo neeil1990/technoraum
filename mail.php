@@ -81,9 +81,13 @@ elseif($_POST["form_id"] == 8)
         "MSG" => $data['msg']
     );
 
-    $event = "REQUEST_PRICE";
+    if($arEventFields['PHONE']){
+        $sms = new \Bitrix\Main\Sms\Event('SMS_USER_REQUEST_PRICE', $arEventFields);
+        $sms->setSite(SITE_ID);
+        $sms->send(true);
+    }
 
-    CEvent::Send($event, SITE_ID, $arEventFields);
+    CEvent::Send("REQUEST_PRICE", SITE_ID, $arEventFields);
 }
 elseif($_POST["form_id"] == 9)
 {

@@ -282,6 +282,17 @@ $( function() {
     });
 
 
+    $( 'input[name="change_contact"]' ).change(function () {
+        if($(this).attr('id') == "phoneContact"){
+            $(this).closest('form').find('input[name="tel"]').fadeIn(0).attr('required', 'required');
+            $(this).closest('form').find('input[name="email"]').fadeOut(0).removeAttr('required').val('');
+        }else{
+            $(this).closest('form').find('input[name="email"]').fadeIn(0).attr('required', 'required');
+            $(this).closest('form').find('input[name="tel"]').fadeOut(0).removeAttr('required').val('');
+        }
+    });
+
+
 
 });
 
