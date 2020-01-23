@@ -1,12 +1,12 @@
-2020-Jan-18 12:54:10 Наличие необходимых модулей php (check_php_modules): Ok
+2020-Jan-23 12:55:01 Наличие необходимых модулей php (check_php_modules): Ok
 Все необходимые модули установлены
-2020-Jan-18 12:54:10 Обязательные параметры PHP (check_php_settings): Ok
+2020-Jan-23 12:55:01 Обязательные параметры PHP (check_php_settings): Ok
 Настройки правильные
-2020-Jan-18 12:54:10 Модули веб-сервера (check_security): Ok
+2020-Jan-23 12:55:01 Модули веб-сервера (check_security): Ok
 Конфликтов не выявлено
-2020-Jan-18 12:54:10 Значения переменных сервера (check_server_vars): Ok
+2020-Jan-23 12:55:01 Значения переменных сервера (check_server_vars): Ok
 Корректные
-2020-Jan-18 12:54:10 Сохранение сессии (check_session): Ok
+2020-Jan-23 12:55:01 Сохранение сессии (check_session): Ok
 50% done
-2020-Jan-18 12:54:10 Параметры настройки UTF (mbstring и константа BX_UTF) (check_mbstring): Fail
+2020-Jan-23 12:55:01 Параметры настройки UTF (mbstring и константа BX_UTF) (check_mbstring): Fail
 Ошибка! Строковые функции strtoupper и strtolower работают некорректно

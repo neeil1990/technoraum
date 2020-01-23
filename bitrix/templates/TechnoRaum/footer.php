@@ -72,9 +72,9 @@ if($_SERVER["REQUEST_URI"] != "/")
                 
                 <div class="social">
                   <noindex>
-                    <a href="https://vk.com/karcher_technoraum" rel="nofollow" target="_blank"><img src="<?=SITE_TEMPLATE_PATH?>/img/vk.png" alt="" /></a>
+                    <a href="https://vk.com/karcher_technoraum" rel="nofollow" target="_blank"><img style="width:26px"src="<?=SITE_TEMPLATE_PATH?>/img/vk.png" alt="" /></a>
 					  <a href="https://www.instagram.com/technoraum/" rel="nofollow" target="_blank"><img style="width:20px" src="<?=SITE_TEMPLATE_PATH?>/img/instagram.png" alt="" /></a>
-                    <a href="https://www.facebook.com/karcher.technoraum" rel="nofollow" target="_blank"><img src="<?=SITE_TEMPLATE_PATH?>/img/fb.png" alt="" /></a>
+                    <a href="https://www.facebook.com/karcher.technoraum" rel="nofollow" target="_blank"><img style="width:22px" src="<?=SITE_TEMPLATE_PATH?>/img/fb.png" alt="" /></a>
 					  <a href="https://ok.ru/technoraum" rel="nofollow" target="_blank"><img style="width:22px" src="<?=SITE_TEMPLATE_PATH?>/img/ok.png" alt="" /></a>
                   </noindex>
                 </div>
@@ -453,12 +453,4 @@ if($_SERVER["REQUEST_URI"] != "/")
 </script>
 <!--//schema.org-->
 
-<div style="display: none;">
-<!-- Top DragoWeb for: `technoraum.ru` id: `373891` -->
-<a href="https://dragoweb.ru/" rel="nofollow" 
-target="_blank" title="DragoWeb">
-<noscript charset="utf-8" type="text/javascript"
-src="//count.dragoweb.ru/jsn.js"></noscript>
-</a><!-- /Top DragoWeb -->
-</div>
 </html>

@@ -2,10 +2,10 @@
 
 <?if (!empty($arResult)):?>
 <style>
-	.header_top_menu ul{background:#FFF !important}
+	.header_top_menu ul{background:#fff !important}
 	.header_top_menu ul li{background:#FFF !important}
-	#horizontal-multilevel-menu li{background:#FFF !important}
-	#horizontal-multilevel-menu li:hover{background:#FFF !important}
+	#horizontal-multilevel-menu li{background:#fff !important}
+	#horizontal-multilevel-menu li:hover{background:#fff !important}
 	#horizontal-multilevel-menu li a.root-item-selected{background:#FFF !important}
 
 
