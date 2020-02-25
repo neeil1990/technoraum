@@ -111,7 +111,7 @@ $this->setFrameMode(true);
                     0 => "",
                 ),
                 "MENU_CACHE_TIME" => "3600",	// Время кеширования (сек.)
-                "MENU_CACHE_TYPE" => "N",	// Тип кеширования
+                "MENU_CACHE_TYPE" => "Y",	// Тип кеширования
                 "MENU_CACHE_USE_GROUPS" => "Y",	// Учитывать права доступа
                 "ROOT_MENU_TYPE" => "spares",	// Тип меню для первого уровня
                 "USE_EXT" => "N",	// Подключать файлы с именами вида .тип_меню.menu_ext.php
@@ -257,7 +257,7 @@ $this->setFrameMode(true);
                 ),
                 $component
             );
-            
+
             $APPLICATION->IncludeComponent(
                 "sotbit:seo.meta",
                 ".default",
